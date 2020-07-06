@@ -1,4 +1,4 @@
-package mymoviemanager.MoviesAndActors;
+package MoviesAndActors;
 
 public class Main {
 
