@@ -1,2 +1,4 @@
 .idea/
-
+.lib/
+.gitignore
+MyMovieManager.iml
