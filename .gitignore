@@ -1,5 +1,7 @@
 .idea/
 .lib/
+out
 .gitignore
 MyMovieManager.iml
 /.idea/misc.xml
+
