@@ -21,14 +21,16 @@ public final class Movie {
     private int rateCount;
     private int length;
     private double rate;
-    private List<Actor> cast;
-    private List<String> genres;
+    private final List<Actor> cast;
+    private final List<String> genres;
     private String coverPath;
     // writers
 
     public Movie(String title, LocalDate premiere) {
         this.title = title;
         this.premiere = premiere;
+        cast = new ArrayList<>();
+        genres = new ArrayList<>();
         logger.info("New movie \"{}\" created", getTitle());
     }
 
@@ -61,6 +63,35 @@ public final class Movie {
         return time.getHour()*60 + time.getMinute();
     }
 
+
+    public void setRate(double rate) {
+        if(this.rate != 0) {
+            logger.warn("Unsuccessful set of rate in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getRate());
+        } else if(rate > 0 && rate <= 10) {
+            this.rate = rate;
+            logger.debug("rate of \"{}\" set to \"{}\"", getTitle(), getRate());
+        }
+    }
+
+    public void setRateCount(int rateCount) {
+        if(this.rateCount != 0) {
+            logger.warn("Unsuccessful set of rateCount in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getRateCount());
+        } else if(rateCount > 0) {
+            this.rateCount = rateCount;
+            logger.debug("rateCount of \"{}\" set to \"{}\"", getTitle(), getRateCount());
+        }
+    }
+
+    public void setDirector(Director director) {
+        if(this.director != null) {
+            logger.warn("Unsuccessful set of director in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getDirector());
+        } else {
+            this.director = director;
+            logger.debug("director of \"{}\" set to \"{}\"", getTitle(), getDirector());
+        }
+    }
+
+    // strings
     public void setTitleOrg(String titleOrg) {
         if(this.titleOrg != null) {
             logger.warn("Unsuccessful set of titleOrg in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getTitleOrg());
@@ -78,6 +109,50 @@ public final class Movie {
             logger.debug("description of \"{}\" set to \"{}\"", getTitle(), getDescription());
         }
     }
+
+    public void setCoverPath(String coverPath) {
+        if(this.coverPath != null) {
+            logger.warn("Unsuccessful set of coverPath in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getCoverPath());
+        } else if(!coverPath.isEmpty()) {
+            this.coverPath = coverPath;
+            logger.debug("coverPath of \"{}\" set to \"{}\"", getTitle(), getCoverPath());
+        }
+    }
+
+    public void addGenre(String genre) {
+        if(this.genres.size() > 4 || this.genres.contains(genre)) {
+            logger.warn("Unsuccessful set of genre in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getGenres().toString());
+        } else if(genre != null && !genre.isEmpty()) {
+            this.genres.add(genre);
+            logger.debug("genre \"{}\" added to \"{}\"", genre, getTitle());
+        }
+    }
+
+    public void addGenres(List<String> genres) {
+        if(genres.size() > 0 && genres.size() < 4) {
+            for (String genre : genres) {
+                addGenre(genre);
+            }
+        }
+    }
+
+    public void addActor(Actor actor) {
+        if(actor == null || this.cast.contains(actor)) {
+            logger.warn("Unsuccessful set of actor in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getCast().toString());
+        } else {
+            this.cast.add(actor);
+            logger.debug("actor \"{}\" added to \"{}\"", actor, getTitle());
+        }
+    }
+
+    public void addActors(List<Actor> actors) {
+        if(actors.size() > 0) {
+            for (Actor actor : actors) {
+                addActor(actor);
+            }
+        }
+    }
+
 
     public String getTitle() {
         return title;
