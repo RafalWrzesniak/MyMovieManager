@@ -17,29 +17,27 @@ public final class Movie {
     private String titleOrg;
     private String description;
     private final LocalDate premiere;
-    private Director director;
     private int rateCount;
     private int length;
     private double rate;
-    private final List<Actor> cast;
-    private final List<String> genres;
+    private final List<Actor> cast = new ArrayList<>();
+    private final List<Actor> directors = new ArrayList<>();
+    private final List<Actor> writers = new ArrayList<>();
+    private final List<String> genres = new ArrayList<>();
     private String coverPath;
-    // writers
 
     public Movie(String title, LocalDate premiere) {
         this.title = title;
         this.premiere = premiere;
-        cast = new ArrayList<>();
-        genres = new ArrayList<>();
-        logger.info("New movie \"{}\" created", getTitle());
+        logger.info("New movie \"{}\" created", this.toString());
     }
 
     public void setLength(int length) {
         if(this.length != 0) {
-            logger.warn("Unsuccessful set of length in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getLengthFormatted());
+            logger.warn("Unsuccessful set of length in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getLengthFormatted());
         } else if(length > 0) {
             this.length = length;
-            logger.debug("length of \"{}\" set to \"{}\"", getTitle(), getLengthFormatted());
+            logger.debug("length of \"{}\" set to \"{}\"", this.toString(), getLengthFormatted());
         }
     }
 
@@ -66,65 +64,58 @@ public final class Movie {
 
     public void setRate(double rate) {
         if(this.rate != 0) {
-            logger.warn("Unsuccessful set of rate in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getRate());
+            logger.warn("Unsuccessful set of rate in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getRate());
         } else if(rate > 0 && rate <= 10) {
             this.rate = rate;
-            logger.debug("rate of \"{}\" set to \"{}\"", getTitle(), getRate());
+            logger.debug("rate of \"{}\" set to \"{}\"", this.toString(), getRate());
         }
     }
 
     public void setRateCount(int rateCount) {
         if(this.rateCount != 0) {
-            logger.warn("Unsuccessful set of rateCount in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getRateCount());
+            logger.warn("Unsuccessful set of rateCount in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getRateCount());
         } else if(rateCount > 0) {
             this.rateCount = rateCount;
-            logger.debug("rateCount of \"{}\" set to \"{}\"", getTitle(), getRateCount());
-        }
-    }
-
-    public void setDirector(Director director) {
-        if(this.director != null) {
-            logger.warn("Unsuccessful set of director in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getDirector());
-        } else {
-            this.director = director;
-            logger.debug("director of \"{}\" set to \"{}\"", getTitle(), getDirector());
+            logger.debug("rateCount of \"{}\" set to \"{}\"", this.toString(), getRateCount());
         }
     }
 
     // strings
     public void setTitleOrg(String titleOrg) {
         if(this.titleOrg != null) {
-            logger.warn("Unsuccessful set of titleOrg in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getTitleOrg());
+            logger.warn("Unsuccessful set of titleOrg in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getTitleOrg());
         } else if(!titleOrg.isEmpty()) {
             this.titleOrg = titleOrg;
-            logger.debug("titleOrg of \"{}\" set to \"{}\"", getTitle(), getTitleOrg());
+            logger.debug("titleOrg of \"{}\" set to \"{}\"", this.toString(), getTitleOrg());
         }
     }
 
     public void setDescription(String description) {
         if(this.description != null) {
-            logger.warn("Unsuccessful set of description in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getDescription());
+            logger.warn("Unsuccessful set of description in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getDescription());
         } else if(!description.isEmpty()) {
             this.description = description;
-            logger.debug("description of \"{}\" set to \"{}\"", getTitle(), getDescription());
+            logger.debug("description of \"{}\" set to \"{}\"", this.toString(), getDescription());
         }
     }
 
     public void setCoverPath(String coverPath) {
         if(this.coverPath != null) {
-            logger.warn("Unsuccessful set of coverPath in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getCoverPath());
+            logger.warn("Unsuccessful set of coverPath in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getCoverPath());
         } else if(!coverPath.isEmpty()) {
             this.coverPath = coverPath;
-            logger.debug("coverPath of \"{}\" set to \"{}\"", getTitle(), getCoverPath());
+            logger.debug("coverPath of \"{}\" set to \"{}\"", this.toString(), getCoverPath());
         }
     }
 
+
+    // genres
     public void addGenre(String genre) {
         if(this.genres.size() > 4 || this.genres.contains(genre)) {
-            logger.warn("Unsuccessful set of genre in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getGenres().toString());
+            logger.warn("Unsuccessful set of genre in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getGenres().toString());
         } else if(genre != null && !genre.isEmpty()) {
             this.genres.add(genre);
-            logger.debug("genre \"{}\" added to \"{}\"", genre, getTitle());
+            logger.debug("genre \"{}\" added to \"{}\"", genre, this.toString());
         }
     }
 
@@ -136,12 +127,15 @@ public final class Movie {
         }
     }
 
+
+    // actors
     public void addActor(Actor actor) {
         if(actor == null || this.cast.contains(actor)) {
-            logger.warn("Unsuccessful set of actor in movie \"{}\" - this field is already set to \"{}\"", getTitle(), getCast().toString());
+            logger.warn("Unsuccessful set of actor in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getCast().toString());
         } else {
             this.cast.add(actor);
-            logger.debug("actor \"{}\" added to \"{}\"", actor, getTitle());
+            logger.debug("actor \"{}\" added to \"{}\"", actor, this.toString());
+            actor.addMovieActorPlayedIn(this);
         }
     }
 
@@ -153,6 +147,73 @@ public final class Movie {
         }
     }
 
+    // directors
+    public void addDirector(Actor director) {
+        if(director == null) {
+            logger.warn("Unsuccessful set of director in movie \"{}\" - null as an input", this.toString());
+        } else {
+            this.directors.add(director);
+            logger.debug("director of \"{}\" set to \"{}\"", this.toString(), getDirectors().toString());
+            director.addMovieDirectedBy(this);
+        }
+    }
+
+    public void addDirectors(List<Actor> directors) {
+        if(directors.size() > 0) {
+            for (Actor director: directors) {
+                addDirector(director);
+            }
+        }
+    }
+
+    // writers
+    public void addWriter(Actor writer) {
+        if(writer == null) {
+            logger.warn("Unsuccessful set of writer in movie \"{}\" - null as an input", this.toString());
+        } else {
+            this.writers.add(writer);
+            logger.debug("writer of \"{}\" set to \"{}\"", this.toString(), getWriters().toString());
+            writer.addMovieWrittenBy(this);
+        }
+    }
+
+    public void addWriters(List<Actor> writers) {
+        if(writers.size() > 0) {
+            for (Actor writer: writers) {
+                addWriter(writer);
+            }
+        }
+    }
+
+
+    public boolean isActorPlayingIn(Actor actor) {
+        return this.getCast().contains(actor);
+    }
+
+    public boolean isDirectedBy(Actor director) {
+        return this.getDirectors().contains(director);
+    }
+
+    public boolean isWrittenBy(Actor writer) {
+        return this.getWriters().contains(writer);
+    }
+
+    public boolean isGenreType(String genre) {
+        return this.getGenres().contains(genre);
+    }
+
+    public boolean isRateHigherThen(double rate) {
+        if(rate > 0 && rate <= 10) {
+            return this.getRate() > rate;
+        } else {
+            throw new IllegalArgumentException("Rate must be in range (0, 10]");
+        }
+    }
+
+
+    public List<Actor> getWriters() {
+        return new ArrayList<>(writers);
+    }
 
     public String getTitle() {
         return title;
@@ -166,8 +227,8 @@ public final class Movie {
         return description;
     }
 
-    public Director getDirector() {
-        return director;
+    public List<Actor> getDirectors() {
+        return new ArrayList<>(directors);
     }
 
     public int getRateCount() {
@@ -200,5 +261,13 @@ public final class Movie {
 
     public String getCoverPath() {
         return coverPath;
+    }
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "title='" + title + '\'' +
+                ", premiere=" + premiere +
+                '}';
     }
 }
