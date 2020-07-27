@@ -10,7 +10,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Movie {
+public final class Movie implements ContentType<Movie> {
 
     private static final Logger logger = LoggerFactory.getLogger(Movie.class.getName());
     private final String title;
@@ -30,6 +30,19 @@ public final class Movie {
         this.title = title;
         this.premiere = premiere;
         logger.info("New movie \"{}\" created", this.toString());
+    }
+
+    public Movie(String title, String premiere) {
+        this.title = title;
+        this.premiere = convertStrToLocalDate(premiere);
+        logger.info("New movie \"{}\" created", this.toString());
+    }
+
+    public static LocalDate convertStrToLocalDate(String string) {
+        if(string == null || string.isEmpty()) {
+            throw new IllegalArgumentException("Argument cannot be null or empty!");
+        }
+        return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
     }
 
     public void setLength(int length) {
@@ -264,10 +277,46 @@ public final class Movie {
     }
 
     @Override
+    public boolean searchFor(String strToFind) {
+        String[] strSplit = strToFind.toLowerCase().split(" ");
+        for (String searchingStr : strSplit) {
+            if (this.getTitle().toLowerCase().contains(searchingStr)) return true;
+            try {
+                if(this.getDescription().toLowerCase().contains(searchingStr)) return true;
+            } catch (NullPointerException ignore) {}
+            try {
+                if(this.getTitleOrg().toLowerCase().contains(searchingStr)) return true;
+            } catch (NullPointerException ignore) {}
+            for(String genre : genres) {
+                if(genre.toLowerCase().contains(searchingStr)) return true;
+            }
+//            List<Actor> allMovieActors = new ArrayList<>(cast);
+//            allMovieActors.addAll(directors);
+//            allMovieActors.addAll(writers);
+//            for(Actor actor : allMovieActors) {
+//                if(actor.searchFor(strToFind)) return true;
+//            }
+        }
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "Movie{" +
                 "title='" + title + '\'' +
                 ", premiere=" + premiere +
                 '}';
     }
+
+    @Override
+    public int compareTo(Movie movie) {
+        if(movie == null) {
+            throw new IllegalArgumentException("Cannot compare to null!");
+        }
+        if(rate != 0 && movie.getRate() != 0) {
+            return (int) (this.getRate() - movie.getRate()) * 100;
+        }
+        return title.compareToIgnoreCase(movie.getTitle());
+    }
+
 }

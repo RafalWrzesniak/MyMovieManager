@@ -1,7 +1,7 @@
 .idea/
 .lib/
 .out/
+/src/Main/
 .gitignore
 MyMovieManager.iml
 /.idea/misc.xml
-/src/MoviesAndActors/Main.java

@@ -4,17 +4,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-public final class Actor {
+public final class Actor implements ContentType<Actor> {
     private static final Logger logger = LoggerFactory.getLogger(Actor.class.getName());
     private final int personId;
     private final String name;
     private final String surname;
     private final String nationality;
-    private final LocalDate birthday;
-    private final int age;
+    private LocalDate birthday;
+    private int age;
     private final String imagePath;
     private static int classId = 0;
     // actor
@@ -27,18 +30,26 @@ public final class Actor {
     private boolean writer = false;
     private final List<Movie> writtenMovies = new ArrayList<>();
 
-
-
-    public Actor(String name, String surname, String nationality, LocalDate birthday, String imagePath) {
+    private Actor(String name, String surname, String nationality, String imagePath) {
         this.name = checkForNullOrEmptyOrIllegalChar(name, "Name");
         this.surname = checkForNullOrEmptyOrIllegalChar(surname, "Surname");
         this.nationality = checkForNullOrEmptyOrIllegalChar(nationality, "Nationality");
-        this.birthday = setBirthday(birthday);
-        this.age = setAge();
         this.imagePath = checkForNullOrEmptyOrIllegalChar(imagePath, "ImagePath");
         this.personId = classId;
         classId++;
         logger.info("New actor created: {}", this.toString());
+    }
+
+    public Actor(String name, String surname, String nationality, LocalDate birthday, String imagePath) {
+        this(name, surname, nationality, imagePath);
+        this.birthday = setBirthday(birthday);
+        this.age = setAge();
+    }
+
+    public Actor(String name, String surname, String nationality, String birthday, String imagePath) {
+        this(name, surname, nationality, imagePath);
+        this.birthday = setBirthday(convertBdStringToLocalDate(birthday));
+        this.age = setAge();
     }
 
     public boolean isActor() {
@@ -61,6 +72,10 @@ public final class Actor {
         return surname;
     }
 
+    public String getNameAndSurname() {
+        return getName().concat(" ").concat(getSurname());
+    }
+
     public String getNationality() {
         return nationality;
     }
@@ -80,6 +95,14 @@ public final class Actor {
     public String getImagePath() {
         return imagePath;
     }
+
+    public static LocalDate convertBdStringToLocalDate(String string) {
+        if(string == null || string.isEmpty()) {
+            throw new IllegalArgumentException("Birthday argument cannot be null or empty!");
+        }
+        return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
+    }
+
 
     private LocalDate setBirthday(LocalDate birthday) {
         if(birthday == null) {
@@ -189,12 +212,28 @@ public final class Actor {
             logger.warn("\"{}\" already exists as a writer in: \"{}\"}", this.toString(), movie);
         } else {
             setIsAWriter(true);
-            directedMovies.add(movie);
+            writtenMovies.add(movie);
             logger.debug("\"{}\" is now a writer in: \"{}\"", this.toString(), movie);
         }
     }
 
-
+    @Override
+    public boolean searchFor(String strToFind) {
+        String[] strSplit = strToFind.toLowerCase().split(" ");
+        for (String searchingStr : strSplit) {
+            if (this.getNameAndSurname().toLowerCase().contains(searchingStr) ||
+                    this.getNationality().toLowerCase().contains(searchingStr)) {
+                return true;
+            }
+//            List<Movie> allActorMovies = new ArrayList<>(playedInMovies);
+//            allActorMovies.addAll(directedMovies);
+//            allActorMovies.addAll(writtenMovies);
+//            for(Movie movie : allActorMovies) {
+//                if(movie.searchFor(searchingStr)) return true;
+//            }
+        }
+        return false;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -214,6 +253,16 @@ public final class Actor {
                 ", age=" + getAge() +
                 '}';
     }
+
+
+    @Override
+    public int compareTo(Actor actor) {
+        if(actor == null) {
+            throw new IllegalArgumentException("Cannot compare to null!");
+        }
+        return this.getNameAndSurname().compareTo(actor.getNameAndSurname());
+    }
+
 
 
 }
