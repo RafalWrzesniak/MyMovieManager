@@ -24,6 +24,7 @@ public final class Movie implements ContentType<Movie> {
     private final List<Actor> directors = new ArrayList<>();
     private final List<Actor> writers = new ArrayList<>();
     private final List<String> genres = new ArrayList<>();
+    private final List<String> production = new ArrayList<>();
     private String coverPath;
 
     public Movie(String title, LocalDate premiere) {
@@ -118,6 +119,24 @@ public final class Movie implements ContentType<Movie> {
         } else if(!coverPath.isEmpty()) {
             this.coverPath = coverPath;
             logger.debug("coverPath of \"{}\" set to \"{}\"", this.toString(), getCoverPath());
+        }
+    }
+
+    //production
+    public void addProduction(String production) {
+        if(this.production.size() > 4 || this.production.contains(production)) {
+            logger.warn("Unsuccessful set of production in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getProduction().toString());
+        } else if(production != null && !production.isEmpty()) {
+            this.production.add(production);
+            logger.debug("production \"{}\" added to \"{}\"", production, this.toString());
+        }
+    }
+
+    public void addProductions(List<String> producers) {
+        if(producers.size() > 0 && producers.size() < 4) {
+            for (String producer : producers) {
+                addProduction(producer);
+            }
         }
     }
 
@@ -272,9 +291,32 @@ public final class Movie implements ContentType<Movie> {
         return premiere;
     }
 
+    public String getPremiereFormatted() {
+        return premiere.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+    }
+
     public String getCoverPath() {
         return coverPath;
     }
+
+    public List<String> getProduction() {
+        return new ArrayList<>(production);
+    }
+
+    public List<String> getTop3Names(List<Actor> list) {
+        List<String> result = new ArrayList<>();
+        if(list.size() < 4) {
+            for (Actor actor : list) {
+                result.add(actor.getNameAndSurname());
+            }
+        } else {
+            for (int i = 0; i < 3; i++) {
+                result.add(list.get(i).getNameAndSurname());
+            }
+        }
+        return result;
+    }
+
 
     @Override
     public boolean searchFor(String strToFind) {
