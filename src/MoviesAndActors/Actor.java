@@ -37,19 +37,20 @@ public final class Actor implements ContentType<Actor> {
         this.imagePath = checkForNullOrEmptyOrIllegalChar(imagePath, "ImagePath");
         this.personId = classId;
         classId++;
-        logger.info("New actor created: {}", this.toString());
     }
 
     public Actor(String name, String surname, String nationality, LocalDate birthday, String imagePath) {
         this(name, surname, nationality, imagePath);
         this.birthday = setBirthday(birthday);
         this.age = setAge();
+        logger.info("New actor created: {}", this.toString());
     }
 
     public Actor(String name, String surname, String nationality, String birthday, String imagePath) {
         this(name, surname, nationality, imagePath);
         this.birthday = setBirthday(convertBdStringToLocalDate(birthday));
         this.age = setAge();
+        logger.info("New actor created: {}", this.toString());
     }
 
     public boolean isActor() {
