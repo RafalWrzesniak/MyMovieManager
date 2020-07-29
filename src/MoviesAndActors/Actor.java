@@ -6,20 +6,21 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public final class Actor implements ContentType<Actor> {
     private static final Logger logger = LoggerFactory.getLogger(Actor.class.getName());
-    private final int personId;
+    private final int id;
     private final String name;
     private final String surname;
     private final String nationality;
     private LocalDate birthday;
     private int age;
     private final String imagePath;
-    private static int classId = 0;
+    private static int classActorId;
     // actor
     private boolean actor = false;
     private final List<Movie> playedInMovies = new ArrayList<>();
@@ -29,29 +30,48 @@ public final class Actor implements ContentType<Actor> {
     // writer
     private boolean writer = false;
     private final List<Movie> writtenMovies = new ArrayList<>();
+    public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(
+            "id", "name", "surname", "nationality", "birthday",
+            "imagePath", "actor", "director", "writer"));
 
-    private Actor(String name, String surname, String nationality, String imagePath) {
+
+    static {
+        classActorId = 0;
+    }
+
+    private Actor(String name, String surname, String nationality, String imagePath, int id) {
         this.name = checkForNullOrEmptyOrIllegalChar(name, "Name");
         this.surname = checkForNullOrEmptyOrIllegalChar(surname, "Surname");
         this.nationality = checkForNullOrEmptyOrIllegalChar(nationality, "Nationality");
         this.imagePath = checkForNullOrEmptyOrIllegalChar(imagePath, "ImagePath");
-        this.personId = classId;
-        classId++;
+        if(id == -1) {
+            this.id = classActorId;
+            classActorId++;
+        } else {
+            this.id = id;
+        }
     }
 
     public Actor(String name, String surname, String nationality, LocalDate birthday, String imagePath) {
-        this(name, surname, nationality, imagePath);
+        this(name, surname, nationality, imagePath, -1);
         this.birthday = setBirthday(birthday);
         this.age = setAge();
         logger.info("New actor created: {}", this.toString());
     }
 
     public Actor(String name, String surname, String nationality, String birthday, String imagePath) {
-        this(name, surname, nationality, imagePath);
+        this(name, surname, nationality, imagePath, -1);
         this.birthday = setBirthday(convertBdStringToLocalDate(birthday));
         this.age = setAge();
         logger.info("New actor created: {}", this.toString());
     }
+
+    public Actor(String name, String surname, String nationality, String birthday, String imagePath, String id) {
+        this(name, surname, nationality, imagePath, Integer.parseInt(id));
+        this.birthday = setBirthday(convertBdStringToLocalDate(birthday));
+        this.age = setAge();
+    }
+
 
     public boolean isActor() {
         return actor;
@@ -89,8 +109,34 @@ public final class Actor implements ContentType<Actor> {
         return age;
     }
 
-    public int getPersonId() {
-        return personId;
+    public int getId() {
+        return id;
+    }
+
+
+    @Override
+    public Map<String, String> getAllFields() {
+        Function<List<Movie>, String> getMovieId = movies -> {
+        if(movies == null || movies.size() == 0) return null;
+        String tmpStr = "";
+        for (Movie movie : movies) {
+            tmpStr = tmpStr.concat(String.valueOf(movie.getId())).concat(";");
+        }
+        tmpStr = tmpStr.substring(0, tmpStr.length()-1);
+        return tmpStr;
+        };
+
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put(FIELD_NAMES.get(0), String.valueOf(id));
+        map.put(FIELD_NAMES.get(1), name);
+        map.put(FIELD_NAMES.get(2), surname);
+        map.put(FIELD_NAMES.get(3), nationality);
+        map.put(FIELD_NAMES.get(4), getBirthday().toString());
+        map.put(FIELD_NAMES.get(5), imagePath);
+        map.put(FIELD_NAMES.get(6), getMovieId.apply(playedInMovies));
+        map.put(FIELD_NAMES.get(7), getMovieId.apply(directedMovies));
+        map.put(FIELD_NAMES.get(8), getMovieId.apply(writtenMovies));
+        return map;
     }
 
     public String getImagePath() {

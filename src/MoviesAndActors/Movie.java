@@ -8,7 +8,10 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public final class Movie implements ContentType<Movie> {
 
@@ -16,26 +19,36 @@ public final class Movie implements ContentType<Movie> {
     private final String title;
     private String titleOrg;
     private String description;
+    private String coverPath;
     private final LocalDate premiere;
-    private int rateCount;
+    private final int id;
+    private static int classMovieId;
     private int length;
+    private int rateCount;
     private double rate;
     private final List<Actor> cast = new ArrayList<>();
     private final List<Actor> directors = new ArrayList<>();
     private final List<Actor> writers = new ArrayList<>();
     private final List<String> genres = new ArrayList<>();
     private final List<String> production = new ArrayList<>();
-    private String coverPath;
+
+    static {
+        classMovieId = 0;
+    }
 
     public Movie(String title, LocalDate premiere) {
         this.title = title;
         this.premiere = premiere;
+        this.id = classMovieId;
+        classMovieId++;
         logger.info("New movie \"{}\" created", this.toString());
     }
 
     public Movie(String title, String premiere) {
         this.title = title;
         this.premiere = convertStrToLocalDate(premiere);
+        this.id = classMovieId;
+        classMovieId++;
         logger.info("New movie \"{}\" created", this.toString());
     }
 
@@ -317,6 +330,62 @@ public final class Movie implements ContentType<Movie> {
         return result;
     }
 
+    public List<String> getDataForSummary() {
+
+        Function<String, String> removeBrackets = string -> string.substring(1, string.length()-1);
+
+        List<String> movieValues = new ArrayList<>();
+        movieValues.add(this.getTitle());
+        movieValues.add(this.getLengthFormatted());
+        movieValues.add(this.getPremiereFormatted());
+        movieValues.add(removeBrackets.apply(this.getGenres().toString()));
+        movieValues.add(removeBrackets.apply(this.getProduction().toString()));
+        movieValues.add(removeBrackets.apply(this.getTop3Names(this.getDirectors()).toString()));
+        movieValues.add(removeBrackets.apply(this.getTop3Names(this.getCast()).toString()));
+        movieValues.add(this.getDescription());
+        return movieValues;
+    }
+
+    public Map<String, String> getAllFields() {
+        Function<List<?>, String> getFromList = objects -> {
+            if(objects == null || objects.size() == 0) return null;
+            String tmpStr = "";
+            if(objects.get(0) instanceof Actor) {
+                for (Object o : objects) {
+                    Actor actor = (Actor) o;
+                    tmpStr = tmpStr.concat(String.valueOf(actor.getId())).concat(";");
+                }
+            } else if(objects.get(0) instanceof String) {
+                for (Object o : objects) {
+                    String field = (String) o;
+                    tmpStr = tmpStr.concat(field).concat(";");
+                }
+            }
+            tmpStr = tmpStr.substring(0, tmpStr.length()-1);
+            return tmpStr;
+        };
+
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("id", String.valueOf(id));
+        map.put("title", title);
+        map.put("titleOrg", titleOrg);
+        map.put("length", String.valueOf(length));
+        map.put("premiere", premiere.toString());
+        map.put("rate", String.valueOf(rate));
+        map.put("rateCount", String.valueOf(rateCount));
+        map.put("coverPath", coverPath);
+        map.put("description", getDescription());
+        map.put("cast", getFromList.apply(cast));
+        map.put("directors", getFromList.apply(directors));
+        map.put("writers", getFromList.apply(writers));
+        map.put("genres", getFromList.apply(genres));
+        map.put("production", getFromList.apply(production));
+        return map;
+    }
+
+    public int getId() {
+        return this.id;
+    }
 
     @Override
     public boolean searchFor(String strToFind) {
