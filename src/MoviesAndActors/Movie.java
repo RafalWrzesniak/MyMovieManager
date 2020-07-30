@@ -195,11 +195,6 @@ public final class Movie implements ContentType<Movie> {
         return stringToCheck;
     }
 
-//    private List<Actor> getActorsFromInt(List<String> list) {
-//
-//    }
-
-
     public void setLength(int length) {
         setFieldDigit("length", length);
     }
