@@ -209,6 +209,9 @@ public final class Actor implements ContentType<Actor> {
         } else {
             setIsAnActor(true);
             playedInMovies.add(movie);
+            if(!movie.isActorPlayingIn(this)) {
+                movie.addActor(this);
+            }
             logger.debug("\"{}\" is now an actor in: \"{}\"", this.toString(), movie);
             return true;
         }
@@ -240,6 +243,9 @@ public final class Actor implements ContentType<Actor> {
         } else {
             setIsADirector(true);
             directedMovies.add(movie);
+            if(!movie.isDirectedBy(this)) {
+                movie.addDirector(this);
+            }
             logger.debug("\"{}\" is now a director in: \"{}\"", this.toString(), movie);
             return true;
         }
@@ -260,6 +266,9 @@ public final class Actor implements ContentType<Actor> {
         } else {
             setIsAWriter(true);
             writtenMovies.add(movie);
+            if(!movie.isWrittenBy(this)) {
+                movie.addWriter(this);
+            }
             logger.debug("\"{}\" is now a writer in: \"{}\"", this.toString(), movie);
         }
     }
