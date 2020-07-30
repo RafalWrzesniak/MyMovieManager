@@ -16,12 +16,12 @@ import java.util.function.Function;
 public final class Movie implements ContentType<Movie> {
 
     private static final Logger logger = LoggerFactory.getLogger(Movie.class.getName());
-    private final String title;
+    private String title;
     private String titleOrg;
     private String description;
     private String coverPath;
-    private final LocalDate premiere;
-    private final int id;
+    private LocalDate premiere;
+    private int id;
     private static int classMovieId;
     private int length;
     private int rateCount;
@@ -31,203 +31,249 @@ public final class Movie implements ContentType<Movie> {
     private final List<Actor> writers = new ArrayList<>();
     private final List<String> genres = new ArrayList<>();
     private final List<String> production = new ArrayList<>();
+    public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(
+            "id", "title", "titleOrg", "length", "premiere", "rate", "rateCount",
+            "coverPath", "description", "cast", "directors", "writers", "genres", "production"));
+
 
     static {
         classMovieId = 0;
     }
 
     public Movie(String title, LocalDate premiere) {
-        this.title = title;
-        this.premiere = premiere;
-        this.id = classMovieId;
+        setFieldString("title", title);
+        setFieldString("premiere", premiere);
         classMovieId++;
         logger.info("New movie \"{}\" created", this.toString());
     }
 
     public Movie(String title, String premiere) {
-        this.title = title;
-        this.premiere = convertStrToLocalDate(premiere);
+        setFieldString("title", title);
+        setFieldString("premiere", premiere);
         this.id = classMovieId;
         classMovieId++;
         logger.info("New movie \"{}\" created", this.toString());
     }
 
-    public static LocalDate convertStrToLocalDate(String string) {
-        if(string == null || string.isEmpty()) {
-            throw new IllegalArgumentException("Argument cannot be null or empty!");
+    public Movie(Map<String, List<String>> fieldMap, ContentList<Actor> allActors) {
+        setFieldString("title", fieldMap.get("title").get(0));
+        fieldMap.remove("title");
+        setFieldString("premiere", fieldMap.get("premiere").get(0));
+        fieldMap.remove("premiere");
+
+        setFieldWithList("cast", allActors.convertStrIdsToObjects(fieldMap.get("cast")));
+        fieldMap.remove("cast");
+        setFieldWithList("directors", allActors.convertStrIdsToObjects(fieldMap.get("directors")));
+        fieldMap.remove("directors");
+        setFieldWithList("writers", allActors.convertStrIdsToObjects(fieldMap.get("writers")));
+        fieldMap.remove("writers");
+
+        for(String field : fieldMap.keySet()) {
+            setFieldWithList(field, fieldMap.get(field));
         }
-        return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
     }
 
-    public void setLength(int length) {
-        if(this.length != 0) {
-            logger.warn("Unsuccessful set of length in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getLengthFormatted());
-        } else if(length > 0) {
-            this.length = length;
-            logger.debug("length of \"{}\" set to \"{}\"", this.toString(), getLengthFormatted());
-        }
-    }
 
-    public static int changeLenStrFromIMDBToInt(String lenString){
-        if(lenString == null || lenString.isEmpty()) {
-            return 0;
-        }
-        DateTimeFormatter longPattern = DateTimeFormatter.ofPattern("'PT'H'H'mm'M'");
-        DateTimeFormatter hourPattern = DateTimeFormatter.ofPattern("'PT'H'H'");
-        LocalTime time;
-        try {
-            time = LocalTime.parse(lenString, longPattern);
-        } catch (DateTimeParseException e) {
+    private <E> void setFieldString(String field, E value) {
+        try { //check if value is int or double
+            setFieldDigit(field, Integer.parseInt((String) value));
+            return;
+        } catch (NumberFormatException e) {
+//            e.printStackTrace();
             try {
-                time = LocalTime.parse(lenString, hourPattern);
-            } catch (DateTimeParseException e2) {
-                lenString = lenString.replace("PT", "PT0H");
-                time = LocalTime.parse(lenString, longPattern);
+                setFieldDigit(field, Double.parseDouble((String) value));
+                return;
+            } catch (NumberFormatException d) {
+//                d.printStackTrace();
             }
         }
-        return time.getHour()*60 + time.getMinute();
+
+        try {
+            if(Movie.class.getDeclaredField(field).get(this) == null) {
+                if (Movie.class.getDeclaredField(field).toString().contains("java.time.LocalDate")) {
+                    Movie.class.getDeclaredField(field).set(this, convertStrToLocalDate(String.valueOf(value)));
+                } else {
+                    Movie.class.getDeclaredField(field).set(this, checkForNullOrEmptyOrIllegalChar(String.valueOf(value), field));
+                }
+                logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
+            } else {
+                logger.warn("Unsuccessful set of \"{}\" in movie \"{}\" - this field is already set to \"{}\"", field, this.toString(), Movie.class.getDeclaredField(field).get(this));
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
+    private <E> void setFieldDigit(String field, E value) {
+        if (!(value instanceof Integer) && !(value instanceof Double)) return;
+
+        try {
+            if(Movie.class.getDeclaredField(field).get(this).toString().equals("0") || Movie.class.getDeclaredField(field).get(this).toString().equals("0.0")) {
+                Movie.class.getDeclaredField(field).set(this, value);
+                logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
+            } else {
+                logger.warn("Unsuccessful set of \"{}\" in movie \"{}\" - this field is already set to \"{}\"", field, this.toString(), Movie.class.getDeclaredField(field).get(this));
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private <E> void setField(String field, E value) {
+        if(value == null) {
+            logger.warn("Unsuccessful set of \"{}\" in \"{}\" - null as input", field, this);
+            return;
+        }
+        try {
+            if(!(Movie.class.getDeclaredField(field).get(this) instanceof List)) {
+                setFieldString(field, value);
+                return;
+            }
+
+            if(value instanceof Actor) {
+                @SuppressWarnings("unchecked")
+                List<Actor> list = (List<Actor>) Movie.class.getDeclaredField(field).get(this);
+                if(!list.contains(value)) {
+                    list.add((Actor) value);
+                    Movie.class.getDeclaredField(field).set(this, list);
+                    switch(field) {
+                        case "cast":
+                            ((Actor) value).addMovieActorPlayedIn(this);
+                            break;
+                        case "directors":
+                            ((Actor) value).addMovieDirectedBy(this);
+                            break;
+                        case "writers":
+                            ((Actor) value).addMovieWrittenBy(this);
+                            break;
+                    }
+                } else {
+                    logger.warn("Unsuccessful set of \"{}\" in \"{}\". \"{}\" is already on the list", field, this, value);
+                    return;
+                }
+            } else if(value instanceof String) {
+                @SuppressWarnings("unchecked")
+                List<String> list = (List<String>) Movie.class.getDeclaredField(field).get(this);
+                if(!list.contains(value)) {
+                    list.add((String) value);
+                    Movie.class.getDeclaredField(field).set(this, list);
+                } else {
+                    logger.warn("Unsuccessful set of \"{}\" in \"{}\". \"{}\" is already on the list", field, this, value);
+                    return;
+                }
+            } else {
+                logger.warn("Unsuccessful set of \"{}\" in \"{}\". \"{}\" is wrong type.", field, this, value);
+                return;
+            }
+            logger.debug("Field \"{}\" of \"{}\" extended by \"{}\"",  field, this.toString(), value);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private <E> void setFieldWithList(String field, List<E> list) {
+        if(list.size() > 0) {
+            for (E obj : list) {
+                setField(field, obj);
+            }
+        }
+    }
+
+    public static String checkForNullOrEmptyOrIllegalChar(String stringToCheck, String argName) {
+        if(stringToCheck == null) {
+            throw new IllegalArgumentException(String.format("%s argument cannot be null!", argName));
+        } else if(stringToCheck.isEmpty()) {
+            throw new IllegalArgumentException(String.format("%s argument cannot be empty!", argName));
+        }
+        for (char aChar : stringToCheck.toCharArray()) {
+            if (((aChar < 20 || (aChar > 90 && aChar < 96) || (aChar > 122 && aChar < 192)) && aChar != 92)) {
+                throw new IllegalArgumentException(String.format("%s argument contains illegal char: '%s' - '%d'", argName, aChar, (int) aChar));
+                // && aChar != 20 && aChar != 32 && aChar != 39 && aChar != 44 && aChar != 46 && aChar != 47 && aChar != 58
+            }
+        }
+        return stringToCheck;
+    }
+
+//    private List<Actor> getActorsFromInt(List<String> list) {
+//
+//    }
+
+
+    public void setLength(int length) {
+        setFieldDigit("length", length);
+    }
+
+    public void setLength(String length) {
+        setFieldString("length", length);
+    }
 
     public void setRate(double rate) {
-        if(this.rate != 0) {
-            logger.warn("Unsuccessful set of rate in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getRate());
-        } else if(rate > 0 && rate <= 10) {
-            this.rate = rate;
-            logger.debug("rate of \"{}\" set to \"{}\"", this.toString(), getRate());
-        }
+        setFieldDigit("rate", rate);
     }
 
     public void setRateCount(int rateCount) {
-        if(this.rateCount != 0) {
-            logger.warn("Unsuccessful set of rateCount in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getRateCount());
-        } else if(rateCount > 0) {
-            this.rateCount = rateCount;
-            logger.debug("rateCount of \"{}\" set to \"{}\"", this.toString(), getRateCount());
-        }
+        setFieldDigit("rateCount", rateCount);
     }
 
-    // strings
     public void setTitleOrg(String titleOrg) {
-        if(this.titleOrg != null) {
-            logger.warn("Unsuccessful set of titleOrg in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getTitleOrg());
-        } else if(!titleOrg.isEmpty()) {
-            this.titleOrg = titleOrg;
-            logger.debug("titleOrg of \"{}\" set to \"{}\"", this.toString(), getTitleOrg());
-        }
+        setFieldString("titleOrg", titleOrg);
     }
 
     public void setDescription(String description) {
-        if(this.description != null) {
-            logger.warn("Unsuccessful set of description in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getDescription());
-        } else if(!description.isEmpty()) {
-            this.description = description;
-            logger.debug("description of \"{}\" set to \"{}\"", this.toString(), getDescription());
-        }
+        setFieldString("description", description);
     }
 
     public void setCoverPath(String coverPath) {
-        if(this.coverPath != null) {
-            logger.warn("Unsuccessful set of coverPath in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getCoverPath());
-        } else if(!coverPath.isEmpty()) {
-            this.coverPath = coverPath;
-            logger.debug("coverPath of \"{}\" set to \"{}\"", this.toString(), getCoverPath());
-        }
+        setFieldString("coverPath", coverPath);
     }
+
 
     //production
     public void addProduction(String production) {
-        if(this.production.size() > 4 || this.production.contains(production)) {
-            logger.warn("Unsuccessful set of production in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getProduction().toString());
-        } else if(production != null && !production.isEmpty()) {
-            this.production.add(production);
-            logger.debug("production \"{}\" added to \"{}\"", production, this.toString());
-        }
+        setField("production", production);
     }
 
     public void addProductions(List<String> producers) {
-        if(producers.size() > 0 && producers.size() < 4) {
-            for (String producer : producers) {
-                addProduction(producer);
-            }
-        }
+        setFieldWithList("production", producers);
     }
 
 
     // genres
     public void addGenre(String genre) {
-        if(this.genres.size() > 4 || this.genres.contains(genre)) {
-            logger.warn("Unsuccessful set of genre in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getGenres().toString());
-        } else if(genre != null && !genre.isEmpty()) {
-            this.genres.add(genre);
-            logger.debug("genre \"{}\" added to \"{}\"", genre, this.toString());
-        }
+        setField("genres", genre);
     }
 
     public void addGenres(List<String> genres) {
-        if(genres.size() > 0 && genres.size() < 4) {
-            for (String genre : genres) {
-                addGenre(genre);
-            }
-        }
+        setFieldWithList("genres", genres);
     }
 
 
     // actors
     public void addActor(Actor actor) {
-        if(actor == null || this.cast.contains(actor)) {
-            logger.warn("Unsuccessful set of actor in movie \"{}\" - this field is already set to \"{}\"", this.toString(), getCast().toString());
-        } else {
-            this.cast.add(actor);
-            logger.debug("actor \"{}\" added to \"{}\"", actor, this.toString());
-            actor.addMovieActorPlayedIn(this);
-        }
+        setField("cast", actor);
     }
 
     public void addActors(List<Actor> actors) {
-        if(actors.size() > 0) {
-            for (Actor actor : actors) {
-                addActor(actor);
-            }
-        }
+        setFieldWithList("cast", actors);
     }
 
     // directors
     public void addDirector(Actor director) {
-        if(director == null) {
-            logger.warn("Unsuccessful set of director in movie \"{}\" - null as an input", this.toString());
-        } else {
-            this.directors.add(director);
-            logger.debug("director of \"{}\" set to \"{}\"", this.toString(), getDirectors().toString());
-            director.addMovieDirectedBy(this);
-        }
+        setField("directors", director);
     }
 
     public void addDirectors(List<Actor> directors) {
-        if(directors.size() > 0) {
-            for (Actor director: directors) {
-                addDirector(director);
-            }
-        }
+        setFieldWithList("directors", directors);
     }
 
     // writers
     public void addWriter(Actor writer) {
-        if(writer == null) {
-            logger.warn("Unsuccessful set of writer in movie \"{}\" - null as an input", this.toString());
-        } else {
-            this.writers.add(writer);
-            logger.debug("writer of \"{}\" set to \"{}\"", this.toString(), getWriters().toString());
-            writer.addMovieWrittenBy(this);
-        }
+        setField("writers", writer);
     }
 
     public void addWriters(List<Actor> writers) {
-        if(writers.size() > 0) {
-            for (Actor writer: writers) {
-                addWriter(writer);
-            }
-        }
+        setFieldWithList("writers", writers);
     }
 
 
@@ -246,15 +292,6 @@ public final class Movie implements ContentType<Movie> {
     public boolean isGenreType(String genre) {
         return this.getGenres().contains(genre);
     }
-
-    public boolean isRateHigherThen(double rate) {
-        if(rate > 0 && rate <= 10) {
-            return this.getRate() > rate;
-        } else {
-            throw new IllegalArgumentException("Rate must be in range (0, 10]");
-        }
-    }
-
 
     public List<Actor> getWriters() {
         return new ArrayList<>(writers);
@@ -316,6 +353,20 @@ public final class Movie implements ContentType<Movie> {
         return new ArrayList<>(production);
     }
 
+    public int getId() {
+        return this.id;
+    }
+
+
+
+    public boolean isRateHigherThen(double rate) {
+        if(rate > 0 && rate <= 10) {
+            return this.getRate() > rate;
+        } else {
+            throw new IllegalArgumentException("Rate must be in range (0, 10]");
+        }
+    }
+
     public List<String> getTop3Names(List<Actor> list) {
         List<String> result = new ArrayList<>();
         if(list.size() < 4) {
@@ -366,25 +417,49 @@ public final class Movie implements ContentType<Movie> {
         };
 
         Map<String, String> map = new LinkedHashMap<>();
-        map.put("id", String.valueOf(id));
-        map.put("title", title);
-        map.put("titleOrg", titleOrg);
-        map.put("length", String.valueOf(length));
-        map.put("premiere", premiere.toString());
-        map.put("rate", String.valueOf(rate));
-        map.put("rateCount", String.valueOf(rateCount));
-        map.put("coverPath", coverPath);
-        map.put("description", getDescription());
-        map.put("cast", getFromList.apply(cast));
-        map.put("directors", getFromList.apply(directors));
-        map.put("writers", getFromList.apply(writers));
-        map.put("genres", getFromList.apply(genres));
-        map.put("production", getFromList.apply(production));
+        map.put(FIELD_NAMES.get(0), String.valueOf(id));
+        map.put(FIELD_NAMES.get(1), title);
+        map.put(FIELD_NAMES.get(2), titleOrg);
+        map.put(FIELD_NAMES.get(3), String.valueOf(length));
+        map.put(FIELD_NAMES.get(4), premiere.toString());
+        map.put(FIELD_NAMES.get(5), String.valueOf(rate));
+        map.put(FIELD_NAMES.get(6), String.valueOf(rateCount));
+        map.put(FIELD_NAMES.get(7), coverPath);
+        map.put(FIELD_NAMES.get(8), getDescription());
+        map.put(FIELD_NAMES.get(9), getFromList.apply(cast));
+        map.put(FIELD_NAMES.get(10), getFromList.apply(directors));
+        map.put(FIELD_NAMES.get(11), getFromList.apply(writers));
+        map.put(FIELD_NAMES.get(12), getFromList.apply(genres));
+        map.put(FIELD_NAMES.get(13), getFromList.apply(production));
         return map;
     }
 
-    public int getId() {
-        return this.id;
+    public static LocalDate convertStrToLocalDate(String string) {
+        if(string == null || string.isEmpty()) {
+            throw new IllegalArgumentException("Argument cannot be null or empty!");
+        }
+        return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
+    }
+
+
+    public static int changeLenStrFromIMDBToInt(String lenString){
+        if(lenString == null || lenString.isEmpty()) {
+            return 0;
+        }
+        DateTimeFormatter longPattern = DateTimeFormatter.ofPattern("'PT'H'H'mm'M'");
+        DateTimeFormatter hourPattern = DateTimeFormatter.ofPattern("'PT'H'H'");
+        LocalTime time;
+        try {
+            time = LocalTime.parse(lenString, longPattern);
+        } catch (DateTimeParseException e) {
+            try {
+                time = LocalTime.parse(lenString, hourPattern);
+            } catch (DateTimeParseException e2) {
+                lenString = lenString.replace("PT", "PT0H");
+                time = LocalTime.parse(lenString, longPattern);
+            }
+        }
+        return time.getHour()*60 + time.getMinute();
     }
 
     @Override
