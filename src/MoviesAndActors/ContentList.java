@@ -35,7 +35,7 @@ public class ContentList<T extends ContentType<T>> {
     }
 
     public void add(T obj) {
-        if(contains(obj)) {
+        if(list.contains(obj)) {
             logger.warn("\"{}\" is already on the {} list", obj.toString(), getListName());
         } else {
             list.add(obj);
@@ -88,6 +88,27 @@ public class ContentList<T extends ContentType<T>> {
         return results;
     }
 
+    public T getById(int id) {
+        for (T obj : list) {
+            if (obj.getId() == id) {
+                return obj;
+            }
+        }
+        return null;
+    }
+
+    public List<T> convertStrIdsToObjects(List<String> strList) {
+        List<T> targetList = new ArrayList<>();
+        for(String str : strList) {
+            try {
+                targetList.add(getById(Integer.parseInt(str)));
+            } catch (NumberFormatException e) {
+                logger.warn("Couldn't convert \"{}\" to int", str);
+            }
+
+        }
+        return targetList;
+    }
 
 
 }
