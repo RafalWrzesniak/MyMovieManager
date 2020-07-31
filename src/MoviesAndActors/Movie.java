@@ -1,49 +1,52 @@
 package MoviesAndActors;
 
+import FileOperations.XMLOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public final class Movie implements ContentType<Movie> {
 
     private static final Logger logger = LoggerFactory.getLogger(Movie.class.getName());
+    private int id;
     private String title;
     private String titleOrg;
-    private String description;
-    private String coverPath;
     private LocalDate premiere;
-    private int id;
-    private static int classMovieId;
     private int length;
-    private int rateCount;
     private double rate;
+    private int rateCount;
     private final List<Actor> cast = new ArrayList<>();
     private final List<Actor> directors = new ArrayList<>();
     private final List<Actor> writers = new ArrayList<>();
     private final List<String> genres = new ArrayList<>();
     private final List<String> production = new ArrayList<>();
-    public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(
-            "id", "title", "titleOrg", "length", "premiere", "rate", "rateCount",
-            "coverPath", "description", "cast", "directors", "writers", "genres", "production"));
-
+    private String description;
+    private String coverPath;
+    private static int classMovieId;
+    public static String ID = "id", TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", LENGTH = "length",
+            RATE = "rate", RATE_COUNT = "rateCount", CAST = "cast", DIRECTORS = "directors", WRITERS = "writers",
+            GENRES = "genres", PRODUCTION = "production", DESCRIPTION = "description", COVER_PATH = "coverPath";
+    public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ID, TITLE, TITLE_ORG, PREMIERE, LENGTH,
+            RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, COVER_PATH));
 
     static {
         classMovieId = 0;
+
     }
 
     public Movie(String title, LocalDate premiere) {
         setFieldString("title", title);
         setFieldString("premiere", premiere);
+        this.id = classMovieId;
         classMovieId++;
+        saveMe();
         logger.info("New movie \"{}\" created", this.toString());
     }
 
@@ -52,6 +55,7 @@ public final class Movie implements ContentType<Movie> {
         setFieldString("premiere", premiere);
         this.id = classMovieId;
         classMovieId++;
+        saveMe();
         logger.info("New movie \"{}\" created", this.toString());
     }
 
@@ -60,6 +64,7 @@ public final class Movie implements ContentType<Movie> {
         fieldMap.remove("title");
         setFieldString("premiere", fieldMap.get("premiere").get(0));
         fieldMap.remove("premiere");
+        logger.info("New movie \"{}\" created", this.toString());
 
         setFieldWithList("cast", allActors.convertStrIdsToObjects(fieldMap.get("cast")));
         fieldMap.remove("cast");
@@ -96,6 +101,7 @@ public final class Movie implements ContentType<Movie> {
                     Movie.class.getDeclaredField(field).set(this, checkForNullOrEmptyOrIllegalChar(String.valueOf(value), field));
                 }
                 logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
+                saveMe();
             } else {
                 logger.warn("Unsuccessful set of \"{}\" in movie \"{}\" - this field is already set to \"{}\"", field, this.toString(), Movie.class.getDeclaredField(field).get(this));
             }
@@ -111,6 +117,7 @@ public final class Movie implements ContentType<Movie> {
             if(Movie.class.getDeclaredField(field).get(this).toString().equals("0") || Movie.class.getDeclaredField(field).get(this).toString().equals("0.0")) {
                 Movie.class.getDeclaredField(field).set(this, value);
                 logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
+                saveMe();
             } else {
                 logger.warn("Unsuccessful set of \"{}\" in movie \"{}\" - this field is already set to \"{}\"", field, this.toString(), Movie.class.getDeclaredField(field).get(this));
             }
@@ -166,6 +173,7 @@ public final class Movie implements ContentType<Movie> {
                 return;
             }
             logger.debug("Field \"{}\" of \"{}\" extended by \"{}\"",  field, this.toString(), value);
+            saveMe();
         } catch (IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -195,80 +203,85 @@ public final class Movie implements ContentType<Movie> {
         return stringToCheck;
     }
 
+    @Override
+    public String getReprName() {
+        return title.replaceAll(" ", "_");
+    }
+
     public void setLength(int length) {
-        setFieldDigit("length", length);
+        setFieldDigit(LENGTH, length);
     }
 
     public void setLength(String length) {
-        setFieldString("length", length);
+        setFieldString(LENGTH, length);
     }
 
     public void setRate(double rate) {
-        setFieldDigit("rate", rate);
+        setFieldDigit(RATE, rate);
     }
 
     public void setRateCount(int rateCount) {
-        setFieldDigit("rateCount", rateCount);
+        setFieldDigit(RATE_COUNT, rateCount);
     }
 
     public void setTitleOrg(String titleOrg) {
-        setFieldString("titleOrg", titleOrg);
+        setFieldString(TITLE_ORG, titleOrg);
     }
 
     public void setDescription(String description) {
-        setFieldString("description", description);
+        setFieldString(DESCRIPTION, description);
     }
 
     public void setCoverPath(String coverPath) {
-        setFieldString("coverPath", coverPath);
+        setFieldString(COVER_PATH, coverPath);
     }
 
 
     //production
     public void addProduction(String production) {
-        setField("production", production);
+        setField(PRODUCTION, production);
     }
 
     public void addProductions(List<String> producers) {
-        setFieldWithList("production", producers);
+        setFieldWithList(PRODUCTION, producers);
     }
 
 
     // genres
     public void addGenre(String genre) {
-        setField("genres", genre);
+        setField(GENRES, genre);
     }
 
     public void addGenres(List<String> genres) {
-        setFieldWithList("genres", genres);
+        setFieldWithList(GENRES, genres);
     }
 
 
     // actors
     public void addActor(Actor actor) {
-        setField("cast", actor);
+        setField(CAST, actor);
     }
 
     public void addActors(List<Actor> actors) {
-        setFieldWithList("cast", actors);
+        setFieldWithList(CAST, actors);
     }
 
     // directors
     public void addDirector(Actor director) {
-        setField("directors", director);
+        setField(DIRECTORS, director);
     }
 
     public void addDirectors(List<Actor> directors) {
-        setFieldWithList("directors", directors);
+        setFieldWithList(DIRECTORS, directors);
     }
 
     // writers
     public void addWriter(Actor writer) {
-        setField("writers", writer);
+        setField(WRITERS, writer);
     }
 
     public void addWriters(List<Actor> writers) {
-        setFieldWithList("writers", writers);
+        setFieldWithList(WRITERS, writers);
     }
 
 
@@ -392,7 +405,7 @@ public final class Movie implements ContentType<Movie> {
         return movieValues;
     }
 
-    public Map<String, String> getAllFields() {
+    public Map<String, String> getAllFieldsAsStrings() {
         Function<List<?>, String> getFromList = objects -> {
             if(objects == null || objects.size() == 0) return null;
             String tmpStr = "";
@@ -412,20 +425,20 @@ public final class Movie implements ContentType<Movie> {
         };
 
         Map<String, String> map = new LinkedHashMap<>();
-        map.put(FIELD_NAMES.get(0), String.valueOf(id));
-        map.put(FIELD_NAMES.get(1), title);
-        map.put(FIELD_NAMES.get(2), titleOrg);
-        map.put(FIELD_NAMES.get(3), String.valueOf(length));
-        map.put(FIELD_NAMES.get(4), premiere.toString());
-        map.put(FIELD_NAMES.get(5), String.valueOf(rate));
-        map.put(FIELD_NAMES.get(6), String.valueOf(rateCount));
-        map.put(FIELD_NAMES.get(7), coverPath);
-        map.put(FIELD_NAMES.get(8), getDescription());
-        map.put(FIELD_NAMES.get(9), getFromList.apply(cast));
-        map.put(FIELD_NAMES.get(10), getFromList.apply(directors));
-        map.put(FIELD_NAMES.get(11), getFromList.apply(writers));
-        map.put(FIELD_NAMES.get(12), getFromList.apply(genres));
-        map.put(FIELD_NAMES.get(13), getFromList.apply(production));
+        map.put(ID, String.valueOf(id));
+        map.put(TITLE, title);
+        map.put(TITLE_ORG, titleOrg);
+        map.put(PREMIERE, premiere.toString());
+        map.put(LENGTH, String.valueOf(length));
+        map.put(RATE, String.valueOf(rate));
+        map.put(RATE_COUNT, String.valueOf(rateCount));
+        map.put(CAST, getFromList.apply(cast));
+        map.put(DIRECTORS, getFromList.apply(directors));
+        map.put(WRITERS, getFromList.apply(writers));
+        map.put(GENRES, getFromList.apply(genres));
+        map.put(PRODUCTION, getFromList.apply(production));
+        map.put(DESCRIPTION, getDescription());
+        map.put(COVER_PATH, coverPath);
         return map;
     }
 
@@ -484,8 +497,29 @@ public final class Movie implements ContentType<Movie> {
     @Override
     public String toString() {
         return "Movie{" +
-                "title='" + title + '\'' +
+                "id='" + id + '\'' +
+                ", title='" + title + '\'' +
                 ", premiere=" + premiere +
+                '}';
+    }
+
+
+    public String toCompleteString() {
+        return "Movie{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", titleOrg='" + titleOrg + '\'' +
+                ", premiere=" + premiere +
+                ", length=" + length +
+                ", rate=" + rate +
+                ", rateCount=" + rateCount +
+                ", cast=" + cast +
+                ", directors=" + directors +
+                ", writers=" + writers +
+                ", genres=" + genres +
+                ", production=" + production +
+                ", description='" + description + '\'' +
+                ", coverPath='" + coverPath + '\'' +
                 '}';
     }
 
@@ -500,4 +534,12 @@ public final class Movie implements ContentType<Movie> {
         return title.compareToIgnoreCase(movie.getTitle());
     }
 
+    @Override
+    public void saveMe() {
+        if(!XMLOperator.OBJECTS_TO_SAVE.contains(this)) {
+            XMLOperator.OBJECTS_TO_SAVE.add(this);
+            logger.debug("Movie \"{}\" added to the list of objects to be saved", this);
+        }
+
+    }
 }
