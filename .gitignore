@@ -2,6 +2,7 @@
 .lib/
 .out/
 /src/xMain/
+/savedData/
 .gitignore
 MyMovieManager.iml
 /.idea/misc.xml

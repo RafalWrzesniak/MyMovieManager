@@ -1,5 +1,6 @@
 package MoviesAndActors;
 
+import FileOperations.XMLOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +40,8 @@ public final class Actor implements ContentType<Actor> {
         classActorId = 0;
     }
 
+
+
     private Actor(String name, String surname, String nationality, String imagePath, int id) {
         this.name = checkForNullOrEmptyOrIllegalChar(name, "Name");
         this.surname = checkForNullOrEmptyOrIllegalChar(surname, "Surname");
@@ -57,6 +60,7 @@ public final class Actor implements ContentType<Actor> {
         this.birthday = setBirthday(birthday);
         this.age = setAge();
         logger.info("New actor created: {}", this.toString());
+        saveMe();
     }
 
     public Actor(String name, String surname, String nationality, String birthday, String imagePath) {
@@ -64,6 +68,7 @@ public final class Actor implements ContentType<Actor> {
         this.birthday = setBirthday(convertBdStringToLocalDate(birthday));
         this.age = setAge();
         logger.info("New actor created: {}", this.toString());
+        saveMe();
     }
 
     public Actor(String name, String surname, String nationality, String birthday, String imagePath, String id) {
@@ -115,7 +120,7 @@ public final class Actor implements ContentType<Actor> {
 
 
     @Override
-    public Map<String, String> getAllFields() {
+    public Map<String, String> getAllFieldsAsStrings() {
         Function<List<Movie>, String> getMovieId = movies -> {
         if(movies == null || movies.size() == 0) return null;
         String tmpStr = "";
@@ -213,6 +218,7 @@ public final class Actor implements ContentType<Actor> {
                 movie.addActor(this);
             }
             logger.debug("\"{}\" is now an actor in: \"{}\"", this.toString(), movie);
+            saveMe();
             return true;
         }
     }
@@ -247,6 +253,7 @@ public final class Actor implements ContentType<Actor> {
                 movie.addDirector(this);
             }
             logger.debug("\"{}\" is now a director in: \"{}\"", this.toString(), movie);
+            saveMe();
             return true;
         }
     }
@@ -260,6 +267,11 @@ public final class Actor implements ContentType<Actor> {
         return writtenMovies.contains(movie);
     }
 
+    @Override
+    public String getReprName() {
+        return getNameAndSurname().replaceAll(" ", "_");
+    }
+
     public void addMovieWrittenBy(Movie movie) {
         if(isWriting(movie)) {
             logger.warn("\"{}\" already exists as a writer in: \"{}\"}", this.toString(), movie);
@@ -270,6 +282,7 @@ public final class Actor implements ContentType<Actor> {
                 movie.addWriter(this);
             }
             logger.debug("\"{}\" is now a writer in: \"{}\"", this.toString(), movie);
+            saveMe();
         }
     }
 
@@ -317,6 +330,14 @@ public final class Actor implements ContentType<Actor> {
             throw new IllegalArgumentException("Cannot compare to null!");
         }
         return this.getNameAndSurname().compareTo(actor.getNameAndSurname());
+    }
+
+    @Override
+    public void saveMe() {
+        if(!XMLOperator.OBJECTS_TO_SAVE.contains(this)) {
+            XMLOperator.OBJECTS_TO_SAVE.add(this);
+            logger.debug("Actor \"{}\" added to list of objects to be saved", this);
+        }
     }
 
 
