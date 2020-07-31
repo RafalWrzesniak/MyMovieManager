@@ -16,8 +16,8 @@ public final class IO {
 
     private static final Logger logger = LoggerFactory.getLogger(IO.class.getName());
 
-    public static List<String> getFileNamesInDirectory(String pathName) {
-        List<File> files = listDirectory(pathName);
+    public static List<String> getFileNamesInDirectory(File directory) {
+        List<File> files = listDirectory(directory);
         if(files == null) return null;
         List<String> fileNames = new ArrayList<>();
         for(File file : files) {
@@ -26,15 +26,15 @@ public final class IO {
                 fileNames.add(formattedName);
             }
         }
-        logger.debug("Found {} properly decoded files in \"{}\"", fileNames.size(), pathName);
+        logger.debug("Found {} properly decoded files in \"{}\"", fileNames.size(), directory);
         return fileNames;
     }
 
-    public static List<File> listDirectory(String pathName) {
+    public static List<File> listDirectory(File directory) {
         try {
-            return Arrays.asList(Objects.requireNonNull(new File(pathName).listFiles()));
+            return Arrays.asList(Objects.requireNonNull(directory.listFiles()));
         } catch (NullPointerException ignore) {
-            logger.warn("Directory \"{}\" does not exist", pathName);
+            logger.warn("Directory \"{}\" does not exist", directory);
             return null;
         }
     }
