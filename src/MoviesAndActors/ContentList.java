@@ -37,6 +37,8 @@ public class ContentList<T extends ContentType<T>> {
     public void add(T obj) {
         if(list.contains(obj)) {
             logger.warn("\"{}\" is already on the {} list", obj.toString(), getListName());
+        } else if(obj == null) {
+            logger.warn("Null object will not be added to the list \"{}\"!", getListName());
         } else {
             list.add(obj);
             logger.debug("\"{}\" added to \"{}\"", obj.toString(), getListName());
@@ -110,5 +112,12 @@ public class ContentList<T extends ContentType<T>> {
         return targetList;
     }
 
+    public boolean isEmpty() {
+        return list.isEmpty();
+    }
 
+    @Override
+    public String toString() {
+        return list.toString();
+    }
 }
