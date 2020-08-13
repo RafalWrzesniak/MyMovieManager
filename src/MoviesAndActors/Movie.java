@@ -22,11 +22,11 @@ public final class Movie implements ContentType<Movie> {
     private int length;
     private double rate;
     private int rateCount;
-    private final List<Actor> cast = new ArrayList<>();
-    private final List<Actor> directors = new ArrayList<>();
-    private final List<Actor> writers = new ArrayList<>();
-    private final List<String> genres = new ArrayList<>();
-    private final List<String> production = new ArrayList<>();
+    private List<Actor> cast = new ArrayList<>();
+    private List<Actor> directors = new ArrayList<>();
+    private List<Actor> writers = new ArrayList<>();
+    private List<String> genres = new ArrayList<>();
+    private List<String> production = new ArrayList<>();
     private String description;
     private String coverPath;
     private static int classMovieId;
@@ -98,7 +98,7 @@ public final class Movie implements ContentType<Movie> {
                 if (Movie.class.getDeclaredField(field).toString().contains("java.time.LocalDate")) {
                     Movie.class.getDeclaredField(field).set(this, convertStrToLocalDate(String.valueOf(value)));
                 } else {
-                    Movie.class.getDeclaredField(field).set(this, checkForNullOrEmptyOrIllegalChar(String.valueOf(value), field));
+                    Movie.class.getDeclaredField(field).set(this, ContentType.checkForNullOrEmptyOrIllegalChar(String.valueOf(value), field));
                 }
                 logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
                 saveMe();
@@ -186,21 +186,6 @@ public final class Movie implements ContentType<Movie> {
                 setField(field, obj);
             }
         }
-    }
-
-    public static String checkForNullOrEmptyOrIllegalChar(String stringToCheck, String argName) {
-        if(stringToCheck == null) {
-            throw new IllegalArgumentException(String.format("%s argument cannot be null!", argName));
-        } else if(stringToCheck.isEmpty()) {
-            throw new IllegalArgumentException(String.format("%s argument cannot be empty!", argName));
-        }
-        for (char aChar : stringToCheck.toCharArray()) {
-            if (((aChar < 20 || (aChar > 90 && aChar < 96) || (aChar > 122 && aChar < 192)) && aChar != 92)) {
-                throw new IllegalArgumentException(String.format("%s argument contains illegal char: '%s' - '%d'", argName, aChar, (int) aChar));
-                // && aChar != 20 && aChar != 32 && aChar != 39 && aChar != 44 && aChar != 46 && aChar != 47 && aChar != 58
-            }
-        }
-        return stringToCheck;
     }
 
     @Override

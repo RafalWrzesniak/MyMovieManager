@@ -15,7 +15,7 @@ public class ContentList<T extends ContentType<T>> {
     private final String listName;
 
     public ContentList(String listName) {
-        this.listName = Actor.checkForNullOrEmptyOrIllegalChar(listName, "listName");
+        this.listName = ContentType.checkForNullOrEmptyOrIllegalChar(listName, "listName");
     }
 
     public List<T> getList() {

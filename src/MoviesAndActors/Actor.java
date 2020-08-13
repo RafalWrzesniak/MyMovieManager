@@ -11,6 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class Actor implements ContentType<Actor> {
     private static final Logger logger = LoggerFactory.getLogger(Actor.class.getName());
@@ -43,10 +45,10 @@ public final class Actor implements ContentType<Actor> {
 
 
     private Actor(String name, String surname, String nationality, String imagePath, int id) {
-        this.name = checkForNullOrEmptyOrIllegalChar(name, "Name");
-        this.surname = checkForNullOrEmptyOrIllegalChar(surname, "Surname");
-        this.nationality = checkForNullOrEmptyOrIllegalChar(nationality, "Nationality");
-        this.imagePath = checkForNullOrEmptyOrIllegalChar(imagePath, "ImagePath");
+        this.name = ContentType.checkForNullOrEmptyOrIllegalChar(name, "Name");
+        this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(surname, "Surname");
+        this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar(nationality, "Nationality");
+        this.imagePath = ContentType.checkForNullOrEmptyOrIllegalChar(imagePath, "ImagePath");
         if(id == -1) {
             this.id = classActorId;
             classActorId++;
@@ -182,22 +184,6 @@ public final class Actor implements ContentType<Actor> {
         this.writer = writer;
         logger.debug("\"{}\" is now a writer", this.toString());
     }
-
-    public static String checkForNullOrEmptyOrIllegalChar(String stringToCheck, String argName) {
-        if(stringToCheck == null) {
-            throw new IllegalArgumentException(String.format("%s argument cannot be null!", argName));
-        } else if(stringToCheck.isEmpty()) {
-            throw new IllegalArgumentException(String.format("%s argument cannot be empty!", argName));
-        }
-        for (char aChar : stringToCheck.toCharArray()) {
-            if (((aChar < 65 || (aChar > 90 && aChar < 96) || (aChar > 122 && aChar < 192))
-                    && aChar != 20 && aChar != 39 && aChar != 44 && aChar != 46 && aChar != 47 && aChar != 58 && aChar != 92)) {
-                throw new IllegalArgumentException(String.format("%s argument contains illegal char: '%s'", argName, aChar));
-            }
-        }
-        return stringToCheck;
-    }
-
 
     // actor
     public List<Movie> getAllMoviesActorPlayedIn() {
