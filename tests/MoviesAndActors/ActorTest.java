@@ -88,16 +88,16 @@ class ActorTest {
     @org.junit.jupiter.api.Test
     void checkForNullOrEmptyOrIllegalChar() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> Actor.checkForNullOrEmptyOrIllegalChar(null, "Name"));
+            () -> ContentType.checkForNullOrEmptyOrIllegalChar(null, "Name"));
         assertEquals("Name argument cannot be null!", exception.getMessage());
 
         IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class,
-                () -> Actor.checkForNullOrEmptyOrIllegalChar("", "Surname"));
+                () -> ContentType.checkForNullOrEmptyOrIllegalChar("", "Surname"));
         assertEquals("Surname argument cannot be empty!", exception2.getMessage());
 
         IllegalArgumentException exception3 = assertThrows(IllegalArgumentException.class,
-                () -> Actor.checkForNullOrEmptyOrIllegalChar("as[d", "Nationality"));
-        assertEquals("Nationality argument contains illegal char: '['", exception3.getMessage());
+                () -> ContentType.checkForNullOrEmptyOrIllegalChar("as[d", "Nationality"));
+        assertEquals("Nationality argument \"as[d\" contains illegal chars: '['", exception3.getMessage());
     }
 
     @org.junit.jupiter.api.Test

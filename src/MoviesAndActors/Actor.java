@@ -11,8 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class Actor implements ContentType<Actor> {
     private static final Logger logger = LoggerFactory.getLogger(Actor.class.getName());
@@ -25,30 +23,30 @@ public final class Actor implements ContentType<Actor> {
     private final String imagePath;
     private static int classActorId;
     // actor
-    private boolean actor = false;
+    private boolean isActor = false;
     private final List<Movie> playedInMovies = new ArrayList<>();
     // director
-    private boolean director = false;
+    private boolean isDirector = false;
     private final List<Movie> directedMovies = new ArrayList<>();
     // writer
-    private boolean writer = false;
-    private final List<Movie> writtenMovies = new ArrayList<>();
+    private boolean isWriter = false;
+    private final List<Movie> wroteMovies = new ArrayList<>();
+
+    public static final String NAME = "name", SURNAME = "surname", NATIONALITY = "nationality", BIRTHDAY = "birthday",
+            PLAYED_IN_MOVIES = "playedInMovies", DIRECTED_MOVIES = "directedMovies", WROTE_MOVIES = "writtenMovies";
     public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(
-            "id", "name", "surname", "nationality", "birthday",
-            "imagePath", "actor", "director", "writer"));
+            ContentType.ID, NAME, SURNAME, NATIONALITY, BIRTHDAY, ContentType.IMAGE_PATH, PLAYED_IN_MOVIES, DIRECTED_MOVIES, WROTE_MOVIES));
 
 
     static {
         classActorId = 0;
     }
 
-
-
     private Actor(String name, String surname, String nationality, String imagePath, int id) {
         this.name = ContentType.checkForNullOrEmptyOrIllegalChar(name, "Name");
         this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(surname, "Surname");
         this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar(nationality, "Nationality");
-        this.imagePath = ContentType.checkForNullOrEmptyOrIllegalChar(imagePath, "ImagePath");
+        this.imagePath = ContentType.checkForNullOrEmptyOrIllegalChar(imagePath, "imagePath");
         if(id == -1) {
             this.id = classActorId;
             classActorId++;
@@ -81,15 +79,15 @@ public final class Actor implements ContentType<Actor> {
 
 
     public boolean isActor() {
-        return actor;
+        return isActor;
     }
 
     public boolean isDirector() {
-        return director;
+        return isDirector;
     }
 
     public boolean isWriter() {
-        return writer;
+        return isWriter;
     }
 
     public String getName() {
@@ -134,15 +132,15 @@ public final class Actor implements ContentType<Actor> {
         };
 
         Map<String, String> map = new LinkedHashMap<>();
-        map.put(FIELD_NAMES.get(0), String.valueOf(id));
-        map.put(FIELD_NAMES.get(1), name);
-        map.put(FIELD_NAMES.get(2), surname);
-        map.put(FIELD_NAMES.get(3), nationality);
-        map.put(FIELD_NAMES.get(4), getBirthday().toString());
-        map.put(FIELD_NAMES.get(5), imagePath);
-        map.put(FIELD_NAMES.get(6), getMovieId.apply(playedInMovies));
-        map.put(FIELD_NAMES.get(7), getMovieId.apply(directedMovies));
-        map.put(FIELD_NAMES.get(8), getMovieId.apply(writtenMovies));
+        map.put(ContentType.ID, String.valueOf(id));
+        map.put(NAME, name);
+        map.put(SURNAME, surname);
+        map.put(NATIONALITY, nationality);
+        map.put(BIRTHDAY, getBirthday().toString());
+        map.put(ContentType.IMAGE_PATH, imagePath);
+        map.put(PLAYED_IN_MOVIES, getMovieId.apply(playedInMovies));
+        map.put(DIRECTED_MOVIES, getMovieId.apply(directedMovies));
+        map.put(WROTE_MOVIES, getMovieId.apply(wroteMovies));
         return map;
     }
 
@@ -171,17 +169,17 @@ public final class Actor implements ContentType<Actor> {
     }
 
     public void setIsAnActor(boolean actor) {
-        this.actor = actor;
+        this.isActor = actor;
         logger.debug("\"{}\" is now an actor", this.toString());
     }
 
     public void setIsADirector(boolean director) {
-        this.director = director;
+        this.isDirector = director;
         logger.debug("\"{}\" is now a director", this.toString());
     }
 
     public void setIsAWriter(boolean writer) {
-        this.writer = writer;
+        this.isWriter = writer;
         logger.debug("\"{}\" is now a writer", this.toString());
     }
 
@@ -193,10 +191,9 @@ public final class Actor implements ContentType<Actor> {
     public boolean isPlayingIn(Movie movie) {
         return playedInMovies.contains(movie);
     }
-    public boolean addMovieActorPlayedIn(Movie movie) {
+    public void addMovieActorPlayedIn(Movie movie) {
         if(isPlayingIn(movie)) {
             logger.warn("\"{}\" already exists as an actor in: \"{}\"}", this.toString(), movie);
-            return false;
         } else {
             setIsAnActor(true);
             playedInMovies.add(movie);
@@ -205,19 +202,17 @@ public final class Actor implements ContentType<Actor> {
             }
             logger.debug("\"{}\" is now an actor in: \"{}\"", this.toString(), movie);
             saveMe();
-            return true;
         }
     }
 
-    public boolean addSeveralMoviesToActor(List<Movie> moviesToAdd) {
+    public void addSeveralMoviesToActor(List<Movie> moviesToAdd) {
         if(moviesToAdd.size() < 1) {
             logger.warn("Empty list added as input to \"addSeveralMoviesToActor\" method");
-            return false;
+            return;
         }
         for (Movie movie : moviesToAdd) {
             addMovieActorPlayedIn(movie);
         }
-        return true;
     }
 
     // director
@@ -247,15 +242,10 @@ public final class Actor implements ContentType<Actor> {
 
     // writer
     public List<Movie> getAllMoviesWrittenBy() {
-        return new ArrayList<>(writtenMovies);
+        return new ArrayList<>(wroteMovies);
     }
     public boolean isWriting(Movie movie) {
-        return writtenMovies.contains(movie);
-    }
-
-    @Override
-    public String getReprName() {
-        return getNameAndSurname().replaceAll(" ", "_");
+        return wroteMovies.contains(movie);
     }
 
     public void addMovieWrittenBy(Movie movie) {
@@ -263,13 +253,18 @@ public final class Actor implements ContentType<Actor> {
             logger.warn("\"{}\" already exists as a writer in: \"{}\"}", this.toString(), movie);
         } else {
             setIsAWriter(true);
-            writtenMovies.add(movie);
+            wroteMovies.add(movie);
             if(!movie.isWrittenBy(this)) {
                 movie.addWriter(this);
             }
             logger.debug("\"{}\" is now a writer in: \"{}\"", this.toString(), movie);
             saveMe();
         }
+    }
+
+    @Override
+    public String getReprName() {
+        return getNameAndSurname().replaceAll(" ", "_");
     }
 
     @Override

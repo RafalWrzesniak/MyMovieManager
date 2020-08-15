@@ -112,8 +112,8 @@ class MovieTest {
     @Test
     void setCoverPath() {
         setUp();
-        movie.setCoverPath("E:\\xInne\\dk.jpg");
-        assertEquals("E:\\xInne\\dk.jpg", movie.getCoverPath());
+        movie.setImagePath("E:\\xInne\\dk.jpg");
+        assertEquals("E:\\xInne\\dk.jpg", movie.getImagePath());
     }
 
     @Test
@@ -246,11 +246,6 @@ class MovieTest {
         assertFalse(movie.searchFor("pool"));
     }
 
-    @Test
-    void testToString() {
-        setUp();
-        assertEquals("Movie{title='Most szpiegów', premiere=2015-10-16}", movie.toString());
-    }
 
     @Test
     void compareTo() {

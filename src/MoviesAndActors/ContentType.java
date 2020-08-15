@@ -5,11 +5,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public interface ContentType<T> extends Comparable<T> {
+    String ID = "id";
+    String IMAGE_PATH = "imagePath";
+
     boolean searchFor(String strToFind);
     int getId();
     Map<String, String> getAllFieldsAsStrings();
     String getReprName();
     void saveMe();
+
     static String checkForNullOrEmptyOrIllegalChar(String stringToCheck, String argName) {
         if(stringToCheck == null) {
             throw new IllegalArgumentException(String.format("%s argument cannot be null!", argName));
@@ -22,12 +26,12 @@ public interface ContentType<T> extends Comparable<T> {
         if(argName.equals(Movie.DESCRIPTION)) {
             correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'., ]+");
             incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'., ]");
-        } else if(argName.equals("ImagePath")){
+        } else if(argName.equals(Movie.IMAGE_PATH)){
             correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'.:\\\\ ]+");
             incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'.:\\\\ ]");
         } else {
-            correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'. ]+");
-            incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'. ]");
+            correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'.: ]+");
+            incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'.: ]");
         }
 
         Matcher matcher = correctCharPattern.matcher(stringToCheck);

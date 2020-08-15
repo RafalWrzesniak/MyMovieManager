@@ -166,7 +166,7 @@ public class XMLOperator {
                 return file;
             }
         }
-        logger.warn("There is no .xml file in directory \"{}\". Actor didn't created", inputDir);
+        logger.warn("There is no .xml file in directory \"{}\". Content wasn't created", inputDir);
         return null;
 
     }

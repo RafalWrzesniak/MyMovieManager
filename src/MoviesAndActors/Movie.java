@@ -4,7 +4,6 @@ import FileOperations.XMLOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -28,13 +27,13 @@ public final class Movie implements ContentType<Movie> {
     private List<String> genres = new ArrayList<>();
     private List<String> production = new ArrayList<>();
     private String description;
-    private String coverPath;
+    private String imagePath;
     private static int classMovieId;
-    public static String ID = "id", TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", LENGTH = "length",
+    public static String TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", LENGTH = "length",
             RATE = "rate", RATE_COUNT = "rateCount", CAST = "cast", DIRECTORS = "directors", WRITERS = "writers",
-            GENRES = "genres", PRODUCTION = "production", DESCRIPTION = "description", COVER_PATH = "coverPath";
-    public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ID, TITLE, TITLE_ORG, PREMIERE, LENGTH,
-            RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, COVER_PATH));
+            GENRES = "genres", PRODUCTION = "production", DESCRIPTION = "description";
+    public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ContentType.ID, TITLE, TITLE_ORG, PREMIERE, LENGTH,
+            RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, ContentType.IMAGE_PATH));
 
     static {
         classMovieId = 0;
@@ -43,7 +42,7 @@ public final class Movie implements ContentType<Movie> {
 
     public Movie(String title, LocalDate premiere) {
         setFieldString("title", title);
-        setFieldString("premiere", premiere);
+        this.premiere = premiere;
         this.id = classMovieId;
         classMovieId++;
         saveMe();
@@ -202,7 +201,9 @@ public final class Movie implements ContentType<Movie> {
     }
 
     public void setRate(double rate) {
-        setFieldDigit(RATE, rate);
+        if(rate > 0 && rate <= 10) {
+            setFieldDigit(RATE, rate);
+        }
     }
 
     public void setRateCount(int rateCount) {
@@ -217,8 +218,8 @@ public final class Movie implements ContentType<Movie> {
         setFieldString(DESCRIPTION, description);
     }
 
-    public void setCoverPath(String coverPath) {
-        setFieldString(COVER_PATH, coverPath);
+    public void setImagePath(String imagePath) {
+        setFieldString(IMAGE_PATH, imagePath);
     }
 
 
@@ -338,8 +339,8 @@ public final class Movie implements ContentType<Movie> {
         return premiere.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
     }
 
-    public String getCoverPath() {
-        return coverPath;
+    public String getImagePath() {
+        return imagePath;
     }
 
     public List<String> getProduction() {
@@ -390,6 +391,7 @@ public final class Movie implements ContentType<Movie> {
         return movieValues;
     }
 
+    @Override
     public Map<String, String> getAllFieldsAsStrings() {
         Function<List<?>, String> getFromList = objects -> {
             if(objects == null || objects.size() == 0) return null;
@@ -423,7 +425,7 @@ public final class Movie implements ContentType<Movie> {
         map.put(GENRES, getFromList.apply(genres));
         map.put(PRODUCTION, getFromList.apply(production));
         map.put(DESCRIPTION, getDescription());
-        map.put(COVER_PATH, coverPath);
+        map.put(IMAGE_PATH, imagePath);
         return map;
     }
 
@@ -504,7 +506,7 @@ public final class Movie implements ContentType<Movie> {
                 ", genres=" + genres +
                 ", production=" + production +
                 ", description='" + description + '\'' +
-                ", coverPath='" + coverPath + '\'' +
+                ", coverPath='" + imagePath + '\'' +
                 '}';
     }
 

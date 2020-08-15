@@ -40,7 +40,7 @@ public final class IO {
     }
 
     public static String removeFileExtension(String fileName) {
-        if(fileName.endsWith(".ini") || fileName.equals("Thumbs.db")) return null;
+        if(fileName.matches("^.+\\.ini") || fileName.equals("Thumbs.db")) return null;
         if(fileName.contains(".")) {
             return fileName.substring(0, fileName.indexOf('.'));
         }
