@@ -1,16 +1,17 @@
 package MoviesAndActors;
 
+import FileOperations.IO;
 import FileOperations.XMLOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class Actor implements ContentType<Actor> {
     private static final Logger logger = LoggerFactory.getLogger(Actor.class.getName());
@@ -39,7 +40,19 @@ public final class Actor implements ContentType<Actor> {
 
 
     static {
-        classActorId = 0;
+        File actorDir = new File(XMLOperator.getSavePathActor());
+        List<String> files = IO.getFileNamesInDirectory(actorDir);
+        if(files.size() == 0) {
+            classActorId = 0;
+        } else {
+            for (String name : files) {
+                Pattern pattern = Pattern.compile("^actor(\\d+)$");
+                Matcher matcher = pattern.matcher(name);
+                if (matcher.find() && Integer.parseInt(matcher.group(1)) > classActorId)
+                    classActorId = Integer.parseInt(matcher.group(1));
+            }
+            classActorId++;
+        }
     }
 
     private Actor(String name, String surname, String nationality, String imagePath, int id) {
@@ -298,7 +311,8 @@ public final class Actor implements ContentType<Actor> {
     @Override
     public String toString() {
         return "Actor{" +
-                "name='" + getName() + '\'' +
+                "id='" + getId() + '\'' +
+                ", name='" + getName() + '\'' +
                 ", surname='" + getSurname() + '\'' +
                 ", age=" + getAge() +
                 '}';

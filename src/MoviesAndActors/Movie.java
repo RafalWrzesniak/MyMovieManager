@@ -1,15 +1,19 @@
 package MoviesAndActors;
 
+import FileOperations.IO;
 import FileOperations.XMLOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class Movie implements ContentType<Movie> {
 
@@ -36,8 +40,20 @@ public final class Movie implements ContentType<Movie> {
             RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, ContentType.IMAGE_PATH));
 
     static {
-        classMovieId = 0;
-
+        File movieDir = new File(XMLOperator.getSavePathMovie());
+        List<String> files = IO.getFileNamesInDirectory(movieDir);
+        if(files.size() == 0) {
+            classMovieId = 0;
+        } else {
+            for (String name : files) {
+                Pattern pattern = Pattern.compile("^movie(\\d+)$");
+                Matcher matcher = pattern.matcher(name);
+                if (matcher.find() && Integer.parseInt(matcher.group(1)) > classMovieId) {
+                    classMovieId = Integer.parseInt(matcher.group(1));
+                }
+            }
+            classMovieId++;
+        }
     }
 
     public Movie(String title, LocalDate premiere) {
@@ -99,7 +115,7 @@ public final class Movie implements ContentType<Movie> {
                 } else {
                     Movie.class.getDeclaredField(field).set(this, ContentType.checkForNullOrEmptyOrIllegalChar(String.valueOf(value), field));
                 }
-                logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
+//                logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
                 saveMe();
             } else {
                 logger.warn("Unsuccessful set of \"{}\" in movie \"{}\" - this field is already set to \"{}\"", field, this.toString(), Movie.class.getDeclaredField(field).get(this));
@@ -115,7 +131,7 @@ public final class Movie implements ContentType<Movie> {
         try {
             if(Movie.class.getDeclaredField(field).get(this).toString().equals("0") || Movie.class.getDeclaredField(field).get(this).toString().equals("0.0")) {
                 Movie.class.getDeclaredField(field).set(this, value);
-                logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
+//                logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
                 saveMe();
             } else {
                 logger.warn("Unsuccessful set of \"{}\" in movie \"{}\" - this field is already set to \"{}\"", field, this.toString(), Movie.class.getDeclaredField(field).get(this));
@@ -171,7 +187,7 @@ public final class Movie implements ContentType<Movie> {
                 logger.warn("Unsuccessful set of \"{}\" in \"{}\". \"{}\" is wrong type.", field, this, value);
                 return;
             }
-            logger.debug("Field \"{}\" of \"{}\" extended by \"{}\"",  field, this.toString(), value);
+//            logger.debug("Field \"{}\" of \"{}\" extended by \"{}\"",  field, this.toString(), value);
             saveMe();
         } catch (IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
