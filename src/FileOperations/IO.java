@@ -16,10 +16,12 @@ public final class IO {
 
     private static final Logger logger = LoggerFactory.getLogger(IO.class.getName());
 
+    private IO() {}
+
     public static List<String> getFileNamesInDirectory(File directory) {
         List<File> files = listDirectory(directory);
-        if(files == null) return null;
         List<String> fileNames = new ArrayList<>();
+        if(files == null) return fileNames;
         for(File file : files) {
             String formattedName = removeFileExtension(file.getName());
             if(formattedName != null) {
@@ -40,7 +42,7 @@ public final class IO {
     }
 
     public static String removeFileExtension(String fileName) {
-        if(fileName.matches("^.+\\.ini") || fileName.equals("Thumbs.db")) return null;
+        if(fileName.matches("^.+\\.ini$") || fileName.equals("Thumbs.db")) return null;
         if(fileName.contains(".")) {
             return fileName.substring(0, fileName.indexOf('.'));
         }
