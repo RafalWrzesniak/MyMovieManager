@@ -1,5 +1,6 @@
 package MoviesAndActors;
 
+import FileOperations.XMLOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,7 @@ public class ContentList<T extends ContentType<T>> {
     }
 
     public boolean contains(T obj) {
-        return indexOf(obj) != -1;
+        return indexOf(obj) > 0;
     }
 
     public int indexOf(T obj) {
@@ -35,12 +36,18 @@ public class ContentList<T extends ContentType<T>> {
     }
 
     public void add(T obj) {
-        if(list.contains(obj)) {
-            logger.warn("\"{}\" is already on the {} list", obj.toString(), getListName());
-        } else if(obj == null) {
+        if(obj == null) {
             logger.warn("Null object will not be added to the list \"{}\"!", getListName());
+        } else if(list.contains(obj)) {
+            logger.warn("\"{}\" is already on the {} list", obj.toString(), getListName());
+            XMLOperator.OBJECTS_TO_SAVE.remove(obj);
         } else {
             list.add(obj);
+            XMLOperator.saveContentToXML(obj);
+            if(list.size() == 1) {
+                XMLOperator.createListFile(this);
+            }
+            XMLOperator.updateSavedContentListWith(this, obj);
             logger.debug("\"{}\" added to \"{}\"", obj.toString(), getListName());
         }
     }
