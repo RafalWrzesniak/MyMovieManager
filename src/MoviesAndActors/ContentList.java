@@ -12,6 +12,8 @@ import java.util.List;
 public class ContentList<T extends ContentType<T>> {
 
     private static final Logger logger = LoggerFactory.getLogger(ContentList.class.getName());
+    public static final String ALL_ACTORS_DEFAULT = "allActors";
+    public static final String ALL_MOVIES_DEFAULT = "allMovies";
     private final List<T> list = new ArrayList<>();
     private final String listName;
 
