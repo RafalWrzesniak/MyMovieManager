@@ -40,6 +40,10 @@ public final class Movie implements ContentType<Movie> {
             RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, ContentType.IMAGE_PATH));
 
     static {
+        updateClassMovieId();
+    }
+
+    public static void updateClassMovieId() {
         File movieDir = new File(XMLOperator.getSavePathMovie());
         List<String> files = IO.getFileNamesInDirectory(movieDir);
         if(files.size() == 0) {
@@ -48,15 +52,16 @@ public final class Movie implements ContentType<Movie> {
             for (String name : files) {
                 Pattern pattern = Pattern.compile("^movie(\\d+)$");
                 Matcher matcher = pattern.matcher(name);
-                if (matcher.find() && Integer.parseInt(matcher.group(1)) > classMovieId) {
+                if (matcher.find() && Integer.parseInt(matcher.group(1)) >= classMovieId) {
                     classMovieId = Integer.parseInt(matcher.group(1));
+                    classMovieId++;
                 }
             }
-            classMovieId++;
         }
     }
 
     public Movie(String title, LocalDate premiere) {
+        updateClassMovieId();
         setFieldString("title", title);
         this.premiere = premiere;
         this.id = classMovieId;
@@ -66,6 +71,7 @@ public final class Movie implements ContentType<Movie> {
     }
 
     public Movie(String title, String premiere) {
+        updateClassMovieId();
         setFieldString("title", title);
         setFieldString("premiere", premiere);
         this.id = classMovieId;
@@ -75,6 +81,7 @@ public final class Movie implements ContentType<Movie> {
     }
 
     public Movie(Map<String, List<String>> fieldMap, ContentList<Actor> allActors) {
+        updateClassMovieId();
         setFieldString("title", fieldMap.get("title").get(0));
         fieldMap.remove("title");
         setFieldString("premiere", fieldMap.get("premiere").get(0));
@@ -539,9 +546,9 @@ public final class Movie implements ContentType<Movie> {
 
     @Override
     public void saveMe() {
-        if(!XMLOperator.OBJECTS_TO_SAVE.contains(this)) {
-            XMLOperator.OBJECTS_TO_SAVE.add(this);
-            logger.debug("Movie \"{}\" added to the list of objects to be saved", this);
+        if(!XMLOperator.NEW_OBJECTS.contains(this)) {
+            XMLOperator.NEW_OBJECTS.add(this);
+            logger.debug("Movie \"{}\" added to the list of new objects", this);
         }
 
     }

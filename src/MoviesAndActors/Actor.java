@@ -38,8 +38,11 @@ public final class Actor implements ContentType<Actor> {
     public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(
             ContentType.ID, NAME, SURNAME, NATIONALITY, BIRTHDAY, ContentType.IMAGE_PATH, PLAYED_IN_MOVIES, DIRECTED_MOVIES, WROTE_MOVIES));
 
-
     static {
+        updateClassActorId();
+    }
+
+    public static void updateClassActorId() {
         File actorDir = new File(XMLOperator.getSavePathActor());
         List<String> files = IO.getFileNamesInDirectory(actorDir);
         if(files.size() == 0) {
@@ -48,14 +51,16 @@ public final class Actor implements ContentType<Actor> {
             for (String name : files) {
                 Pattern pattern = Pattern.compile("^actor(\\d+)$");
                 Matcher matcher = pattern.matcher(name);
-                if (matcher.find() && Integer.parseInt(matcher.group(1)) > classActorId)
+                if (matcher.find() && Integer.parseInt(matcher.group(1)) >= classActorId){
                     classActorId = Integer.parseInt(matcher.group(1));
+                    classActorId++;
+                }
             }
-            classActorId++;
         }
     }
 
     private Actor(String name, String surname, String nationality, String imagePath, int id) {
+        updateClassActorId();
         this.name = ContentType.checkForNullOrEmptyOrIllegalChar(name, "Name");
         this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(surname, "Surname");
         this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar(nationality, "Nationality");
@@ -182,18 +187,24 @@ public final class Actor implements ContentType<Actor> {
     }
 
     public void setIsAnActor(boolean actor) {
-        this.isActor = actor;
-        logger.debug("\"{}\" is now an actor", this.toString());
+        if(!this.isActor) {
+            this.isActor = actor;
+            logger.debug("\"{}\" is now an actor", this.toString());
+        }
     }
 
     public void setIsADirector(boolean director) {
-        this.isDirector = director;
-        logger.debug("\"{}\" is now a director", this.toString());
+        if(!this.isDirector) {
+            this.isDirector = director;
+            logger.debug("\"{}\" is now a director", this.toString());
+        }
     }
 
     public void setIsAWriter(boolean writer) {
-        this.isWriter = writer;
-        logger.debug("\"{}\" is now a writer", this.toString());
+        if(!this.isWriter) {
+            this.isWriter = writer;
+            logger.debug("\"{}\" is now a writer", this.toString());
+        }
     }
 
     // actor
@@ -329,9 +340,9 @@ public final class Actor implements ContentType<Actor> {
 
     @Override
     public void saveMe() {
-        if(!XMLOperator.OBJECTS_TO_SAVE.contains(this)) {
-            XMLOperator.OBJECTS_TO_SAVE.add(this);
-            logger.debug("Actor \"{}\" added to list of objects to be saved", this);
+        if(!XMLOperator.NEW_OBJECTS.contains(this)) {
+            XMLOperator.NEW_OBJECTS.add(this);
+            logger.debug("Actor \"{}\" added to list of new objects", this);
         }
     }
 
