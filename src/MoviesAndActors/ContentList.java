@@ -42,7 +42,7 @@ public class ContentList<T extends ContentType<T>> {
             logger.warn("Null object will not be added to the list \"{}\"!", getListName());
         } else if(list.contains(obj)) {
             logger.warn("\"{}\" is already on the {} list", obj.toString(), getListName());
-            XMLOperator.OBJECTS_TO_SAVE.remove(obj);
+            XMLOperator.NEW_OBJECTS.remove(obj);
         } else {
             list.add(obj);
             XMLOperator.saveContentToXML(obj);
@@ -123,6 +123,16 @@ public class ContentList<T extends ContentType<T>> {
 
     public boolean isEmpty() {
         return list.isEmpty();
+    }
+
+    public static <E extends ContentType<E>> ContentList<E> getContentListFromListByName(List<ContentList<E>> contentLists, String listName) {
+        ContentList<E> desiredContentList = null;
+        for(ContentList<E> contentList : contentLists) {
+            if (contentList.getListName().equals(listName)) {
+                desiredContentList = contentList;
+            }
+        }
+        return desiredContentList;
     }
 
     @Override
