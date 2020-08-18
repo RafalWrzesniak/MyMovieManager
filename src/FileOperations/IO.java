@@ -1,5 +1,7 @@
 package FileOperations;
 
+import MoviesAndActors.Actor;
+import MoviesAndActors.ContentType;
 import MoviesAndActors.Movie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,14 +23,13 @@ public final class IO {
     public static List<String> getFileNamesInDirectory(File directory) {
         List<File> files = listDirectory(directory);
         List<String> fileNames = new ArrayList<>();
-        if(files == null) return fileNames;
         for(File file : files) {
             String formattedName = removeFileExtension(file.getName());
             if(formattedName != null) {
                 fileNames.add(formattedName);
             }
         }
-        logger.debug("Found {} properly decoded files in \"{}\"", fileNames.size(), directory);
+//        logger.debug("Found {} properly decoded files in \"{}\"", fileNames.size(), directory);
         return fileNames;
     }
 
@@ -37,7 +38,7 @@ public final class IO {
             return Arrays.asList(Objects.requireNonNull(directory.listFiles()));
         } catch (NullPointerException ignore) {
             logger.warn("Directory \"{}\" does not exist", directory);
-            return null;
+            return new ArrayList<>();
         }
     }
 
@@ -47,6 +48,51 @@ public final class IO {
             return fileName.substring(0, fileName.indexOf('.'));
         }
         return fileName;
+    }
+
+    public static boolean deleteDirectory(File directoryToBeDeleted) {
+        File[] allContents = directoryToBeDeleted.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteDirectory(file);
+            }
+        }
+        return directoryToBeDeleted.delete();
+    }
+
+    public static <E extends ContentType<E>> File createContentDirectory(E content) {
+        File outDir;
+        if (content instanceof Actor) {
+            outDir = new File(XMLOperator.getSavePathActor() + "\\actor" + content.getId());
+        } else if(content instanceof Movie) {
+            outDir = new File(XMLOperator.getSavePathMovie() + "\\movie" + content.getId());
+        } else {
+            logger.warn("Wrong input argument - \"{}\". Directory didn't created", content);
+            return null;
+        }
+        if (outDir.mkdir()) {
+            logger.info("New directory \"{}\" created", outDir);
+        }
+        return outDir;
+    }
+
+    public static File getXmlFileFromDir(File inputDir) {
+        if(inputDir == null || !inputDir.isDirectory()) {
+            logger.warn("Couldn't create content from directory \"{}\" - no such directory or is not a directory", inputDir);
+            return null;
+        }
+        List<File> fileList = IO.listDirectory(inputDir);
+        if(fileList.size() == 0) {
+            logger.warn("Couldn't create content from directory \"{}\" - directory is empty or does not exist", inputDir);
+            return null;
+        }
+        for(File file : fileList) {
+            if(file.toString().endsWith(".xml")) {
+                return file;
+            }
+        }
+        logger.warn("There is no .xml file in directory \"{}\". Content wasn't created", inputDir);
+        return null;
     }
 
     public static void createSummaryImage(Movie movie, File pathName) {
