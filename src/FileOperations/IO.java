@@ -9,8 +9,7 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 
@@ -94,6 +93,20 @@ public final class IO {
         logger.warn("There is no .xml file in directory \"{}\". Content wasn't created", inputDir);
         return null;
     }
+
+    public static String findInFile(File file, String textToFind) throws IOException {
+        FileReader fileIn = new FileReader(file);
+        BufferedReader reader = new BufferedReader(fileIn);
+        String line;
+        while((line = reader.readLine()) != null) {
+            if ((line.contains(textToFind))) {
+                return line;
+            }
+        }
+        return null;
+    }
+
+
 
     public static void createSummaryImage(Movie movie, File pathName) {
         if(!pathName.isDirectory()) {

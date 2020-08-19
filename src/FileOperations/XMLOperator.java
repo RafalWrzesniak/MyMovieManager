@@ -33,6 +33,7 @@ public final class XMLOperator {
     private static String SAVE_PATH_ACTOR;
     private static final Logger logger = LoggerFactory.getLogger(XMLOperator.class.getName());
     public static final List<ContentType> NEW_OBJECTS = new ArrayList<>();
+    public static boolean AUTOSAVE = false;
 
     private XMLOperator(){}
 
@@ -55,16 +56,33 @@ public final class XMLOperator {
                 makeSimpleSave(doc, cfg);
             }
             updateParamInCfg("SAVE_PATH", System.getProperty("user.dir").concat("\\savedData"));
-            new File(System.getProperty("user.dir").concat("\\savedData")).mkdir();
+            boolean made1 = new File(System.getProperty("user.dir").concat("\\savedData")).mkdir();
             SAVE_PATH = System.getProperty("user.dir").concat("\\savedData");
         }
-        new File(SAVE_PATH).mkdir();
+        boolean made2 = new File(SAVE_PATH).mkdir();
         updateRelativePaths();
+        Thread autosave = new Thread(() -> {
+            while(AUTOSAVE) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (NEW_OBJECTS.size() > 0) {
+                    System.out.println("Saving objects: " + XMLOperator.NEW_OBJECTS);
+                    for (int i = 0; i < NEW_OBJECTS.size(); i++) {
+                        saveContentToXML(NEW_OBJECTS.get(i));
+                    }
+                }
+            }
+        });
+        autosave.start();
     }
 
     private static void updateRelativePaths() {
-        new File(SAVE_PATH + "\\" + Movie.class.getSimpleName()).mkdir();
-        new File(SAVE_PATH + "\\" + Actor.class.getSimpleName()).mkdir();
+        boolean made1 = new File(SAVE_PATH + "\\" + Movie.class.getSimpleName()).mkdir();
+        boolean made2 = new File(SAVE_PATH + "\\" + Actor.class.getSimpleName()).mkdir();
         SAVE_PATH_MOVIE = SAVE_PATH + "\\" + Movie.class.getSimpleName();
         SAVE_PATH_ACTOR = SAVE_PATH + "\\" + Actor.class.getSimpleName();
 
@@ -178,7 +196,7 @@ public final class XMLOperator {
                 element.appendChild(doc.createTextNode(contentDetails.get(detail)));
             } else {
                 rootElement.appendChild(doc.createTextNode("\n\t"));
-                element =  doc.createElement(detail.substring(0,1).toUpperCase().concat(detail.substring(1)));;
+                element =  doc.createElement(detail.substring(0,1).toUpperCase().concat(detail.substring(1)));
                 for(int i = 0; i < listCheckSemicolon.length; i++) {
                     element.appendChild(doc.createTextNode("\n\t\t"));
                     Element childElement = doc.createElement(detail);
@@ -493,7 +511,7 @@ public final class XMLOperator {
                     else if(type.equals(Movie.class.getSimpleName())) outDir = new File(SAVE_PATH_MOVIE);
                 }
 
-                outDir.mkdir();
+                boolean made = outDir.mkdir();
                 File targetFile = new File(outDir.toString().concat("\\").concat(reprName).concat(".xml"));
                 makeSimpleSave(doc, targetFile);
             }
