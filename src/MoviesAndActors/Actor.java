@@ -342,7 +342,7 @@ public final class Actor implements ContentType<Actor> {
     public void saveMe() {
         if(!XMLOperator.NEW_OBJECTS.contains(this)) {
             XMLOperator.NEW_OBJECTS.add(this);
-            logger.debug("Actor \"{}\" added to list of new objects", this);
+            logger.debug("Actor \"{}\" added to the list of new objects", this);
         }
     }
 
