@@ -25,9 +25,9 @@ class MovieTest {
     Actor actor2;
     Actor actor3;
     void createActors() {
-        actor = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "E:\\xInne\\dk.jpg");
-        actor2 = new Actor("Jackie", "Sparrow", "Karaibian", "1957-06-02", "E:\\xInne\\dk.jpg");
-        actor3 = new Actor("John", "Wick", "USA", "1983-07-21", "E:\\xInne\\dk.jpg");
+        actor = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
+        actor2 = new Actor("Jackie", "Sparrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
+        actor3 = new Actor("John", "Wick", "USA", "1983-07-21", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
     }
 
     Movie movie;

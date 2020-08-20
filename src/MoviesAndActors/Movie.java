@@ -32,16 +32,18 @@ public final class Movie implements ContentType<Movie> {
     private List<String> production = new ArrayList<>();
     private String description;
     private String imagePath;
+    private String filmweb;
     private static int classMovieId;
     public static String TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", LENGTH = "length",
             RATE = "rate", RATE_COUNT = "rateCount", CAST = "cast", DIRECTORS = "directors", WRITERS = "writers",
             GENRES = "genres", PRODUCTION = "production", DESCRIPTION = "description";
     public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ContentType.ID, TITLE, TITLE_ORG, PREMIERE, LENGTH,
-            RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, ContentType.IMAGE_PATH));
+            RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, IMAGE_PATH, FILMWEB));
 
     static {
         updateClassMovieId();
     }
+
 
     public static void updateClassMovieId() {
         File movieDir = new File(XMLOperator.getSavePathMovie());
@@ -374,7 +376,9 @@ public final class Movie implements ContentType<Movie> {
         return this.id;
     }
 
-
+    public String getFilmweb() {
+        return filmweb;
+    }
 
     public boolean isRateHigherThen(double rate) {
         if(rate > 0 && rate <= 10) {
@@ -449,6 +453,7 @@ public final class Movie implements ContentType<Movie> {
         map.put(PRODUCTION, getFromList.apply(production));
         map.put(DESCRIPTION, getDescription());
         map.put(IMAGE_PATH, imagePath);
+        map.put(FILMWEB, filmweb);
         return map;
     }
 

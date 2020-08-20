@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 public interface ContentType<T> extends Comparable<T> {
     String ID = "id";
     String IMAGE_PATH = "imagePath";
+    String FILMWEB = "filmweb";
 
     boolean searchFor(String strToFind);
     int getId();
@@ -26,9 +27,9 @@ public interface ContentType<T> extends Comparable<T> {
         if(argName.equals(Movie.DESCRIPTION)) {
             correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'., ]+");
             incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'., ]");
-        } else if(argName.equals(Movie.IMAGE_PATH)){
-            correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'.:\\\\ ]+");
-            incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'.:\\\\ ]");
+        } else if(argName.equals(Movie.IMAGE_PATH) || argName.equals(FILMWEB)){
+            correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'.+/_:\\\\ ]+");
+            incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'_+/.:\\\\ ]");
         } else {
             correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'.: ]+");
             incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'.: ]");

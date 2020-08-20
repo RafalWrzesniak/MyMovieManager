@@ -3,6 +3,7 @@
 .out/
 /src/xMain/
 /savedData/
+/savedImages/
 .gitignore
 MyMovieManager.iml
 MyMovieManager_exported.xml

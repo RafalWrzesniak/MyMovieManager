@@ -247,7 +247,7 @@ public final class XMLOperator {
         }
 
         Actor actor = new Actor(map.get(Actor.NAME), map.get(Actor.SURNAME), map.get(Actor.NATIONALITY),
-                map.get(Actor.BIRTHDAY), map.get(Actor.IMAGE_PATH), map.get(Actor.ID));
+                map.get(Actor.BIRTHDAY), map.get(Actor.IMAGE_PATH), map.get(Actor.FILMWEB), map.get(Actor.ID));
         logger.info("New actor \"{}\" created successfully from file \"{}\"", actor, inputFile);
         XMLOperator.NEW_OBJECTS.remove(actor);
         return actor;

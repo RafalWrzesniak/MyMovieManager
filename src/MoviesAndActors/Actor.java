@@ -22,6 +22,7 @@ public final class Actor implements ContentType<Actor> {
     private LocalDate birthday;
     private int age;
     private final String imagePath;
+    private final String filmweb;
     private static int classActorId;
     // actor
     private boolean isActor = false;
@@ -35,8 +36,8 @@ public final class Actor implements ContentType<Actor> {
 
     public static final String NAME = "name", SURNAME = "surname", NATIONALITY = "nationality", BIRTHDAY = "birthday",
             PLAYED_IN_MOVIES = "playedInMovies", DIRECTED_MOVIES = "directedMovies", WROTE_MOVIES = "writtenMovies";
-    public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(
-            ContentType.ID, NAME, SURNAME, NATIONALITY, BIRTHDAY, ContentType.IMAGE_PATH, PLAYED_IN_MOVIES, DIRECTED_MOVIES, WROTE_MOVIES));
+    public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ID, NAME, SURNAME, NATIONALITY, BIRTHDAY,
+            IMAGE_PATH, FILMWEB, PLAYED_IN_MOVIES, DIRECTED_MOVIES, WROTE_MOVIES));
 
     static {
         updateClassActorId();
@@ -59,12 +60,13 @@ public final class Actor implements ContentType<Actor> {
         }
     }
 
-    private Actor(String name, String surname, String nationality, String imagePath, int id) {
+    private Actor(String name, String surname, String nationality, String imagePath, String filmweb, int id) {
         updateClassActorId();
         this.name = ContentType.checkForNullOrEmptyOrIllegalChar(name, "Name");
         this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(surname, "Surname");
         this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar(nationality, "Nationality");
         this.imagePath = ContentType.checkForNullOrEmptyOrIllegalChar(imagePath, "imagePath");
+        this.filmweb = ContentType.checkForNullOrEmptyOrIllegalChar(filmweb, "filmweb");
         if(id == -1) {
             this.id = classActorId;
             classActorId++;
@@ -73,24 +75,24 @@ public final class Actor implements ContentType<Actor> {
         }
     }
 
-    public Actor(String name, String surname, String nationality, LocalDate birthday, String imagePath) {
-        this(name, surname, nationality, imagePath, -1);
+    public Actor(String name, String surname, String nationality, LocalDate birthday, String imagePath, String filmweb) {
+        this(name, surname, nationality, imagePath, filmweb, -1);
         this.birthday = setBirthday(birthday);
         this.age = setAge();
         logger.info("New actor created: {}", this.toString());
         saveMe();
     }
 
-    public Actor(String name, String surname, String nationality, String birthday, String imagePath) {
-        this(name, surname, nationality, imagePath, -1);
+    public Actor(String name, String surname, String nationality, String birthday, String imagePath, String filmweb) {
+        this(name, surname, nationality, imagePath, filmweb, -1);
         this.birthday = setBirthday(convertBdStringToLocalDate(birthday));
         this.age = setAge();
         logger.info("New actor created: {}", this.toString());
         saveMe();
     }
 
-    public Actor(String name, String surname, String nationality, String birthday, String imagePath, String id) {
-        this(name, surname, nationality, imagePath, Integer.parseInt(id));
+    public Actor(String name, String surname, String nationality, String birthday, String imagePath, String filmweb, String id) {
+        this(name, surname, nationality, imagePath, filmweb, Integer.parseInt(id));
         this.birthday = setBirthday(convertBdStringToLocalDate(birthday));
         this.age = setAge();
     }
@@ -136,6 +138,9 @@ public final class Actor implements ContentType<Actor> {
         return id;
     }
 
+    public String getFilmweb() {
+        return filmweb;
+    }
 
     @Override
     public Map<String, String> getAllFieldsAsStrings() {
@@ -156,6 +161,7 @@ public final class Actor implements ContentType<Actor> {
         map.put(NATIONALITY, nationality);
         map.put(BIRTHDAY, getBirthday().toString());
         map.put(ContentType.IMAGE_PATH, imagePath);
+        map.put(ContentType.FILMWEB, filmweb);
         map.put(PLAYED_IN_MOVIES, getMovieId.apply(playedInMovies));
         map.put(DIRECTED_MOVIES, getMovieId.apply(directedMovies));
         map.put(WROTE_MOVIES, getMovieId.apply(wroteMovies));

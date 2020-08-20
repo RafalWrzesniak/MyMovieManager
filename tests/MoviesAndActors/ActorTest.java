@@ -15,11 +15,11 @@ class ActorTest {
 
     static Collection<Object[]> stringParams() {
         return Arrays.asList(new Object[][]{
-                {"Rafał", "Wrześniak", "Poland", LocalDate.of(1994, 8, 11), "E:\\xInne\\me.jpg", 26, 0},
-                {"Steven", "Spielberg", "USA", LocalDate.of(1946, 12, 18), "E:\\xInne\\ss.jpg", 74, 1},
-                {"Cezary", "Pazura", "Poland", LocalDate.of(1962, 6, 13), "E:\\xInne\\cp.jpg", 58, 2},
-                {"Jeniffer", "Aniston", "USA", LocalDate.of(1969, 2, 11), "E:\\xInne\\ja.jpg", 51, 3},
-                {"Tom", "Hanks", "USA", LocalDate.of(1956, 7, 9), "E:\\xInne\\th.jpg", 64, 4}
+                {"Rafał", "Wrześniak", "Poland", LocalDate.of(1994, 8, 11), "E:\\xInne\\me.jpg", "www.filmweb.pl", 26, 0},
+                {"Steven", "Spielberg", "USA", LocalDate.of(1946, 12, 18), "E:\\xInne\\ss.jpg", "www.filmweb.pl", 74, 1},
+                {"Cezary", "Pazura", "Poland", LocalDate.of(1962, 6, 13), "E:\\xInne\\cp.jpg", "www.filmweb.pl", 58, 2},
+                {"Jeniffer", "Aniston", "USA", LocalDate.of(1969, 2, 11), "E:\\xInne\\ja.jpg", "www.filmweb.pl", 51, 3},
+                {"Tom", "Hanks", "USA", LocalDate.of(1956, 7, 9), "E:\\xInne\\th.jpg", "www.filmweb.pl", 64, 4}
         });
     }
 
@@ -30,7 +30,7 @@ class ActorTest {
     Movie deadpool = new Movie("Deadpool", LocalDate.of(2016, 1, 21));    
         
     void setUp() {
-        actor = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "E:\\xInne\\dk.jpg");
+        actor = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
     }
 
 
@@ -38,50 +38,50 @@ class ActorTest {
 
     @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
     @MethodSource("stringParams")
-    void getName(String name, String surname, String nationality, LocalDate birthday, String imagePath) {
-        Actor person = new Actor(name, surname, nationality, birthday, imagePath);
+    void getName(String name, String surname, String nationality, LocalDate birthday, String imagePath, String filmweb) {
+        Actor person = new Actor(name, surname, nationality, birthday, imagePath, filmweb);
         assertEquals(name, person.getName());
     }
 
     @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
     @MethodSource("stringParams")
-    void getSurname(String name, String surname, String nationality, LocalDate birthday, String imagePath) {
-        Actor person = new Actor(name, surname, nationality, birthday, imagePath);
+    void getSurname(String name, String surname, String nationality, LocalDate birthday, String imagePath, String filmweb) {
+        Actor person = new Actor(name, surname, nationality, birthday, imagePath, filmweb);
         assertEquals(surname, person.getSurname());
     }
 
     @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
     @MethodSource("stringParams")
-    void getNationality(String name, String surname, String nationality, LocalDate birthday, String imagePath) {
-        Actor person = new Actor(name, surname, nationality, birthday, imagePath);
+    void getNationality(String name, String surname, String nationality, LocalDate birthday, String imagePath, String filmweb) {
+        Actor person = new Actor(name, surname, nationality, birthday, imagePath, filmweb);
         assertEquals(nationality, person.getNationality());
     }
 
     @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
     @MethodSource("stringParams")
-    void getBirthday(String name, String surname, String nationality, LocalDate birthday, String imagePath) {
-        Actor person = new Actor(name, surname, nationality, birthday, imagePath);
+    void getBirthday(String name, String surname, String nationality, LocalDate birthday, String imagePath, String filmweb) {
+        Actor person = new Actor(name, surname, nationality, birthday, imagePath, filmweb);
         assertEquals(birthday, person.getBirthday());
     }
 
     @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
     @MethodSource("stringParams")
-    void getAge(String name, String surname, String nationality, LocalDate birthday, String imagePath, int age) {
-        Actor person = new Actor(name, surname, nationality, birthday, imagePath);
+    void getAge(String name, String surname, String nationality, LocalDate birthday, String imagePath, String filmweb, int age) {
+        Actor person = new Actor(name, surname, nationality, birthday, imagePath, filmweb);
         assertEquals(age, person.getAge());
     }
 
 //    @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
 //    @MethodSource("stringParams")
-//    void getPersonId(String name, String surname, String nationality, LocalDate birthday, String imagePath, int age, int id) {
+//    void getPersonId(String name, String surname, String nationality, LocalDate birthday, String imagePath, String filmweb, int age, int id) {
 //        Actor person = new Actor(name, surname, nationality, birthday, imagePath);
 //        assertEquals(id, person.getPersonId());
 //    }
 
     @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
     @MethodSource("stringParams")
-    void getImagePath(String name, String surname, String nationality, LocalDate birthday, String imagePath) {
-        Actor person = new Actor(name, surname, nationality, birthday, imagePath);
+    void getImagePath(String name, String surname, String nationality, LocalDate birthday, String imagePath, String filmweb) {
+        Actor person = new Actor(name, surname, nationality, birthday, imagePath, filmweb);
         assertEquals(imagePath, person.getImagePath());
     }
 
@@ -102,15 +102,15 @@ class ActorTest {
 
     @org.junit.jupiter.api.Test
     void testEquals() {
-        Actor person = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "E:\\xInne\\dk.jpg");
-        Actor person2 = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "E:\\xInne\\dk.jpg");
+        Actor person = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
+        Actor person2 = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
         assertEquals(person, person2);
 
     }
 
     @org.junit.jupiter.api.Test
     void testToString() {
-        Actor person = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "E:\\xInne\\dk.jpg");
+        Actor person = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
 
         String expected = "Actor{name='Jack', surname='Sparrow', age=63}";
         assertEquals(expected, person.toString());
@@ -213,8 +213,8 @@ class ActorTest {
     @Test
     void equals() {
         setUp();
-        Actor actor2 = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "E:\\xInne\\dk.jpg");
-        Actor actor3 = new Actor("Jackie", "Arrow", "Karaibian", "1957-06-02", "E:\\xInne\\dk.jpg");
+        Actor actor2 = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
+        Actor actor3 = new Actor("Jackie", "Arrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
         assertEquals(actor2, actor);
         assertNotEquals(actor3, actor);
     }
@@ -222,8 +222,8 @@ class ActorTest {
     @Test
     void compareTo() {
         setUp();
-        Actor actor2 = new Actor("Ian", "Sparrow", "Karaibian", "1957-06-02", "E:\\xInne\\dk.jpg");
-        Actor actor3 = new Actor("Khan", "Arrow", "Karaibian", "1957-06-02", "E:\\xInne\\dk.jpg");
+        Actor actor2 = new Actor("Ian", "Sparrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
+        Actor actor3 = new Actor("Khan", "Arrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
         assertEquals(1, actor.compareTo(actor2));
         assertEquals(-1, actor.compareTo(actor3));
     }
