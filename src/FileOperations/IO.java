@@ -16,6 +16,18 @@ import java.util.List;
 public final class IO {
 
     private static final Logger logger = LoggerFactory.getLogger(IO.class.getName());
+    public static final String TMP_FILES = System.getProperty("user.dir").concat("\\tmp");
+    public static final String SAVED_IMAGES = System.getProperty("user.dir").concat("\\savedImages");
+    public static final String NO_IMAGE = "resources\\iHaveNoImage.jpg";
+
+    static {
+        new File(SAVED_IMAGES).mkdir();
+        File tmpFiles = new File(TMP_FILES);
+        if(!tmpFiles.mkdir()) {
+            IO.deleteDirectory(tmpFiles);
+            tmpFiles.mkdir();
+        }
+    }
 
     private IO() {}
 
@@ -90,7 +102,7 @@ public final class IO {
                 return file;
             }
         }
-        logger.warn("There is no .xml file in directory \"{}\". Content wasn't created", inputDir);
+        logger.warn("There is no .xml file in directory \"{}\".", inputDir);
         return null;
     }
 
