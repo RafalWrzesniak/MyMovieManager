@@ -1,9 +1,7 @@
 package FileOperations;
 
 import MoviesAndActors.Movie;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -15,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class IOTest {
 
     static File tmp = new File(System.getProperty("user.dir").concat("\\tmpTest"));
@@ -43,8 +42,9 @@ class IOTest {
 
 
     @Test
+    @Order(0)
     void getFileNamesInDirectory() {
-        List<String> names = new ArrayList<>(Arrays.asList("filename", "otherFile", "someDir0", "someDir1", "someDir2", "someDir3", "someDir4",
+        List<String> names = new ArrayList<>(Arrays.asList("fileName", "otherFile", "someDir0", "someDir1", "someDir2", "someDir3", "someDir4",
                 "someDir5","someFile"));
         assertEquals(names, IO.getFileNamesInDirectory(tmp));
     }

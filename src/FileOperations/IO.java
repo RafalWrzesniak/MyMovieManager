@@ -133,7 +133,6 @@ public final class IO {
                 "Tytuł: ", "Długość: ", "Premiera: ", "Gatunek: ",
                 "Produkcja: ", "Reżyseria: ", "Obsada: ", "Opis: ");
         List<String> movieValues = new ArrayList<>(movie.getDataForSummary());
-        System.out.println(movieValues);
 
         Font font = new Font("Helvetica", Font.PLAIN, 14);
         BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
