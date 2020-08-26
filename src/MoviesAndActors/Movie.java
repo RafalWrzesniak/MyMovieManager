@@ -415,6 +415,12 @@ public final class Movie implements ContentType<Movie> {
         movieValues.add(removeBrackets.apply(this.getTop3Names(this.getDirectors()).toString()));
         movieValues.add(removeBrackets.apply(this.getTop3Names(this.getCast()).toString()));
         movieValues.add(this.getDescription());
+        movieValues.replaceAll(str -> {
+            if(str == null) {
+                return "";
+            }
+            return str;
+        });
         return movieValues;
     }
 

@@ -26,7 +26,7 @@ public class ContentList<T extends ContentType<T>> {
     }
 
     public boolean contains(T obj) {
-        return indexOf(obj) > 0;
+        return indexOf(obj) >= 0;
     }
 
     public int indexOf(T obj) {
@@ -45,7 +45,7 @@ public class ContentList<T extends ContentType<T>> {
             XMLOperator.NEW_OBJECTS.remove(obj);
         } else {
             list.add(obj);
-            XMLOperator.saveContentToXML(obj);
+//            XMLOperator.saveContentToXML(obj);
             if(list.size() == 1) {
                 XMLOperator.createListFile(this);
             }
@@ -88,14 +88,13 @@ public class ContentList<T extends ContentType<T>> {
 
 
     public List<T> find(String strToFind) {
-        if (strToFind == null || strToFind.isEmpty() || list.size() == 0) return null;
         List<T> results = new ArrayList<>();
+        if (strToFind == null || strToFind.isEmpty() || list.size() == 0) return null;
         for(T obj : list) {
             if(obj.searchFor(strToFind)) {
                 results.add(obj);
             }
         }
-        if(results.size() == 0) return null;
         return results;
     }
 

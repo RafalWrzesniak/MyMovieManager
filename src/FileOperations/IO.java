@@ -24,12 +24,21 @@ public final class IO {
         new File(SAVED_IMAGES).mkdir();
         File tmpFiles = new File(TMP_FILES);
         if(!tmpFiles.mkdir()) {
-            IO.deleteDirectory(tmpFiles);
+            IO.deleteDirectoryRecursively(tmpFiles);
             tmpFiles.mkdir();
         }
     }
 
     private IO() {}
+
+    public static List<File> listDirectory(File directory) {
+        try {
+            return Arrays.asList(Objects.requireNonNull(directory.listFiles()));
+        } catch (NullPointerException ignore) {
+            logger.warn("Directory \"{}\" does not exist", directory);
+            return new ArrayList<>();
+        }
+    }
 
     public static List<String> getFileNamesInDirectory(File directory) {
         List<File> files = listDirectory(directory);
@@ -44,28 +53,20 @@ public final class IO {
         return fileNames;
     }
 
-    public static List<File> listDirectory(File directory) {
-        try {
-            return Arrays.asList(Objects.requireNonNull(directory.listFiles()));
-        } catch (NullPointerException ignore) {
-            logger.warn("Directory \"{}\" does not exist", directory);
-            return new ArrayList<>();
-        }
-    }
 
     public static String removeFileExtension(String fileName) {
         if(fileName.matches("^.+\\.ini$") || fileName.equals("Thumbs.db")) return null;
         if(fileName.contains(".")) {
-            return fileName.substring(0, fileName.indexOf('.'));
+            return fileName.substring(0, fileName.lastIndexOf('.'));
         }
         return fileName;
     }
 
-    public static boolean deleteDirectory(File directoryToBeDeleted) {
+    public static boolean deleteDirectoryRecursively(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {
             for (File file : allContents) {
-                deleteDirectory(file);
+                deleteDirectoryRecursively(file);
             }
         }
         return directoryToBeDeleted.delete();
@@ -132,6 +133,7 @@ public final class IO {
                 "Tytuł: ", "Długość: ", "Premiera: ", "Gatunek: ",
                 "Produkcja: ", "Reżyseria: ", "Obsada: ", "Opis: ");
         List<String> movieValues = new ArrayList<>(movie.getDataForSummary());
+        System.out.println(movieValues);
 
         Font font = new Font("Helvetica", Font.PLAIN, 14);
         BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
@@ -140,7 +142,13 @@ public final class IO {
         FontMetrics fm = g2d.getFontMetrics();
         int maxDescLen = 125;
         int width = 850;
-        int height = movie.getDescription().length() < maxDescLen ? (fm.getHeight()+10)*8 + 10 : (fm.getHeight()+10)*9 + 10;
+        int movieDescLen;
+        if(movie.getDescription() != null) {
+            movieDescLen = movie.getDescription().length();
+        } else {
+            movieDescLen = 100;
+        }
+        int height = movieDescLen < maxDescLen ? (fm.getHeight()+10)*8 + 10 : (fm.getHeight()+10)*9 + 10;
         g2d.dispose();
 
         bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
@@ -161,7 +169,7 @@ public final class IO {
             if(i != keys.size()-1) {
                 g2d.drawString(movieValues.get(i), 10 + fm.stringWidth(keys.get(i)), (fm.getAscent() + 10)*(i+1));
             } else { // description positioning
-                if(movie.getDescription().length() < maxDescLen) {
+                if(movieDescLen < maxDescLen) {
                     g2d.drawString(movieValues.get(i), 10, (fm.getAscent() + 10)*(i+2));
                 } else {
                     int spaceInTheMiddle = movie.getDescription().substring(0, maxDescLen).lastIndexOf(' ');

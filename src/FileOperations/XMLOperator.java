@@ -35,7 +35,7 @@ public final class XMLOperator {
     public static final List<ContentType> NEW_OBJECTS = new ArrayList<>();
     public static boolean AUTOSAVE = false;
 
-    private XMLOperator(){}
+    private XMLOperator() {}
 
     static {
         File cfg = new File("resources\\config.cfg");
@@ -59,7 +59,7 @@ public final class XMLOperator {
             boolean made1 = new File(System.getProperty("user.dir").concat("\\savedData")).mkdir();
             SAVE_PATH = System.getProperty("user.dir").concat("\\savedData");
         }
-        boolean made2 = new File(SAVE_PATH).mkdir();
+        boolean made2 = new File(SAVE_PATH).mkdirs();
         updateRelativePaths();
         Thread autosave = new Thread(() -> {
             while(AUTOSAVE) {
@@ -338,7 +338,7 @@ public final class XMLOperator {
         makeSimpleSave(doc, savedFile);
     }
 
-    public static List<ContentList<Actor>> createAllActorsContentLists() {
+    public static List<ContentList<Actor>> createAllActorsContentListsFromXml() {
         List<ContentList<Actor>> allActorLists = new ArrayList<>();
         ContentList<Actor> defaultAllActors = createDefaultActorContentList();
         allActorLists.add(defaultAllActors);
@@ -351,7 +351,7 @@ public final class XMLOperator {
         return allActorLists;
     }
 
-    public static List<ContentList<Movie>> createAllMoviesContentLists(List<ContentList<Actor>> allActorsContentLists) {
+    public static List<ContentList<Movie>> createAllMoviesContentListsFromXml(List<ContentList<Actor>> allActorsContentLists) {
         List<ContentList<Movie>> allMovieLists = new ArrayList<>();
         ContentList<Movie> defaultAllMovies = createDefaultMovieContentList(allActorsContentLists);
         allMovieLists.add(defaultAllMovies);
@@ -518,7 +518,7 @@ public final class XMLOperator {
             return true;
         };
 
-        if(IO.deleteDirectory(new File(SAVE_PATH))) {
+        if(IO.deleteDirectoryRecursively(new File(SAVE_PATH))) {
             if(new File(SAVE_PATH).mkdir()) updateRelativePaths();
             if(saveAllContentsToFiles.apply(Movie.class.getSimpleName()) &&
                saveAllContentsToFiles.apply(Actor.class.getSimpleName()) &&
@@ -531,7 +531,6 @@ public final class XMLOperator {
         }
     }
 
-//    public static void autoSave() {}
 
 }
 
