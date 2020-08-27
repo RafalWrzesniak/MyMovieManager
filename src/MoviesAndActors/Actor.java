@@ -20,6 +20,7 @@ public final class Actor implements ContentType<Actor> {
     private final String surname;
     private final String nationality;
     private LocalDate birthday;
+    private LocalDate deathDay;
     private int age;
     private final String imagePath;
     private final String filmweb;
@@ -35,9 +36,10 @@ public final class Actor implements ContentType<Actor> {
     private final List<Movie> wroteMovies = new ArrayList<>();
 
     public static final String NAME = "name", SURNAME = "surname", NATIONALITY = "nationality", BIRTHDAY = "birthday",
-            PLAYED_IN_MOVIES = "playedInMovies", DIRECTED_MOVIES = "directedMovies", WROTE_MOVIES = "writtenMovies";
+            PLAYED_IN_MOVIES = "playedInMovies", DIRECTED_MOVIES = "directedMovies", WROTE_MOVIES = "writtenMovies",
+            DEATH_DAY = "deathDay";
     public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ID, NAME, SURNAME, NATIONALITY, BIRTHDAY,
-            IMAGE_PATH, FILMWEB, PLAYED_IN_MOVIES, DIRECTED_MOVIES, WROTE_MOVIES));
+            DEATH_DAY, IMAGE_PATH, FILMWEB, PLAYED_IN_MOVIES, DIRECTED_MOVIES, WROTE_MOVIES));
 
     static {
         updateClassActorId();
@@ -60,6 +62,18 @@ public final class Actor implements ContentType<Actor> {
         }
     }
 
+    public Actor(Map<String, String> actorMap) {
+        this(actorMap.get(NAME), actorMap.get(SURNAME), actorMap.get(NATIONALITY), actorMap.get(IMAGE_PATH),
+                actorMap.get(FILMWEB), actorMap.get(ID) == null ? -1 : Integer.parseInt(actorMap.get(ID)));
+        this.birthday = setBirthday(convertBdStringToLocalDate(actorMap.get(Actor.BIRTHDAY)));
+        if(actorMap.get(Actor.DEATH_DAY) != null) {
+            setDeathDay(LocalDate.parse(actorMap.get(Actor.DEATH_DAY)));
+        }
+        setAge();
+        logger.info("New actor created: {}", this.toString());
+        saveMe();
+    }
+
     private Actor(String name, String surname, String nationality, String imagePath, String filmweb, int id) {
         updateClassActorId();
         this.name = ContentType.checkForNullOrEmptyOrIllegalChar(name, "Name");
@@ -78,7 +92,7 @@ public final class Actor implements ContentType<Actor> {
     public Actor(String name, String surname, String nationality, LocalDate birthday, String imagePath, String filmweb) {
         this(name, surname, nationality, imagePath, filmweb, -1);
         this.birthday = setBirthday(birthday);
-        this.age = setAge();
+        setAge();
         logger.info("New actor created: {}", this.toString());
         saveMe();
     }
@@ -86,7 +100,7 @@ public final class Actor implements ContentType<Actor> {
     public Actor(String name, String surname, String nationality, String birthday, String imagePath, String filmweb) {
         this(name, surname, nationality, imagePath, filmweb, -1);
         this.birthday = setBirthday(convertBdStringToLocalDate(birthday));
-        this.age = setAge();
+        setAge();
         logger.info("New actor created: {}", this.toString());
         saveMe();
     }
@@ -94,7 +108,7 @@ public final class Actor implements ContentType<Actor> {
     public Actor(String name, String surname, String nationality, String birthday, String imagePath, String filmweb, String id) {
         this(name, surname, nationality, imagePath, filmweb, Integer.parseInt(id));
         this.birthday = setBirthday(convertBdStringToLocalDate(birthday));
-        this.age = setAge();
+        setAge();
     }
 
 
@@ -160,6 +174,7 @@ public final class Actor implements ContentType<Actor> {
         map.put(SURNAME, surname);
         map.put(NATIONALITY, nationality);
         map.put(BIRTHDAY, getBirthday().toString());
+        if(deathDay != null) map.put(DEATH_DAY, deathDay.toString());
         map.put(ContentType.IMAGE_PATH, imagePath);
         map.put(ContentType.FILMWEB, filmweb);
         map.put(PLAYED_IN_MOVIES, getMovieId.apply(playedInMovies));
@@ -188,8 +203,24 @@ public final class Actor implements ContentType<Actor> {
         }
     }
 
-    private int setAge() {
-        return LocalDate.now().minusYears(getBirthday().getYear()).getYear();
+    private void setAge() {
+        if(deathDay == null) {
+            this.age = LocalDate.now().minusYears(getBirthday().getYear()).getYear();
+            return;
+        }
+        this.age = deathDay.minusYears(birthday.getYear()).getYear();
+    }
+
+    public LocalDate getDeathDay() {
+        return deathDay;
+    }
+
+    public void setDeathDay(LocalDate deathDay) {
+        if(deathDay.isBefore(birthday)) {
+            throw new IllegalArgumentException("DeathDay can't be before birthday!");
+        }
+        this.deathDay = deathDay;
+        setAge();
     }
 
     public void setIsAnActor(boolean actor) {
@@ -334,7 +365,6 @@ public final class Actor implements ContentType<Actor> {
                 ", age=" + getAge() +
                 '}';
     }
-
 
     @Override
     public int compareTo(Actor actor) {

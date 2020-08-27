@@ -59,8 +59,8 @@ class MovieTest {
     @Test
     void setLength() {
         setUp();
-        movie.setLength(100);
-        assertEquals(100, movie.getLength());
+        movie.setDuration(100);
+        assertEquals(100, movie.getDuration());
     }
 
     @Test
@@ -234,7 +234,7 @@ class MovieTest {
     @Test
     void getLengthFormatted() {
         setUp();
-        movie.setLength(100);
+        movie.setDuration(100);
         assertEquals("1h 40min", movie.getLengthFormatted());
     }
 

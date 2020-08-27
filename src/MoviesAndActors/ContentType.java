@@ -28,8 +28,8 @@ public interface ContentType<T> extends Comparable<T> {
             correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'., ]+");
             incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'., ]");
         } else if(argName.equals(Movie.IMAGE_PATH) || argName.equals(FILMWEB)){
-            correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'.+/_:\\\\ ]+");
-            incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'_+/.:\\\\ ]");
+            correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'.+/_:%\\\\ ]+");
+            incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'_+/.:%\\\\ ]");
         } else {
             correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'.: ]+");
             incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'.: ]");

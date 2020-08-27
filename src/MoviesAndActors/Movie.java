@@ -22,7 +22,7 @@ public final class Movie implements ContentType<Movie> {
     private String title;
     private String titleOrg;
     private LocalDate premiere;
-    private int length;
+    private int duration;
     private double rate;
     private int rateCount;
     private List<Actor> cast = new ArrayList<>();
@@ -34,10 +34,10 @@ public final class Movie implements ContentType<Movie> {
     private String imagePath;
     private String filmweb;
     private static int classMovieId;
-    public static String TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", LENGTH = "length",
+    public static String TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", DURATION = "duration",
             RATE = "rate", RATE_COUNT = "rateCount", CAST = "cast", DIRECTORS = "directors", WRITERS = "writers",
             GENRES = "genres", PRODUCTION = "production", DESCRIPTION = "description";
-    public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ContentType.ID, TITLE, TITLE_ORG, PREMIERE, LENGTH,
+    public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ContentType.ID, TITLE, TITLE_ORG, PREMIERE, DURATION,
             RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, IMAGE_PATH, FILMWEB));
 
     static {
@@ -217,12 +217,12 @@ public final class Movie implements ContentType<Movie> {
         return title.replaceAll(" ", "_");
     }
 
-    public void setLength(int length) {
-        setFieldDigit(LENGTH, length);
+    public void setDuration(int duration) {
+        setFieldDigit(DURATION, duration);
     }
 
     public void setLength(String length) {
-        setFieldString(LENGTH, length);
+        setFieldString(DURATION, length);
     }
 
     public void setRate(double rate) {
@@ -336,12 +336,12 @@ public final class Movie implements ContentType<Movie> {
         return rateCount;
     }
 
-    public int getLength() {
-        return length;
+    public int getDuration() {
+        return duration;
     }
 
     public String getLengthFormatted() {
-        return String.format("%dh %dmin", length/60, length%60);
+        return String.format("%dh %dmin", duration /60, duration %60);
     }
 
     public double getRate() {
@@ -449,7 +449,7 @@ public final class Movie implements ContentType<Movie> {
         map.put(TITLE, title);
         map.put(TITLE_ORG, titleOrg);
         map.put(PREMIERE, premiere.toString());
-        map.put(LENGTH, String.valueOf(length));
+        map.put(DURATION, String.valueOf(duration));
         map.put(RATE, String.valueOf(rate));
         map.put(RATE_COUNT, String.valueOf(rateCount));
         map.put(CAST, getFromList.apply(cast));
@@ -531,7 +531,7 @@ public final class Movie implements ContentType<Movie> {
                 ", title='" + title + '\'' +
                 ", titleOrg='" + titleOrg + '\'' +
                 ", premiere=" + premiere +
-                ", length=" + length +
+                ", duration=" + duration +
                 ", rate=" + rate +
                 ", rateCount=" + rateCount +
                 ", cast=" + cast +
