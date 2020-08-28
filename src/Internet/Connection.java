@@ -2,6 +2,7 @@ package Internet;
 
 import FileOperations.IO;
 import MoviesAndActors.Actor;
+import MoviesAndActors.Movie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,19 +16,47 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.util.Map.entry;
 
 public class Connection {
 
     private URL websiteUrl;
-    private URL defaultWebsiteUrl;
-    private static String FILMWEB = "https://www.filmweb.pl";
-    private static final Logger logger = LoggerFactory.getLogger(IO.class.getName());
+    private final URL defaultWebsiteUrl;
+    private static final String FILMWEB = "https://www.filmweb.pl";
+    private static final Logger logger = LoggerFactory.getLogger(Connection.class.getName());
+    public static final String MOVIE_LINE_KEY = "data-linkable=\"filmMain\"";
+    public static final String CAST_LINE_KEY  = "data-linkable=\"filmFullCast\"";
+    public static final String ACTOR_LINE_KEY = "personMainHeader";
+    private static final Map<String, String> ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
+            entry(Actor.NAME,        "name"),
+            entry(Actor.NATIONALITY, "birthPlace"),
+            entry(Actor.BIRTHDAY,    "itemprop=\"birthDate\" content"),
+            entry(Actor.IMAGE_PATH,  "itemprop=\"image\" src")
+    );
+    private static final Map<String, String> MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
+            entry(Movie.TITLE,      "data-title"),
+            entry(Movie.TITLE_ORG,  "originalTitle"),
+            entry(Movie.PREMIERE,   "releaseCountryPublicString"),
+            entry(Movie.DURATION,   "duration"),
+            entry(Movie.RATE,       "data-rate"),
+            entry(Movie.RATE_COUNT, "dataRating-count"),
+            entry(Movie.DESCRIPTION,"itemprop=\"description\""),
+            entry(Movie.IMAGE_PATH, "itemprop=\"image\" content")
+    );
+    private static final Map<String, String> MOVIE_CLASS_LIST_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
+            entry(Movie.GENRES,     "genres"),
+            entry(Movie.PRODUCTION, "countries")
+    );
+    public static final Map<String, String> MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
+            entry(Movie.CAST,     "actors"),
+            entry(Movie.DIRECTORS,"director"),
+            entry(Movie.WRITERS,  "screenwriter")
+    );
+
 
     public Connection(String websiteUrl) throws MalformedURLException {
         this.websiteUrl = new URL(websiteUrl);
@@ -60,28 +89,6 @@ public class Connection {
         return null;
     }
 
-    public String extractItemPropFromFilmWebLine(String itemToExtract, String line) {
-        Pattern pattern = Pattern.compile(
-                "<.+? itemprop=\"" + itemToExtract + "\"" +
-                "( content=\"(\\d{4}-\\d{2}-\\d{2})\")?+" +
-                "( src=\"(.+?)\")?+( .+?=\".+?\")??>" +
-                "((.+?)( [vViI]+)??" +
-                "(</.+?>))?+");
-        Matcher matcher = pattern.matcher(line);
-        if (matcher.find()) {
-            // content - birthday
-            if (matcher.group(2) != null) {
-                return matcher.group(2);
-            }
-            // src - image
-            if (matcher.group(4) != null) {
-                return matcher.group(4);
-            }
-            return replaceAcutesHTML(matcher.group(7));
-        }
-        return null;
-    }
-
     public String extractDeathDateFromFilmwebLine(String line) {
         Pattern pattern = Pattern.compile("dateToCalc=new Date\\((.+?)\\)");
         Matcher matcher = pattern.matcher(line);
@@ -97,46 +104,12 @@ public class Connection {
         }
     }
 
-
     public void changeMovieUrlToCast() throws MalformedURLException {
         this.websiteUrl = new URL(defaultWebsiteUrl.toString().concat("/cast/actors"));
     }
     public void changeMovieUrlToCrew() throws MalformedURLException {
         this.websiteUrl = new URL(defaultWebsiteUrl.toString().concat("/cast/crew"));
     }
-
-
-    public Map<String, String> grabActorDataFromFilmweb() throws IOException {
-        String foundLine = grepLineFromWebsite("itemprop=\"birthDate\"");
-        String fullName = extractItemPropFromFilmWebLine("name", foundLine);
-        String birthday = extractItemPropFromFilmWebLine("birthDate", foundLine);
-        String[] birthPlace = extractItemPropFromFilmWebLine("birthPlace", foundLine).replaceAll("\\(.+?\\)", "").split(", ");
-        String imageUrl = extractItemPropFromFilmWebLine("image", foundLine);
-        String deathDay = extractDeathDateFromFilmwebLine(foundLine);
-        Map<String, String> actorData = new HashMap<>();
-        actorData.put(Actor.NAME, fullName.substring(0, fullName.lastIndexOf(" ")));
-        actorData.put(Actor.SURNAME, fullName.substring(fullName.lastIndexOf(" ") + 1));
-        actorData.put(Actor.BIRTHDAY, birthday);
-        actorData.put(Actor.NATIONALITY, birthPlace[birthPlace.length - 1]);
-        actorData.put(Actor.FILMWEB, websiteUrl.toString());
-        actorData.put(Actor.DEATH_DAY, deathDay);
-        String imagePath;
-        if (imageUrl != null) {
-            imagePath = IO.SAVED_IMAGES.concat("\\").concat(fullName.replaceAll(" ", "_")).concat("_").concat(birthday.concat(".jpg"));
-            try {
-                downloadImage(imageUrl, imagePath);
-            } catch (IOException e) {
-                logger.warn("Couldn't download image of \"{}\" from \"{}\"", fullName, websiteUrl);
-                imagePath = IO.NO_IMAGE;
-            }
-        } else {
-            imagePath = IO.NO_IMAGE;
-        }
-        actorData.put(Actor.IMAGE_PATH, imagePath);
-        logger.info("\"{}\" data properly grabbed from \"{}\"", fullName, websiteUrl);
-        return actorData;
-    }
-
 
     public String extractItemFromFilmwebLine(String itemToExtract, String line) {
         Pattern pattern = Pattern.compile(itemToExtract + "(=|\":)?+[\">]+(.+?)[\"<]");
@@ -170,8 +143,67 @@ public class Connection {
     }
 
 
+    public Map<String, String> grabActorDataFromFilmwebAndCreateActorMap() throws IOException {
+        Map<String, String> actorData = new HashMap<>();
+        String foundLine = grepLineFromWebsite(ACTOR_LINE_KEY);
+
+        String fullName = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine);
+        String birthday = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.BIRTHDAY), foundLine);
+        String[] birthPlace = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NATIONALITY), foundLine).replaceAll("\\(.+?\\)", "").split(", ");
+        String imageUrl = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_PATH), foundLine);
+        String deathDay = extractDeathDateFromFilmwebLine(foundLine);
+
+        actorData.put(Actor.NAME, fullName.substring(0, fullName.lastIndexOf(" ")));
+        actorData.put(Actor.SURNAME, fullName.substring(fullName.lastIndexOf(" ") + 1));
+        actorData.put(Actor.BIRTHDAY, birthday);
+        actorData.put(Actor.NATIONALITY, birthPlace[birthPlace.length - 1]);
+        actorData.put(Actor.FILMWEB, websiteUrl.toString());
+        actorData.put(Actor.DEATH_DAY, deathDay);
+        actorData.put(Actor.IMAGE_PATH, imageUrl);
+
+        logger.info("Data properly grabbed from \"{}\"", websiteUrl);
+        return actorData;
+    }
+
+    public Map<String, List<String>> grabBasicMovieDataFromFilmwebAndCreateMovieMap() throws IOException {
+        Map<String, List<String>> movieData = new HashMap<>();
+        String foundLine = grepLineFromWebsite(MOVIE_LINE_KEY);
+
+        for (Map.Entry<String, String> pair : MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.entrySet()) {
+            movieData.put(pair.getKey(), Collections.singletonList(extractItemFromFilmwebLine(pair.getValue(), foundLine)));
+        }
+        for(Map.Entry<String, String> pair : MOVIE_CLASS_LIST_FIELDS_MAP_FILMWEB_KEYS.entrySet()) {
+            movieData.put(pair.getKey(), extractListOfItemsFromFilmwebLine(pair.getValue(), foundLine));
+        }
+        movieData.put(Movie.FILMWEB, Collections.singletonList(defaultWebsiteUrl.toString()));
+
+        logger.info("Data properly grabbed from \"{}\"", websiteUrl);
+        return movieData;
+    }
+
+    public List<String> grabCastOrCrewFromFilmweb(String castType) throws IOException {
+        if(!castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST)) &&
+                !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.DIRECTORS)) &&
+                !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.WRITERS))) {
+            logger.warn("Wrong castType parameter, can't download cast data of \"{}\" from \"{}\"", castType, websiteUrl);
+            throw new IllegalArgumentException("Wrong castType parameter");
+        }
+
+        return extractCastLinksFromFilmwebLink(castType, grepLineFromWebsite(CAST_LINE_KEY));
+    }
 
 
+//        if (imageUrl != null) {
+//            imagePath = IO.SAVED_IMAGES.concat("\\").concat(fullName.replaceAll(" ", "_")).concat("_").concat(birthday.concat(".jpg"));
+//            try {
+//                downloadImage(imageUrl, imagePath);
+//            } catch (IOException e) {
+//                logger.warn("Couldn't download image of \"{}\" from \"{}\"", fullName, websiteUrl);
+//                imagePath = IO.NO_IMAGE;
+//            }
+//        } else {
+//            imagePath = IO.NO_IMAGE;
+//        }
 
     public static String replaceAcutesHTML(String str) {
         str = str.replaceAll("&aacute;", "á");
