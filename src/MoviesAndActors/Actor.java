@@ -323,6 +323,15 @@ public final class Actor implements ContentType<Actor> {
         }
     }
 
+    public void printPretty() {
+        System.out.println("ID          : " + id);
+        System.out.println("FullName    : " + name + " " + surname);
+        System.out.println("BirthDate   : " + birthday);
+        if(deathDay != null) System.out.println("DeathDate   : " + deathDay);
+        System.out.println("Age         : " + age);
+        System.out.println("Nationality : " + nationality);
+    }
+
     @Override
     public String getReprName() {
         return getNameAndSurname().replaceAll(" ", "_");
@@ -343,6 +352,9 @@ public final class Actor implements ContentType<Actor> {
 //                if(movie.searchFor(searchingStr)) return true;
 //            }
         }
+        try {
+            return filmweb.equals(strToFind);
+        } catch (NullPointerException ignore) {}
         return false;
     }
 

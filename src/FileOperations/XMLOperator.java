@@ -226,7 +226,7 @@ public final class XMLOperator {
     }
 
 
-    private static Actor createActorFromXml(File inputDir) {
+    public static Actor createActorFromXml(File inputDir) {
         File inputFile = IO.getXmlFileFromDir(inputDir);
         Element root = createRootElementFromXml(inputFile);
         if(root == null) {
@@ -245,15 +245,13 @@ public final class XMLOperator {
                 if(value != null) map.put(fieldName, value);
             }
         }
-
-        Actor actor = new Actor(map.get(Actor.NAME), map.get(Actor.SURNAME), map.get(Actor.NATIONALITY),
-                map.get(Actor.BIRTHDAY), map.get(Actor.IMAGE_PATH), map.get(Actor.FILMWEB), map.get(Actor.ID));
-        logger.info("New actor \"{}\" created successfully from file \"{}\"", actor, inputFile);
+        logger.info("New actor created successfully from file \"{}\"", inputFile);
+        Actor actor = new Actor(map);
         XMLOperator.NEW_OBJECTS.remove(actor);
         return actor;
     }
 
-    private static Movie createMovieFromXml(File inputDir, ContentList<Actor> allActors) {
+    public static Movie createMovieFromXml(File inputDir, ContentList<Actor> allActors) {
         File inputFile = IO.getXmlFileFromDir(inputDir);
         Element root = createRootElementFromXml(inputFile);
         if(root == null) {
@@ -274,8 +272,8 @@ public final class XMLOperator {
             }
             map.put(fieldName, param);
         }
+        logger.info("New movie created successfully from file \"{}\"", inputFile);
         Movie movie = new Movie(map, allActors);
-        logger.info("New movie \"{}\" created successfully from file \"{}\"", movie, inputFile);
         XMLOperator.NEW_OBJECTS.remove(movie);
         Function<List<Actor>, Boolean> removeActorsFromListToSave = list -> {
             for(Actor actor : list) {
@@ -291,9 +289,9 @@ public final class XMLOperator {
 
 
 
-    public static <E extends ContentType<E>> void createListFile(ContentList<E> list) {
+    public static <E extends ContentType<E>> boolean createListFile(ContentList<E> list) {
         File savedFile;
-        if(list == null || list.size() == 0) return;
+        if(list == null || list.size() == 0) throw new IllegalArgumentException("List argument cannot be null or empty!");
         String type;
         if(list.get(0) instanceof Actor) {
             savedFile = new File(SAVE_PATH_ACTOR.concat("\\").concat(list.getListName()).concat(".xml"));
@@ -303,9 +301,10 @@ public final class XMLOperator {
             savedFile = new File(SAVE_PATH_MOVIE.concat("\\").concat(list.getListName()).concat(".xml"));
             type = Movie.class.getSimpleName();
         }
-        else return;
+        else throw new IllegalArgumentException("Wrong list type!");
+        if(savedFile.exists()) return false;
         Document doc = createDoc();
-        if(doc == null) return;
+        if(doc == null) return false;
         Element rootElement = doc.createElement(ContentList.class.getSimpleName());
         doc.appendChild(rootElement);
         rootElement.appendChild(doc.createTextNode("\n\t"));
@@ -318,6 +317,7 @@ public final class XMLOperator {
         rootElement.appendChild(typeElement);
         rootElement.appendChild(doc.createTextNode("\n"));
         makeSimpleSave(doc, savedFile);
+        return true;
     }
 
     public static <E extends ContentType<E>> void updateSavedContentListWith(ContentList<E> list, E content) {
