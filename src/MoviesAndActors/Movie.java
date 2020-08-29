@@ -45,6 +45,8 @@ public final class Movie implements ContentType<Movie> {
     }
 
 
+
+
     public static void updateClassMovieId() {
         File movieDir = new File(XMLOperator.getSavePathMovie());
         List<String> files = IO.getFileNamesInDirectory(movieDir);
@@ -83,24 +85,25 @@ public final class Movie implements ContentType<Movie> {
     }
 
     public Movie(Map<String, List<String>> fieldMap, ContentList<Actor> allActors) {
+        this(fieldMap);
+        setFieldWithList("cast", allActors.convertStrIdsToObjects(fieldMap.get("cast")));
+        setFieldWithList("directors", allActors.convertStrIdsToObjects(fieldMap.get("directors")));
+        setFieldWithList("writers", allActors.convertStrIdsToObjects(fieldMap.get("writers")));
+    }
+
+    public Movie(Map<String, List<String>> fieldMap) {
         updateClassMovieId();
         setFieldString("title", fieldMap.get("title").get(0));
         fieldMap.remove("title");
         setFieldString("premiere", fieldMap.get("premiere").get(0));
         fieldMap.remove("premiere");
-        logger.info("New movie \"{}\" created", this.toString());
-
-        setFieldWithList("cast", allActors.convertStrIdsToObjects(fieldMap.get("cast")));
-        fieldMap.remove("cast");
-        setFieldWithList("directors", allActors.convertStrIdsToObjects(fieldMap.get("directors")));
-        fieldMap.remove("directors");
-        setFieldWithList("writers", allActors.convertStrIdsToObjects(fieldMap.get("writers")));
-        fieldMap.remove("writers");
-
         for(String field : fieldMap.keySet()) {
             setFieldWithList(field, fieldMap.get(field));
         }
+
+        logger.info("New movie \"{}\" created", this.toString());
     }
+
 
 
     private <E> void setFieldString(String field, E value) {
@@ -139,7 +142,16 @@ public final class Movie implements ContentType<Movie> {
 
         try {
             if(Movie.class.getDeclaredField(field).get(this).toString().equals("0") || Movie.class.getDeclaredField(field).get(this).toString().equals("0.0")) {
-                Movie.class.getDeclaredField(field).set(this, value);
+                if(field.equals(Movie.RATE)) {
+                    double doubleValue = (double) value;
+                    if(doubleValue > 0 && doubleValue <= 10) {
+                        Movie.class.getDeclaredField(field).set(this, (double) (Math.round(doubleValue * 100)) / 100);
+                    } else {
+                        logger.warn("Unsuccessful set of \"{}\" in movie \"{}\" - rate has to be in range (0,10]", field, this.toString());
+                    }
+                } else {
+                    Movie.class.getDeclaredField(field).set(this, value);
+                }
 //                logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
                 saveMe();
             } else {
@@ -495,16 +507,20 @@ public final class Movie implements ContentType<Movie> {
     public boolean searchFor(String strToFind) {
         String[] strSplit = strToFind.toLowerCase().split(" ");
         for (String searchingStr : strSplit) {
-            if (this.getTitle().toLowerCase().contains(searchingStr)) return true;
+            if (title.toLowerCase().contains(searchingStr)) return true;
             try {
-                if(this.getDescription().toLowerCase().contains(searchingStr)) return true;
+                if(description.toLowerCase().contains(searchingStr)) return true;
             } catch (NullPointerException ignore) {}
             try {
-                if(this.getTitleOrg().toLowerCase().contains(searchingStr)) return true;
+                if(titleOrg.toLowerCase().contains(searchingStr)) return true;
             } catch (NullPointerException ignore) {}
             for(String genre : genres) {
                 if(genre.toLowerCase().contains(searchingStr)) return true;
             }
+            try {
+                return filmweb.equals(searchingStr);
+            } catch (NullPointerException ignore) {}
+
 //            List<Actor> allMovieActors = new ArrayList<>(cast);
 //            allMovieActors.addAll(directors);
 //            allMovieActors.addAll(writers);
@@ -525,23 +541,20 @@ public final class Movie implements ContentType<Movie> {
     }
 
 
-    public String toCompleteString() {
-        return "Movie{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", titleOrg='" + titleOrg + '\'' +
-                ", premiere=" + premiere +
-                ", duration=" + duration +
-                ", rate=" + rate +
-                ", rateCount=" + rateCount +
-                ", cast=" + cast +
-                ", directors=" + directors +
-                ", writers=" + writers +
-                ", genres=" + genres +
-                ", production=" + production +
-                ", description='" + description + '\'' +
-                ", coverPath='" + imagePath + '\'' +
-                '}';
+    public void printPretty() {
+        System.out.println("Title      : " + title);
+        System.out.println("TitleOrg   : " + titleOrg);
+        System.out.println("Premiere   : " + getPremiereFormatted());
+        System.out.println("Duration   : " + getLengthFormatted());
+        System.out.println("Genres     : " + genres);
+        System.out.println("Production : " + production);
+        System.out.println("Rate       : " + rate);
+        System.out.println("RateCount  : " + rateCount);
+        System.out.println("Plot       : " + description);
+        System.out.println("Directors  : " + directors);
+        System.out.println("Cast       : " + cast);
+        System.out.println("Writers    : " + writers);
+        System.out.println("WebLink    : " + filmweb);
     }
 
     @Override
