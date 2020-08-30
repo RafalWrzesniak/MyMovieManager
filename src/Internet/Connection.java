@@ -2,6 +2,7 @@ package Internet;
 
 import FileOperations.IO;
 import MoviesAndActors.Actor;
+import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +26,13 @@ import static java.util.Map.entry;
 public class Connection {
 
     private URL websiteUrl;
-    private final URL defaultWebsiteUrl;
+    private URL mainMoviePage;
     private static final String FILMWEB = "https://www.filmweb.pl";
     private static final Logger logger = LoggerFactory.getLogger(Connection.class.getName());
-    public static final String MOVIE_LINE_KEY = "data-linkable=\"filmMain\"";
-    public static final String CAST_LINE_KEY  = "data-linkable=\"filmFullCast\"";
-    public static final String ACTOR_LINE_KEY = "personMainHeader";
+    private static final String MOVIE_LINE_KEY  = "data-linkable=\"filmMain\"";
+    private static final String MOVIE_LINE_KEY2 = "data-source=\"linksData\"";
+    private static final String ACTOR_LINE_KEY  = "personMainHeader";
+    private static final String CAST_LINE_KEY   = "data-linkable=\"filmFullCast\"";
     private static final Map<String, String> ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
             entry(Actor.NAME,        "name"),
             entry(Actor.NATIONALITY, "birthPlace"),
@@ -58,9 +60,8 @@ public class Connection {
     );
 
 
-    public Connection(String websiteUrl) throws MalformedURLException {
-        this.websiteUrl = new URL(websiteUrl);
-        this.defaultWebsiteUrl = this.websiteUrl;
+    public Connection(String websiteUrl) throws IOException {
+        changeUrlTo(websiteUrl);
     }
 
     public File downloadWebsite() throws IOException {
@@ -74,7 +75,28 @@ public class Connection {
     }
 
 
-    public String grepLineFromWebsite(String find) throws IOException {
+    public static void downloadImage(String imageUrl, String fileName) throws IOException {
+        try (InputStream inputStream = new URL(imageUrl).openStream()) {
+            Files.copy(inputStream, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    public void changeUrlTo(String newUrl) throws MalformedURLException {
+        if(newUrl.matches("^" + FILMWEB + "/film/[^/]+?$")) {
+            this.mainMoviePage = new URL(newUrl);
+        }
+        this.websiteUrl = new URL(newUrl);
+    }
+
+    public void changeMovieUrlToCastActors() throws MalformedURLException {
+        this.websiteUrl = new URL(mainMoviePage.toString().concat("/cast/actors"));
+    }
+    public void changeMovieUrlToCastCrew() throws MalformedURLException {
+        this.websiteUrl = new URL(mainMoviePage.toString().concat("/cast/crew"));
+    }
+
+    private String grepLineFromWebsite(String find) throws IOException {
+        if(find == null) return null;
         URLConnection con;
         BufferedReader bufferedReader;
         con = websiteUrl.openConnection();
@@ -86,70 +108,83 @@ public class Connection {
                 return line;
             }
         }
+        logger.warn("Couldn't find proper line containing \"{}\" on \"{}\"", find, websiteUrl);
         return null;
     }
 
-    public String extractDeathDateFromFilmwebLine(String line) {
-        Pattern pattern = Pattern.compile("dateToCalc=new Date\\((.+?)\\)");
-        Matcher matcher = pattern.matcher(line);
-        if (matcher.find()) {
-            return LocalDate.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy,MM,dd")).toString();
+    private String extractItemFromFilmwebLine(String itemToExtract, String line) {
+        if(itemToExtract == null || line == null) {
+            logger.warn("Null as input - can't extract item \"{}\" from \"{}\"", itemToExtract, websiteUrl);
+            return null;
         }
-        return null;
-    }
-
-    public void downloadImage(String imageUrl, String fileName) throws IOException {
-        try (InputStream inputStream = new URL(imageUrl).openStream()) {
-            Files.copy(inputStream, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
-        }
-    }
-
-    public void changeMovieUrlToCast() throws MalformedURLException {
-        this.websiteUrl = new URL(defaultWebsiteUrl.toString().concat("/cast/actors"));
-    }
-    public void changeMovieUrlToCrew() throws MalformedURLException {
-        this.websiteUrl = new URL(defaultWebsiteUrl.toString().concat("/cast/crew"));
-    }
-
-    public String extractItemFromFilmwebLine(String itemToExtract, String line) {
         Pattern pattern = Pattern.compile(itemToExtract + "(=|\":)?+[\">]+(.+?)[\"<]");
         Matcher matcher = pattern.matcher(line);
         if(matcher.find()) {
             return replaceAcutesHTML(matcher.group(2));
+        } else {
+            logger.warn("Couldn't extract \"{}\" from \"{}\"", itemToExtract, websiteUrl);
         }
         return null;
     }
 
-    public List<String> extractListOfItemsFromFilmwebLine(String itemToExtract, String line) {
+    private List<String> extractListOfItemsFromFilmwebLine(String itemToExtract, String line) {
+        if(itemToExtract == null || line == null) {
+            logger.warn("Null as input - can't extract list of items \"{}\" from \"{}\"", itemToExtract, websiteUrl);
+            return null;
+        }
         Pattern pattern = Pattern.compile(itemToExtract + "=\\d+\">(.+?)</a>");
         Matcher matcher = pattern.matcher(line);
         List<String> listOfItems = new ArrayList<>();
         while(matcher.find()) {
             listOfItems.add(replaceAcutesHTML(matcher.group(1)));
         }
+        if(listOfItems.size() == 0) {
+            logger.warn("Couldn't find any list item \"{}\" on \"{}\"", itemToExtract, websiteUrl);
+        }
         return listOfItems;
     }
 
-    public List<String> extractCastLinksFromFilmwebLink(String itemToExtract, String line) {
+    private List<String> extractCastLinksFromFilmwebLink(String itemToExtract, String line) {
+        if(itemToExtract == null || line == null) {
+            logger.warn("Null as input - can't extract cast links \"{}\" from \"{}\"", itemToExtract, websiteUrl);
+            return null;
+        }
         List<String> listOfItems = new ArrayList<>();
         Pattern pattern = Pattern.compile("data-profession=\"" + itemToExtract + "\"(.+?)<a href=\"(.+?)\">");
         Matcher matcher = pattern.matcher(line);
         int numberOfMatcher = 0;
         while(matcher.find() && numberOfMatcher < 10) {
-            listOfItems.add(FILMWEB.concat(replaceAcutesHTML(matcher.group(2))));
+            listOfItems.add(FILMWEB.concat(matcher.group(2)));
             numberOfMatcher++;
+        }
+        if(listOfItems.size() == 0) {
+            logger.warn("Couldn't find any cast link \"{}\" on \"{}\"", itemToExtract, websiteUrl);
         }
         return listOfItems;
     }
 
+    private String extractDeathDateFromFilmwebLine(String line) {
+        if(line == null) {
+            logger.warn("Null as input - can't extract death date from \"{}\"", websiteUrl);
+            return null;
+        }
+        Pattern pattern = Pattern.compile("dateToCalc=new Date\\((.+?)\\)");
+        Matcher matcher = pattern.matcher(line);
+        if (matcher.find()) {
+            String[] split = matcher.group(1).split(",");
+            return LocalDate.of(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])).toString();
+        }
+        return null;
+    }
 
-    public Map<String, String> grabActorDataFromFilmwebAndCreateActorMap() throws IOException {
+
+    public Actor createActorFromFilmwebLink() throws IOException, NullPointerException {
         Map<String, String> actorData = new HashMap<>();
         String foundLine = grepLineFromWebsite(ACTOR_LINE_KEY);
 
-        String fullName = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine);
-        String birthday = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.BIRTHDAY), foundLine);
-        String[] birthPlace = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NATIONALITY), foundLine).replaceAll("\\(.+?\\)", "").split(", ");
+        String fullName = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine).replaceAll(" [iIvVxX]+", "");
+        String birthday = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.BIRTHDAY), foundLine));
+        String[] birthPlace = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NATIONALITY), foundLine)).replaceAll("\\(.+?\\)", "").split(", ");
         String imageUrl = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_PATH), foundLine);
         String deathDay = extractDeathDateFromFilmwebLine(foundLine);
 
@@ -162,12 +197,12 @@ public class Connection {
         actorData.put(Actor.IMAGE_PATH, imageUrl);
 
         logger.info("Data properly grabbed from \"{}\"", websiteUrl);
-        return actorData;
+        return new Actor(actorData);
     }
 
-    public Map<String, List<String>> grabBasicMovieDataFromFilmwebAndCreateMovieMap() throws IOException {
+    private Map<String, List<String>> grabBasicMovieDataFromFilmwebAndCreateMovieMap() throws IOException {
         Map<String, List<String>> movieData = new HashMap<>();
-        String foundLine = grepLineFromWebsite(MOVIE_LINE_KEY);
+        String foundLine = grepLineFromWebsite(MOVIE_LINE_KEY).concat(grepLineFromWebsite(MOVIE_LINE_KEY2));
 
         for (Map.Entry<String, String> pair : MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.entrySet()) {
             movieData.put(pair.getKey(), Collections.singletonList(extractItemFromFilmwebLine(pair.getValue(), foundLine)));
@@ -175,37 +210,79 @@ public class Connection {
         for(Map.Entry<String, String> pair : MOVIE_CLASS_LIST_FIELDS_MAP_FILMWEB_KEYS.entrySet()) {
             movieData.put(pair.getKey(), extractListOfItemsFromFilmwebLine(pair.getValue(), foundLine));
         }
-        movieData.put(Movie.FILMWEB, Collections.singletonList(defaultWebsiteUrl.toString()));
+        if(movieData.get(Movie.TITLE_ORG).get(0) == null) movieData.replace(Movie.TITLE_ORG, movieData.get(Movie.TITLE));
+        movieData.put(Movie.FILMWEB, Collections.singletonList(mainMoviePage.toString()));
 
         logger.info("Data properly grabbed from \"{}\"", websiteUrl);
         return movieData;
     }
 
-    public List<String> grabCastOrCrewFromFilmweb(String castType) throws IOException {
-        if(!castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST)) &&
+    private List<String> grabCastOrCrewFromFilmweb(String castType) throws IOException {
+        if(castType == null || !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST)) &&
                 !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.DIRECTORS)) &&
                 !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.WRITERS))) {
             logger.warn("Wrong castType parameter, can't download cast data of \"{}\" from \"{}\"", castType, websiteUrl);
             throw new IllegalArgumentException("Wrong castType parameter");
         }
-
         return extractCastLinksFromFilmwebLink(castType, grepLineFromWebsite(CAST_LINE_KEY));
     }
 
+    public List<Actor> createActorsFromFilmwebLinks(List<String> actorUrls, ContentList<Actor> allActors) {
+        List<Actor> actorList = new ArrayList<>();
+        if(actorUrls == null || actorUrls.size() == 0 || allActors == null || allActors.size() == 0) {
+             logger.warn("Null or empty argument");
+            return actorList;
+        }
+        for(String actorUrl : actorUrls) {
+            if(allActors.find(actorUrl).size() == 0) {
+                try {
+                    Connection connection = new Connection(actorUrl);
+                    Actor actor = connection.createActorFromFilmwebLink();
+                    actorList.add(actor);
+                    allActors.add(actor);
+                } catch (IOException | NullPointerException e) {
+                    logger.warn("Can't get data from \"{}\"", actorUrl);
+                }
+            } else actorList.add(allActors.find(actorUrl).get(0));
 
-//        if (imageUrl != null) {
-//            imagePath = IO.SAVED_IMAGES.concat("\\").concat(fullName.replaceAll(" ", "_")).concat("_").concat(birthday.concat(".jpg"));
-//            try {
-//                downloadImage(imageUrl, imagePath);
-//            } catch (IOException e) {
-//                logger.warn("Couldn't download image of \"{}\" from \"{}\"", fullName, websiteUrl);
-//                imagePath = IO.NO_IMAGE;
-//            }
-//        } else {
-//            imagePath = IO.NO_IMAGE;
-//        }
+        }
+        return actorList;
+    }
 
-    public static String replaceAcutesHTML(String str) {
+    public Movie createMovieFromFilmwebLink(ContentList<Actor> allActors) throws IOException {
+        Movie movie = new Movie(grabBasicMovieDataFromFilmwebAndCreateMovieMap());
+
+        changeMovieUrlToCastActors();
+        List<String> castUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST));
+        List<Actor> actors = createActorsFromFilmwebLinks(castUrls, allActors);
+        movie.addActors(actors);
+
+        changeMovieUrlToCastCrew();
+        List<String> directorUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.DIRECTORS));
+        List<Actor> directors = createActorsFromFilmwebLinks(directorUrls, allActors);
+        movie.addDirectors(directors);
+
+        List<String> writerUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.WRITERS));
+        List<Actor> writers = createActorsFromFilmwebLinks(writerUrls, allActors);
+        movie.addWriters(writers);
+
+        return movie;
+    }
+
+
+
+
+
+
+
+
+
+    private static String replaceNullWithDash(String object) {
+        return object == null ? "-" : object;
+    }
+
+    private static String replaceAcutesHTML(String str) {
+        if(str == null) return null;
         str = str.replaceAll("&aacute;", "á");
         str = str.replaceAll("&eacute;", "é");
         str = str.replaceAll("&iacute;", "í");
