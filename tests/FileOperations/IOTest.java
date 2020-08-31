@@ -9,9 +9,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class IOTest {
@@ -81,7 +79,10 @@ class IOTest {
 
     @Test
     void createSummaryImage() {
-        Movie movie = new Movie("Most szpiegów", LocalDate.of(2015, 10, 16));
+        Movie movie = new Movie(Map.ofEntries(
+                Map.entry(Movie.TITLE, Collections.singletonList("Some Title")),
+                Map.entry(Movie.PREMIERE, Collections.singletonList("2020-08-31"))
+        ));
         IO.createSummaryImage(movie, tmp);
         assertTrue(IO.listDirectory(tmp).contains(new File(tmpPath.concat("\\tmpTest.png"))));
     }

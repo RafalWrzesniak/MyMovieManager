@@ -13,11 +13,26 @@ class MovieTest {
 
     static Collection<Object[]> stringParams() {
         return Arrays.asList(new Object[][]{
-                {"Most szpiegów", LocalDate.of(2015, 10, 16)},
-                {"Birdman", LocalDate.of(2014, 8, 27)},
-                {"Władca pierścieni: Drużyna Pierścienia", LocalDate.of(2001, 12, 13)},
-                {"Deadpool", LocalDate.of(2016, 1, 21)},
-                {"Kiler", LocalDate.of(1997, 11, 17)}
+                {Map.ofEntries(
+                        Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
+                        Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16"))
+                )},
+                {Map.ofEntries(
+                        Map.entry(Movie.TITLE, Collections.singletonList("Birdman")),
+                        Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13"))
+                )},
+                {Map.ofEntries(
+                        Map.entry(Movie.TITLE, Collections.singletonList("Władca pierścieni: Drużyna Pierścienia")),
+                        Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13"))
+                )},
+                {Map.ofEntries(
+                        Map.entry(Movie.TITLE, Collections.singletonList("Deadpool")),
+                        Map.entry(Movie.PREMIERE, Collections.singletonList("2016-01-21"))
+                )},
+                {Map.ofEntries(
+                        Map.entry(Movie.TITLE, Collections.singletonList("Kiler")),
+                        Map.entry(Movie.PREMIERE, Collections.singletonList("1997-11-17"))
+                )},
         });
     }
 
@@ -25,29 +40,53 @@ class MovieTest {
     Actor actor2;
     Actor actor3;
     void createActors() {
-        actor = new Actor("Jack", "Sparrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
-        actor2 = new Actor("Jackie", "Sparrow", "Karaibian", "1957-06-02", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
-        actor3 = new Actor("John", "Wick", "USA", "1983-07-21", "www.filmweb.pl", "E:\\xInne\\dk.jpg");
+        actor = new Actor(Map.ofEntries(
+                Map.entry(Actor.NAME, "Cezary"),
+                Map.entry(Actor.SURNAME, "Pazura"),
+                Map.entry(Actor.NATIONALITY, "Poland"),
+                Map.entry(Actor.BIRTHDAY, "1962-06-13"),
+                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\cp.jpg")
+        ));
+        actor2 = new Actor(Map.ofEntries(
+                Map.entry(Actor.NAME, "Jack"),
+                Map.entry(Actor.SURNAME, "Sparrow"),
+                Map.entry(Actor.NATIONALITY, "Karaibian"),
+                Map.entry(Actor.BIRTHDAY, "1957-06-02"),
+                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\js.jpg")
+        ));
+       actor3 = new Actor(Map.ofEntries(
+                Map.entry(Actor.NAME, "John"),
+                Map.entry(Actor.SURNAME, "Wick"),
+                Map.entry(Actor.NATIONALITY, "USA"),
+                Map.entry(Actor.BIRTHDAY, "1983-07-21"),
+                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\jw.jpg")
+        ));
     }
 
     Movie movie;
     void setUp() {
-        movie = new Movie("Most szpiegów", LocalDate.of(2015, 10, 16));
+        movie = new Movie(Map.ofEntries(
+                Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
+                Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16"))
+        ));
     }
 
 
     @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
     @MethodSource("stringParams")
-    void getTitle(String title, LocalDate premiere) {
-        Movie movie = new Movie(title, premiere);
-        assertEquals(title, movie.getTitle());
+    void getTitle(Map<String, List<String>> map) {
+        Movie movie = new Movie(map);
+        assertEquals(map.get(Movie.TITLE).get(0), movie.getTitle());
     }
 
     @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
     @MethodSource("stringParams")
-    void getPremiere(String title, LocalDate premiere) {
-        Movie movie = new Movie(title, premiere);
-        assertEquals(premiere, movie.getPremiere());
+    void getPremiere(Map<String, List<String>> map) {
+        Movie movie = new Movie(map);
+        assertEquals(map.get(Movie.PREMIERE).get(0), movie.getPremiere().toString());
     }
 
     @Test
@@ -250,8 +289,14 @@ class MovieTest {
     @Test
     void compareTo() {
         setUp();
-        Movie movie2 = new Movie("Most szpiegów", LocalDate.of(2015, 10, 16));
-        Movie movie3 = new Movie("Deadpool", LocalDate.of(2015, 10, 16));
+        Movie movie2 = new Movie(Map.ofEntries(
+                Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
+                Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16"))
+        ));
+        Movie movie3 = new Movie(Map.ofEntries(
+                Map.entry(Movie.TITLE, Collections.singletonList("Deadpool")),
+                Map.entry(Movie.PREMIERE, Collections.singletonList("2016-01-21"))
+        ));
         assertEquals(0, movie.compareTo(movie2));
         assertEquals(9, movie.compareTo(movie3));
     }
