@@ -40,7 +40,7 @@ public class ContentList<T extends ContentType<T>> {
     public void add(T obj) {
         if(obj == null) {
             logger.warn("Null object will not be added to the list \"{}\"!", getListName());
-        } else if(list.contains(obj)) {
+        } else if(this.contains(obj)) {
             logger.warn("\"{}\" is already on the {} list", obj.toString(), getListName());
             XMLOperator.NEW_OBJECTS.remove(obj);
         } else {

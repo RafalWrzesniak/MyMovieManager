@@ -136,7 +136,9 @@ public class Connection {
         Matcher matcher = pattern.matcher(line);
         List<String> listOfItems = new ArrayList<>();
         while(matcher.find()) {
-            listOfItems.add(replaceAcutesHTML(matcher.group(1)));
+            if(!listOfItems.contains(replaceAcutesHTML(matcher.group(1)))) {
+                listOfItems.add(replaceAcutesHTML(matcher.group(1)));
+            }
         }
         if(listOfItems.size() == 0) {
             logger.warn("Couldn't find any list item \"{}\" on \"{}\"", itemToExtract, websiteUrl);
