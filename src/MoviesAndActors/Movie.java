@@ -39,13 +39,12 @@ public final class Movie implements ContentType<Movie> {
             GENRES = "genres", PRODUCTION = "production", DESCRIPTION = "description";
     public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ContentType.ID, TITLE, TITLE_ORG, PREMIERE, DURATION,
             RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, IMAGE_PATH, FILMWEB));
+    private boolean iAmFromConstructor = false;
+
 
     static {
         updateClassMovieId();
     }
-
-
-
 
     public static void updateClassMovieId() {
         File movieDir = new File(XMLOperator.getSavePathMovie());
@@ -64,25 +63,6 @@ public final class Movie implements ContentType<Movie> {
         }
     }
 
-    public Movie(String title, LocalDate premiere) {
-        updateClassMovieId();
-        setFieldString("title", title);
-        this.premiere = premiere;
-        this.id = classMovieId;
-        classMovieId++;
-        saveMe();
-        logger.info("New movie \"{}\" created", this.toString());
-    }
-
-    public Movie(String title, String premiere) {
-        updateClassMovieId();
-        setFieldString("title", title);
-        setFieldString("premiere", premiere);
-        this.id = classMovieId;
-        classMovieId++;
-        saveMe();
-        logger.info("New movie \"{}\" created", this.toString());
-    }
 
     public Movie(Map<String, List<String>> fieldMap, ContentList<Actor> allActors) {
         this(fieldMap);
@@ -93,15 +73,18 @@ public final class Movie implements ContentType<Movie> {
 
     public Movie(Map<String, List<String>> fieldMap) {
         updateClassMovieId();
-        setFieldString("title", fieldMap.get("title").get(0));
-        fieldMap.remove("title");
-        setFieldString("premiere", fieldMap.get("premiere").get(0));
-        fieldMap.remove("premiere");
+        iAmFromConstructor = true;
         for(String field : fieldMap.keySet()) {
             setFieldWithList(field, fieldMap.get(field));
         }
-
+        if(id == 0) {
+            id = classMovieId;
+            classMovieId++;
+        }
         logger.info("New movie \"{}\" created", this.toString());
+//        IO.createContentDirectory(this);
+        iAmFromConstructor = false;
+        saveMe();
     }
 
 
@@ -533,10 +516,12 @@ public final class Movie implements ContentType<Movie> {
 
     @Override
     public String toString() {
+        String bold = "\033[1m";
+        String end = "\033[0m";
         return "Movie{" +
-                "id='" + id + '\'' +
-                ", title='" + title + '\'' +
-                ", premiere=" + premiere +
+                "id='" + bold + id + end + '\'' +
+                ", title='" + bold + title + end + '\'' +
+                ", premiere=" + bold + premiere + end +
                 '}';
     }
 
@@ -546,14 +531,14 @@ public final class Movie implements ContentType<Movie> {
         System.out.println("TitleOrg   : " + titleOrg);
         System.out.println("Premiere   : " + getPremiereFormatted());
         System.out.println("Duration   : " + getLengthFormatted());
+        System.out.println("Directors  : " + directors);
+        System.out.println("Writers    : " + writers);
         System.out.println("Genres     : " + genres);
         System.out.println("Production : " + production);
         System.out.println("Rate       : " + rate);
         System.out.println("RateCount  : " + rateCount);
         System.out.println("Plot       : " + description);
-        System.out.println("Directors  : " + directors);
         System.out.println("Cast       : " + cast);
-        System.out.println("Writers    : " + writers);
         System.out.println("WebLink    : " + filmweb);
     }
 
@@ -570,7 +555,7 @@ public final class Movie implements ContentType<Movie> {
 
     @Override
     public void saveMe() {
-        if(!XMLOperator.NEW_OBJECTS.contains(this)) {
+        if(!XMLOperator.NEW_OBJECTS.contains(this) && !iAmFromConstructor) {
             XMLOperator.NEW_OBJECTS.add(this);
             logger.debug("Movie \"{}\" added to the list of new objects", this);
         }

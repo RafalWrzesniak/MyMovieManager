@@ -15,15 +15,15 @@ import java.util.regex.Pattern;
 
 public final class Actor implements ContentType<Actor> {
     private static final Logger logger = LoggerFactory.getLogger(Actor.class.getName());
-    private final int id;
-    private final String name;
-    private final String surname;
-    private final String nationality;
+    private int id;
+    private String name;
+    private String surname;
+    private String nationality;
     private LocalDate birthday;
     private LocalDate deathDay;
     private int age;
-    private final String imagePath;
-    private final String filmweb;
+    private String imagePath;
+    private String filmweb;
     private static int classActorId;
     // actor
     private boolean isActor = false;
@@ -63,53 +63,29 @@ public final class Actor implements ContentType<Actor> {
     }
 
     public Actor(Map<String, String> actorMap) {
-        this(actorMap.get(NAME), actorMap.get(SURNAME), actorMap.get(NATIONALITY), actorMap.get(IMAGE_PATH),
-                actorMap.get(FILMWEB), actorMap.get(ID) == null ? -1 : Integer.parseInt(actorMap.get(ID)));
-        this.birthday = setBirthday(convertBdStringToLocalDate(actorMap.get(Actor.BIRTHDAY)));
+        updateClassActorId();
+        this.name = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(NAME), "Name");
+        this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(SURNAME), "Surname");
+        this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar( actorMap.get(NATIONALITY), "Nationality");
+        this.imagePath = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(IMAGE_PATH), "imagePath");
+        this.filmweb = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(FILMWEB), "filmweb");
+        this.birthday = convertBdStringToLocalDate(actorMap.get(Actor.BIRTHDAY));
         if(actorMap.get(Actor.DEATH_DAY) != null) {
             setDeathDay(LocalDate.parse(actorMap.get(Actor.DEATH_DAY)));
         }
         setAge();
-        logger.info("New actor created: {}", this.toString());
-        saveMe();
-    }
-
-    private Actor(String name, String surname, String nationality, String imagePath, String filmweb, int id) {
-        updateClassActorId();
-        this.name = ContentType.checkForNullOrEmptyOrIllegalChar(name, "Name");
-        this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(surname, "Surname");
-        this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar(nationality, "Nationality");
-        this.imagePath = ContentType.checkForNullOrEmptyOrIllegalChar(imagePath, "imagePath");
-        this.filmweb = ContentType.checkForNullOrEmptyOrIllegalChar(filmweb, "filmweb");
+        int id = actorMap.get(ID) == null ? -1 : Integer.parseInt(actorMap.get(ID));
         if(id == -1) {
             this.id = classActorId;
             classActorId++;
         } else {
             this.id = id;
         }
-    }
-
-    public Actor(String name, String surname, String nationality, LocalDate birthday, String imagePath, String filmweb) {
-        this(name, surname, nationality, imagePath, filmweb, -1);
-        this.birthday = setBirthday(birthday);
-        setAge();
         logger.info("New actor created: {}", this.toString());
         saveMe();
+//        IO.createContentDirectory(this);
     }
 
-    public Actor(String name, String surname, String nationality, String birthday, String imagePath, String filmweb) {
-        this(name, surname, nationality, imagePath, filmweb, -1);
-        this.birthday = setBirthday(convertBdStringToLocalDate(birthday));
-        setAge();
-        logger.info("New actor created: {}", this.toString());
-        saveMe();
-    }
-
-    public Actor(String name, String surname, String nationality, String birthday, String imagePath, String filmweb, String id) {
-        this(name, surname, nationality, imagePath, filmweb, Integer.parseInt(id));
-        this.birthday = setBirthday(convertBdStringToLocalDate(birthday));
-        setAge();
-    }
 
 
     public boolean isActor() {
@@ -190,25 +166,19 @@ public final class Actor implements ContentType<Actor> {
     public static LocalDate convertBdStringToLocalDate(String string) {
         if(string == null || string.isEmpty()) {
             throw new IllegalArgumentException("Birthday argument cannot be null or empty!");
-        }
+        } else if(string.equals("-")) return null;
         return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
     }
 
 
-    private LocalDate setBirthday(LocalDate birthday) {
-        if(birthday == null) {
-            throw new IllegalArgumentException("Birthday argument cannot be null!");
-        } else {
-            return birthday;
-        }
-    }
-
     private void setAge() {
+        if(birthday == null) return;
         if(deathDay == null) {
             this.age = LocalDate.now().minusYears(getBirthday().getYear()).getYear();
-            return;
+        } else {
+            this.age = deathDay.minusYears(birthday.getYear()).getYear();
         }
-        this.age = deathDay.minusYears(birthday.getYear()).getYear();
+
     }
 
     public LocalDate getDeathDay() {
@@ -370,12 +340,15 @@ public final class Actor implements ContentType<Actor> {
 
     @Override
     public String toString() {
+        String bold = "\033[1m";
+        String end = "\033[0m";
         return "Actor{" +
-                "id='" + getId() + '\'' +
-                ", name='" + getName() + '\'' +
-                ", surname='" + getSurname() + '\'' +
-                ", age=" + getAge() +
-                '}';
+                "id='" + bold + id + end + '\'' +
+                ", name='" + bold + name + end + '\'' +
+                ", surname='" + bold + surname + end + '\'' +
+                ", age='" + bold + age + end + '\'' +
+                ", born='" + bold + nationality + end + '\'' +
+        '}';
     }
 
     @Override
