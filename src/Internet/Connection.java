@@ -4,6 +4,7 @@ import FileOperations.IO;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,9 +62,12 @@ public class Connection {
     );
 
 
-    public Connection(String websiteUrl) throws IOException {
-        changeUrlTo(websiteUrl);
+    public Connection(String desiredTitle) throws IOException {
+        String desiredTitleEncoded = URLEncoder.encode(desiredTitle, "UTF-8");
+        changeUrlTo(FILMWEB + "/search?type=film&q=" + desiredTitleEncoded);//.replaceAll(" ", "+"));
+        changeUrlTo(getMostSimilarTitleUrlFromQuery(desiredTitle));
     }
+
 
     public File downloadWebsite() throws IOException {
         String tmpFileName = "\\tmp_".concat(websiteUrl.getHost().replaceAll("(^.{3}\\.)|(\\..+)", ""))
@@ -81,11 +86,20 @@ public class Connection {
         }
     }
 
-    public void changeUrlTo(String newUrl) throws MalformedURLException {
-        if(newUrl.matches("^" + FILMWEB + "/film/[^/]+?$")) {
+    public void changeUrlTo(String newUrl) throws IOException {
+        if(newUrl == null) {
+            logger.warn("Null as input - cannot change URL to null");
+            throw new IOException("Null as input - cannot change URL to null");
+        }
+        if (newUrl.matches("^" + FILMWEB + "/film/[^/]+?$")) {
             this.mainMoviePage = new URL(newUrl);
         }
         this.websiteUrl = new URL(newUrl);
+        if (websiteUrl.getQuery() == null) {
+            logger.debug("Changed Connection URL to \"{}\"", websiteUrl);
+        } else {
+            logger.debug("Making a query to website \"{}\"", websiteUrl);
+        }
     }
 
     public void changeMovieUrlToCastActors() throws MalformedURLException {
@@ -127,18 +141,16 @@ public class Connection {
         return null;
     }
 
-    private List<String> extractListOfItemsFromFilmwebLine(String itemToExtract, String line) {
+    private List<String> extractListOfItemsFromFilmwebLine(String itemToExtract, String line) throws IOException {
         if(itemToExtract == null || line == null) {
             logger.warn("Null as input - can't extract list of items \"{}\" from \"{}\"", itemToExtract, websiteUrl);
-            return null;
+            throw new IOException("Null as input - can't extract list of items \"" + itemToExtract + "\" from " + websiteUrl);
         }
         Pattern pattern = Pattern.compile(itemToExtract + "=\\d+\">(.+?)</a>");
         Matcher matcher = pattern.matcher(line);
         List<String> listOfItems = new ArrayList<>();
         while(matcher.find()) {
-            if(!listOfItems.contains(replaceAcutesHTML(matcher.group(1)))) {
                 listOfItems.add(replaceAcutesHTML(matcher.group(1)));
-            }
         }
         if(listOfItems.size() == 0) {
             logger.warn("Couldn't find any list item \"{}\" on \"{}\"", itemToExtract, websiteUrl);
@@ -152,11 +164,11 @@ public class Connection {
             return null;
         }
         List<String> listOfItems = new ArrayList<>();
-        Pattern pattern = Pattern.compile("data-profession=\"" + itemToExtract + "\"(.+?)<a href=\"(.+?)\">");
+        Pattern pattern = Pattern.compile("data-profession=\"" + itemToExtract + "\".+?<a href=\"(.+?)\">");
         Matcher matcher = pattern.matcher(line);
         int numberOfMatcher = 0;
         while(matcher.find() && numberOfMatcher < 10) {
-            listOfItems.add(FILMWEB.concat(matcher.group(2)));
+            listOfItems.add(FILMWEB.concat(matcher.group(1)));
             numberOfMatcher++;
         }
         if(listOfItems.size() == 0) {
@@ -179,15 +191,32 @@ public class Connection {
         return null;
     }
 
+    private Map<String, String> extractQueryTitleAndItsLinks(String line) {
+        if(line == null) {
+            logger.warn("Null as input - can't extract query data from null");
+            return null;
+        }
+        Map<String, String> map = new HashMap<>();
+        Pattern pattern = Pattern.compile("<data class.+?data-title=\"(.+?)\".+?href=\"(.+?)\"");
+        Matcher matcher = pattern.matcher(line);
+        while(matcher.find()) {
+            map.putIfAbsent(replaceAcutesHTML(matcher.group(1)), matcher.group(2));
+        }
+        if(map.size() == 0) {
+            logger.warn("Couldn't find any results of query");
+        }
+        return map;
+    }
+
 
     public Actor createActorFromFilmwebLink() throws IOException, NullPointerException {
         Map<String, String> actorData = new HashMap<>();
         String foundLine = grepLineFromWebsite(ACTOR_LINE_KEY);
 
-        String fullName = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine).replaceAll(" [iIvVxX]+", "");
+        String fullName = Objects.requireNonNull(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine)).replaceAll(" [iIvVxX]+", "");
         String birthday = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.BIRTHDAY), foundLine));
         String[] birthPlace = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NATIONALITY), foundLine)).replaceAll("\\(.+?\\)", "").split(", ");
-        String imageUrl = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_PATH), foundLine);
+        String imageUrl = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_PATH), foundLine));
         String deathDay = extractDeathDateFromFilmwebLine(foundLine);
 
         actorData.put(Actor.NAME, fullName.substring(0, fullName.lastIndexOf(" ")));
@@ -204,7 +233,10 @@ public class Connection {
 
     private Map<String, List<String>> grabBasicMovieDataFromFilmwebAndCreateMovieMap() throws IOException {
         Map<String, List<String>> movieData = new HashMap<>();
-        String foundLine = grepLineFromWebsite(MOVIE_LINE_KEY).concat(grepLineFromWebsite(MOVIE_LINE_KEY2));
+        String foundLine = grepLineFromWebsite(MOVIE_LINE_KEY);
+        if(!foundLine.contains(MOVIE_LINE_KEY2)){
+            foundLine = foundLine.concat(grepLineFromWebsite(MOVIE_LINE_KEY2));
+        }
 
         for (Map.Entry<String, String> pair : MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.entrySet()) {
             movieData.put(pair.getKey(), Collections.singletonList(extractItemFromFilmwebLine(pair.getValue(), foundLine)));
@@ -231,15 +263,15 @@ public class Connection {
 
     public List<Actor> createActorsFromFilmwebLinks(List<String> actorUrls, ContentList<Actor> allActors) {
         List<Actor> actorList = new ArrayList<>();
-        if(actorUrls == null || actorUrls.size() == 0 || allActors == null || allActors.size() == 0) {
+        if(actorUrls == null || actorUrls.size() == 0 || allActors == null) {
              logger.warn("Null or empty argument");
             return actorList;
         }
         for(String actorUrl : actorUrls) {
             if(allActors.find(actorUrl).size() == 0) {
                 try {
-                    Connection connection = new Connection(actorUrl);
-                    Actor actor = connection.createActorFromFilmwebLink();
+                    changeUrlTo(actorUrl);
+                    Actor actor = createActorFromFilmwebLink();
                     actorList.add(actor);
                     allActors.add(actor);
                 } catch (IOException | NullPointerException e) {
@@ -272,6 +304,95 @@ public class Connection {
     }
 
 
+    public String getMostSimilarTitleUrlFromQuery(String desiredTitle) throws IOException {
+        String urlToReturn = null;
+        Function<String, Map<Character, Integer>> createCharCountMap = string -> {
+            Map<Character, Integer> tmpMap = new HashMap<>();
+            for(Character character : string.toCharArray()) {
+                tmpMap.putIfAbsent(character, countChar(string, character));
+            }
+            return tmpMap;
+        };
+        Function<String, Integer> getMovieYearFromUrl = url -> {
+            assert url != null;
+            try {
+                changeUrlTo(url);
+                String lineOfCurrentTitle = grepLineFromWebsite(MOVIE_LINE_KEY).concat(MOVIE_LINE_KEY2);
+                String premiereOfCurrentTitle = extractItemFromFilmwebLine(MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Movie.PREMIERE), lineOfCurrentTitle);
+                if(premiereOfCurrentTitle == null) return 0;
+                return LocalDate.parse(premiereOfCurrentTitle, DateTimeFormatter.ISO_DATE).getYear();
+            } catch (IOException e) {
+                logger.warn("Couldn't extract year from url \"{}\"", url);
+            }
+            return 0;
+        };
+
+        Map<Character, Integer> desiredTitleCharMap = createCharCountMap.apply(desiredTitle);
+
+        String foundLine = grepLineFromWebsite("searchMain");
+        Map<String, String> foundTitleAndLinkMap = extractQueryTitleAndItsLinks(foundLine);
+        if(foundTitleAndLinkMap == null || foundTitleAndLinkMap.size() == 0) return null;
+        String chosenTitle = null;
+        double highestCorrelation = 0;
+
+        for(Map.Entry<String, String> titleLinkPair : foundTitleAndLinkMap.entrySet()) {
+            String foundTitle = titleLinkPair.getKey();
+            String foundUrl = titleLinkPair.getValue();
+            double correlation, correlation1 = 0, correlation2 = 0;
+            Map<Character, Integer> foundTitleCharMap = createCharCountMap.apply(foundTitle);
+
+            for(Map.Entry<Character, Integer> pair : desiredTitleCharMap.entrySet()) {
+                if(foundTitleCharMap.containsKey(pair.getKey()) && foundTitleCharMap.get(pair.getKey()).equals(desiredTitleCharMap.get(pair.getKey()))) {
+                    correlation1 += desiredTitleCharMap.get(pair.getKey());
+                }
+            }
+            correlation1 = correlation1 / desiredTitle.length();
+
+            for(Map.Entry<Character, Integer> pair : foundTitleCharMap.entrySet()) {
+                if(desiredTitleCharMap.containsKey(pair.getKey()) && foundTitleCharMap.get(pair.getKey()).equals(desiredTitleCharMap.get(pair.getKey()))) {
+                    correlation2 += foundTitleCharMap.get(pair.getKey());
+                }
+            }
+            correlation2 = correlation2 / foundTitle.length();
+
+            correlation = (correlation1 + correlation2) / 2;
+            if(correlation > highestCorrelation) {
+                highestCorrelation = correlation;
+                urlToReturn =  FILMWEB.concat(foundUrl);
+                chosenTitle = foundTitle;
+            }
+            // if two movies has the same title but was released in different years
+            else if(correlation == highestCorrelation && Pattern.compile(".+?\\((\\d{4})\\)$").matcher(desiredTitle).find()) {
+                int desireYear = Integer.parseInt(Pattern.compile(".+?\\((\\d{4})\\)$").matcher(desiredTitle).group(1));
+                int currentTitleYear = getMovieYearFromUrl.apply(urlToReturn);
+                if(currentTitleYear == desireYear) {
+                    continue;
+                }
+                int pretendedTitleYear = getMovieYearFromUrl.apply(FILMWEB.concat(foundUrl));
+                if(pretendedTitleYear == desireYear) {
+                    urlToReturn =  FILMWEB.concat(foundUrl);
+                    chosenTitle = foundTitle;
+                }
+            }
+//            System.out.println("Correlation of \"" + foundTitle + "\" : " + Math.round(correlation*100) + "%");
+        }
+        if(Math.round(highestCorrelation*100) > 50) {
+            logger.info("For query \"{}\" there was found \"{}\" with correlation: {}%", desiredTitle, chosenTitle, Math.round(highestCorrelation*100));
+        } else {
+            logger.warn("For query \"{}\" there was found \"{}\" with low correlation: {}%. Possibility of wrong movie assigning", desiredTitle, chosenTitle, Math.round(highestCorrelation*100));
+        }
+        return urlToReturn;
+    }
+
+    private static int countChar(@NotNull String string, char character) {
+        int hitNumber = 0;
+        for(Character chara : string.toCharArray()) {
+            if(chara == character) {
+                hitNumber++;
+            }
+        }
+        return hitNumber;
+    }
 
 
 
@@ -306,6 +427,7 @@ public class Connection {
         str = str.replaceAll("&ndash; ", "- ");
         str = str.replaceAll("%C5%84", "ń");
         str = str.replaceAll("u0142", "ł");
+        str = str.replaceAll("&oslash;", "ø");
         return str;
     }
 }
