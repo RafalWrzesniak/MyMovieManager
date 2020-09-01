@@ -167,6 +167,9 @@ public final class Actor implements ContentType<Actor> {
         if(string == null || string.isEmpty()) {
             throw new IllegalArgumentException("Birthday argument cannot be null or empty!");
         } else if(string.equals("-")) return null;
+        if(string.matches("^\\d{4}$")) {
+            return LocalDate.of(Integer.parseInt(string), 1, 1);
+        }
         return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
     }
 

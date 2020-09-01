@@ -89,7 +89,7 @@ public class ContentList<T extends ContentType<T>> {
 
     public List<T> find(String strToFind) {
         List<T> results = new ArrayList<>();
-        if (strToFind == null || strToFind.isEmpty() || list.size() == 0) return null;
+        if (strToFind == null || strToFind.isEmpty()) return null;
         for(T obj : list) {
             if(obj.searchFor(strToFind)) {
                 results.add(obj);
