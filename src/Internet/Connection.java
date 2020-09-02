@@ -296,6 +296,7 @@ public class Connection {
         List<Actor> directors = createActorsFromFilmwebLinks(directorUrls, allActors);
         movie.addDirectors(directors);
 
+        changeMovieUrlToCastCrew();
         List<String> writerUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.WRITERS));
         List<Actor> writers = createActorsFromFilmwebLinks(writerUrls, allActors);
         movie.addWriters(writers);
