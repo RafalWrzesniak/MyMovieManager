@@ -13,11 +13,23 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
+/**
+ * Fully static and final class with private constructor to manage some I/O operations
+ */
 public final class IO {
 
     private static final Logger logger = LoggerFactory.getLogger(IO.class.getName());
+    /**
+     * Path for files that are needed only for some time
+     */
     public static final String TMP_FILES = System.getProperty("user.dir").concat("\\tmp");
+    /**
+     * Path of downloaded images
+     */
     public static final String SAVED_IMAGES = System.getProperty("user.dir").concat("\\savedImages");
+    /**
+     * File to be used when there is no available image of something on the web
+     */
     public static final String NO_IMAGE = "resources\\iHaveNoImage.jpg";
 
     static {
@@ -31,37 +43,72 @@ public final class IO {
 
     private IO() {}
 
+    /** Lists directory to ArrayList
+     * @param directory
+     * File to list
+     * @return
+     * Arraylist of files in directory
+     */
     public static List<File> listDirectory(File directory) {
         try {
-            return Arrays.asList(Objects.requireNonNull(directory.listFiles()));
+            List<File> files = new ArrayList<>(Arrays.asList(directory.listFiles()));
+            files.remove(new File(directory + "\\00DONE"));
+            files.remove(new File(directory + "\\Thumbs.db"));
+            files.removeIf(file -> file.getName().matches("^.+\\.ini$"));
+            return files;
         } catch (NullPointerException ignore) {
             logger.warn("Directory \"{}\" does not exist", directory);
             return new ArrayList<>();
         }
     }
 
+    /**
+     * Creates list of files in directory and removes file extensions if present - see {@link #removeFileExtension}
+     * @param directory
+     * Directory to list
+     * @return
+     * List of directories and files without extensions
+     * @see IO#removeFileExtension
+     */
     public static List<String> getFileNamesInDirectory(File directory) {
         List<File> files = listDirectory(directory);
         List<String> fileNames = new ArrayList<>();
         for(File file : files) {
-            String formattedName = removeFileExtension(file.getName());
+            String formattedName;
+            if(!file.isDirectory() || file.getName().equals("00DONE")) {
+                formattedName = removeFileExtension(file.getName());
+            } else {
+                formattedName = file.getName();
+            }
             if(formattedName != null) {
                 fileNames.add(formattedName);
             }
         }
-//        logger.debug("Found {} properly decoded files in \"{}\"", fileNames.size(), directory);
         return fileNames;
     }
 
 
+    /** Removes regular extension from file
+     * @param fileName
+     * Name of file to remove its extension
+     * @return
+     * null if fileName is null .
+     * File name without extension - substring from the beginning to the last found '.'
+     */
     public static String removeFileExtension(String fileName) {
-        if(fileName.matches("^.+\\.ini$") || fileName.equals("Thumbs.db")) return null;
+        if(fileName == null) return null;
         if(fileName.contains(".")) {
             return fileName.substring(0, fileName.lastIndexOf('.'));
         }
         return fileName;
     }
 
+    /** Removes directory and all its subdirectories
+     * @param directoryToBeDeleted
+     * Directory that has to been removed
+     * @return
+     * true if everything was deleted, false in other case
+     */
     public static boolean deleteDirectoryRecursively(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {
@@ -72,6 +119,16 @@ public final class IO {
         return directoryToBeDeleted.delete();
     }
 
+    /** Creates folder in path that is connected with object type. Path is taken from {@link XMLOperator}
+     * @param content
+     * Object of type {@link E}
+     * @param <E>
+     *     Object implementing {@link ContentType} interface - {@link Actor} or {@link Movie}
+     *
+     * @return
+     * Empty {@link File} (directory). {@link XMLOperator#getSavePathActor()} or {@link XMLOperator#getSavePathMovie()} ()}
+     * and then \\actor or \\movie and in the end content id. For example: C:\ProjectPath\savedData\actor42
+     */
     public static <E extends ContentType<E>> File createContentDirectory(E content) {
         File outDir;
         if (content instanceof Actor) {
@@ -88,6 +145,13 @@ public final class IO {
         return outDir;
     }
 
+    /** Extracts XML file from directory
+     * @param inputDir
+     * Directory from which it is needed to get only XML file
+     * @return
+     * null if inputDir is null or empty or is not a directory or in the directory there is no XML file.
+     * First file with '.xml' extension when found
+     */
     public static File getXmlFileFromDir(File inputDir) {
         if(inputDir == null || !inputDir.isDirectory()) {
             logger.warn("Couldn't create content from directory \"{}\" - no such directory or is not a directory", inputDir);
@@ -107,6 +171,16 @@ public final class IO {
         return null;
     }
 
+    /** Method is trying to find line in file that contains desired string
+     * @param file
+     * File to search in
+     * @param textToFind
+     * String that is being looked for
+     * @return
+     * Line containing desired string or null if not found
+     * @throws IOException
+     * if file does not exist
+     */
     public static String findInFile(File file, String textToFind) throws IOException {
         FileReader fileIn = new FileReader(file);
         BufferedReader reader = new BufferedReader(fileIn);
@@ -120,7 +194,13 @@ public final class IO {
     }
 
 
-
+    /** Method created a .png file with basic information about movie. It uses {@link Movie#getDataForSummary()} to get
+     * all need movie data. It will be saved in pathName\pathName.{@link File#getName()}.png
+     * @param movie
+     * Movie to create its summary image
+     * @param pathName
+     * Path of directory that contains movie file
+     */
     public static void createSummaryImage(Movie movie, File pathName) {
         if(!pathName.isDirectory()) {
             logger.warn("Failed to save summaryImage of movie \"{}\" - no such directory \"{}\"", movie, pathName);
@@ -129,10 +209,6 @@ public final class IO {
             logger.warn("Failed to save summaryImage - movie is null");
             return;
         }
-        List<String> keys = Arrays.asList(
-                "Tytuł: ", "Długość: ", "Premiera: ", "Gatunek: ",
-                "Produkcja: ", "Reżyseria: ", "Obsada: ", "Opis: ");
-        List<String> movieValues = new ArrayList<>(movie.getDataForSummary());
 
         Font font = new Font("Helvetica", Font.PLAIN, 14);
         BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
@@ -157,6 +233,10 @@ public final class IO {
         g2d.setColor(new Color(43, 43, 43));
         g2d.fillRect(0, 0, width, height);
 
+        List<String> keys = Arrays.asList(
+                "Tytuł: ", "Długość: ", "Premiera: ", "Gatunek: ",
+                "Produkcja: ", "Reżyseria: ", "Obsada: ", "Opis: ");
+        List<String> movieValues = new ArrayList<>(movie.getDataForSummary());
         for(int i = 0; i < keys.size(); i++) {
             g2d.setFont(font);
             g2d.setColor(new Color(70, 150, 200));
