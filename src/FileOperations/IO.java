@@ -215,7 +215,7 @@ public final class IO {
         Graphics2D g2d = bufferedImage.createGraphics();
         g2d.setFont(font);
         FontMetrics fm = g2d.getFontMetrics();
-        int maxDescLen = 125;
+        int maxDescLen = 120;
         int width = 850;
         int movieDescLen;
         if(movie.getDescription() != null) {
@@ -246,7 +246,8 @@ public final class IO {
             g2d.setFont(font);
 
             if(i != keys.size()-1) {
-                g2d.drawString(movieValues.get(i), 10 + fm.stringWidth(keys.get(i)), (fm.getAscent() + 10)*(i+1));
+//                g2d.drawString(movieValues.get(i), 10 + fm.stringWidth(keys.get(i)), (fm.getAscent() + 10)*(i+1));
+                g2d.drawString(movieValues.get(i), 10 + 70, (fm.getAscent() + 10)*(i+1));
             } else { // description positioning
                 if(movieDescLen < maxDescLen) {
                     g2d.drawString(movieValues.get(i), 10, (fm.getAscent() + 10)*(i+2));

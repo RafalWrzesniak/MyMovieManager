@@ -24,12 +24,9 @@ public interface ContentType<T> extends Comparable<T> {
 
         Pattern correctCharPattern;
         Pattern incorrectCharPattern;
-        if(argName.equals(Movie.DESCRIPTION)) {
-            correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'.,: ]+");
-            incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'.,: ]");
-        } else if(argName.equals(Movie.IMAGE_PATH) || argName.equals(FILMWEB)){
-            correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'.+/_:%\\\\ ]+");
-            incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'_+/.:%\\\\ ]");
+        if(argName.equals(Movie.DESCRIPTION) || argName.equals(Movie.IMAGE_PATH) || argName.equals(FILMWEB)) {
+            correctCharPattern = Pattern.compile("^(?U)[\\w\\W]+");
+            incorrectCharPattern = Pattern.compile("(?U)[\\w\\W]");
         } else {
             correctCharPattern = Pattern.compile("^(?U)[\\p{Alpha}\\d\\-'.: ]+");
             incorrectCharPattern = Pattern.compile("(?U)[^\\p{Alpha}\\d\\-'.: ]");

@@ -356,7 +356,7 @@ public final class Movie implements ContentType<Movie> {
     }
 
     public String getPremiereFormatted() {
-        return premiere.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        return premiere.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
 
     public String getImagePath() {
