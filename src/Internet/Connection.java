@@ -136,7 +136,16 @@ public class Connection {
         if(matcher.find()) {
             return replaceAcutesHTML(matcher.group(2));
         } else {
-            logger.warn("Couldn't extract \"{}\" from \"{}\"", itemToExtract, websiteUrl);
+            try {
+                String newLine = grepLineFromWebsite(itemToExtract);
+                if(newLine != null && !newLine.equals(line)) {
+                    return extractItemFromFilmwebLine(itemToExtract, newLine);
+                } else {
+                    logger.warn("Couldn't extract \"{}\" from \"{}\"", itemToExtract, websiteUrl);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }
@@ -153,7 +162,16 @@ public class Connection {
                 listOfItems.add(replaceAcutesHTML(matcher.group(1)));
         }
         if(listOfItems.size() == 0) {
-            logger.warn("Couldn't find any list item \"{}\" on \"{}\"", itemToExtract, websiteUrl);
+            try {
+                String newLine = grepLineFromWebsite(itemToExtract);
+                if(newLine != null && !newLine.equals(line)) {
+                    return extractListOfItemsFromFilmwebLine(itemToExtract, newLine);
+                } else {
+                    logger.warn("Couldn't find any list item \"{}\" on \"{}\"", itemToExtract, websiteUrl);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return listOfItems;
     }
@@ -213,8 +231,13 @@ public class Connection {
         Map<String, String> actorData = new HashMap<>();
         String foundLine = grepLineFromWebsite(ACTOR_LINE_KEY);
 
-        String fullName = Objects.requireNonNull(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine)).replaceAll(" [iIvVxX]+", "");
-        String birthday = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.BIRTHDAY), foundLine));
+        String fullName = Objects.requireNonNull(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine)).replaceAll(" [iIvVxX]+", "").replaceAll(" (Jr\\.)|(Sr\\.)", "");
+        if(!fullName.contains(" ")) {
+            fullName = Objects.requireNonNull(extractItemFromFilmwebLine("additionalName", foundLine)).replaceAll(" [iIvVxX]+", "").replaceAll(" (Jr\\.)|(Sr\\.)", "");
+            if(!fullName.contains(" ")) return null;
+        }
+        String birthday = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.BIRTHDAY), foundLine);
+        if(birthday == null) return null;
         String[] birthPlace = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NATIONALITY), foundLine)).replaceAll("\\(.+?\\)", "").split(", ");
         String imageUrl = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_PATH), foundLine));
         String deathDay = extractDeathDateFromFilmwebLine(foundLine);
@@ -245,6 +268,9 @@ public class Connection {
             movieData.put(pair.getKey(), extractListOfItemsFromFilmwebLine(pair.getValue(), foundLine));
         }
         if(movieData.get(Movie.TITLE_ORG).get(0) == null) movieData.replace(Movie.TITLE_ORG, movieData.get(Movie.TITLE));
+        if(movieData.get(Movie.PREMIERE).get(0) == null) {
+            movieData.replace(Movie.PREMIERE, Collections.singletonList(extractItemFromFilmwebLine("releaseWorldString", foundLine)));
+        }
         movieData.put(Movie.FILMWEB, Collections.singletonList(mainMoviePage.toString()));
 
         logger.info("Data properly grabbed from \"{}\"", websiteUrl);
@@ -285,6 +311,7 @@ public class Connection {
 
     public Movie createMovieFromFilmwebLink(ContentList<Actor> allActors) throws IOException {
         Movie movie = new Movie(grabBasicMovieDataFromFilmwebAndCreateMovieMap());
+        if(movie.getPremiere() == null) return null;
 
         changeMovieUrlToCastActors();
         List<String> castUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST));
@@ -429,6 +456,7 @@ public class Connection {
         str = str.replaceAll("%C5%84", "ń");
         str = str.replaceAll("u0142", "ł");
         str = str.replaceAll("&oslash;", "ø");
+        str = str.replaceAll("&euml;", "ë");
         return str;
     }
 }
