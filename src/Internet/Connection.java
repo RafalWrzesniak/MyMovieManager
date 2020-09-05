@@ -80,10 +80,13 @@ public class Connection {
     }
 
 
-    public static void downloadImage(String imageUrl, String fileName) throws IOException {
+    public static boolean downloadImage(String imageUrl, String fileName) {
         try (InputStream inputStream = new URL(imageUrl).openStream()) {
             Files.copy(inputStream, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            return false;
         }
+        return true;
     }
 
     public void changeUrlTo(String newUrl) throws IOException {
@@ -294,24 +297,23 @@ public class Connection {
             return actorList;
         }
         for(String actorUrl : actorUrls) {
-            if(allActors.find(actorUrl).size() == 0) {
-                try {
-                    changeUrlTo(actorUrl);
-                    Actor actor = createActorFromFilmwebLink();
-                    actorList.add(actor);
-                    allActors.add(actor);
-                } catch (IOException | NullPointerException e) {
-                    logger.warn("Can't get data from \"{}\"", actorUrl);
-                }
-            } else actorList.add(allActors.find(actorUrl).get(0));
-
+                if(allActors.find(actorUrl).size() == 0) {
+                    try {
+                        changeUrlTo(actorUrl);
+                        Actor actor = createActorFromFilmwebLink();
+                        actorList.add(actor);
+                        allActors.add(actor);
+                    } catch (IOException | NullPointerException e) {
+                        logger.warn("Can't get data from \"{}\"", actorUrl);
+                    }
+                } else actorList.add(allActors.find(actorUrl).get(0));
         }
         return actorList;
     }
 
-    public Movie createMovieFromFilmwebLink(ContentList<Actor> allActors) throws IOException {
+    public Movie createMovieFromFilmwebLink(ContentList<Actor> allActors) throws IOException, NullPointerException {
         Movie movie = new Movie(grabBasicMovieDataFromFilmwebAndCreateMovieMap());
-        if(movie.getPremiere() == null) return null;
+        if(movie.getPremiere() == null) throw new NullPointerException("Couldn't find proper data of " + movie.getTitle());
 
         changeMovieUrlToCastActors();
         List<String> castUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST));

@@ -104,17 +104,12 @@ public final class Movie implements ContentType<Movie> {
         }
 
         try {
-            if(Movie.class.getDeclaredField(field).get(this) == null) {
-                if (Movie.class.getDeclaredField(field).toString().contains("java.time.LocalDate")) {
-                    Movie.class.getDeclaredField(field).set(this, convertStrToLocalDate(String.valueOf(value)));
-                } else {
-                    Movie.class.getDeclaredField(field).set(this, ContentType.checkForNullOrEmptyOrIllegalChar(String.valueOf(value), field));
-                }
-//                logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
-                saveMe();
+            if (Movie.class.getDeclaredField(field).toString().contains("java.time.LocalDate")) {
+                Movie.class.getDeclaredField(field).set(this, convertStrToLocalDate(String.valueOf(value)));
             } else {
-                logger.warn("Unsuccessful set of \"{}\" in movie \"{}\" - this field is already set to \"{}\"", field, this.toString(), Movie.class.getDeclaredField(field).get(this));
+                Movie.class.getDeclaredField(field).set(this, ContentType.checkForNullOrEmptyOrIllegalChar(String.valueOf(value), field));
             }
+            saveMe();
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -355,10 +350,6 @@ public final class Movie implements ContentType<Movie> {
         return premiere;
     }
 
-    public String getPremiereFormatted() {
-        return premiere.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-    }
-
     public String getImagePath() {
         return imagePath;
     }
@@ -402,14 +393,14 @@ public final class Movie implements ContentType<Movie> {
         Function<String, String> removeBrackets = string -> string.substring(1, string.length()-1);
 
         List<String> movieValues = new ArrayList<>();
-        movieValues.add(this.getTitle());
+        movieValues.add(title);
         movieValues.add(this.getLengthFormatted());
-        movieValues.add(this.getPremiereFormatted());
-        movieValues.add(removeBrackets.apply(this.getGenres().toString()));
-        movieValues.add(removeBrackets.apply(this.getProduction().toString()));
-        movieValues.add(removeBrackets.apply(this.getTop3Names(this.getDirectors()).toString()));
-        movieValues.add(removeBrackets.apply(this.getTop3Names(this.getCast()).toString()));
-        movieValues.add(this.getDescription());
+        movieValues.add(premiere.toString());
+        movieValues.add(removeBrackets.apply(genres.toString()));
+        movieValues.add(removeBrackets.apply(production.toString()));
+        movieValues.add(removeBrackets.apply(this.getTop3Names(directors).toString()));
+        movieValues.add(removeBrackets.apply(this.getTop3Names(cast).toString()));
+        movieValues.add(description);
         movieValues.replaceAll(str -> {
             if(str == null) {
                 return "";
@@ -529,7 +520,7 @@ public final class Movie implements ContentType<Movie> {
     public void printPretty() {
         System.out.println("Title      : " + title);
         System.out.println("TitleOrg   : " + titleOrg);
-        System.out.println("Premiere   : " + getPremiereFormatted());
+        System.out.println("Premiere   : " + premiere);
         System.out.println("Duration   : " + getLengthFormatted());
         System.out.println("Directors  : " + directors);
         System.out.println("Writers    : " + writers);

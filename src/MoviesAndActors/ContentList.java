@@ -37,7 +37,7 @@ public class ContentList<T extends ContentType<T>> {
         return list.get(index);
     }
 
-    public void add(T obj) {
+    public synchronized void add(T obj) {
         if(obj == null) {
             logger.warn("Null object will not be added to the list \"{}\"!", getListName());
         } else if(this.contains(obj)) {

@@ -130,14 +130,11 @@ public final class IO {
      * and then \\actor or \\movie and in the end content id. For example: C:\ProjectPath\savedData\actor42
      */
     public static <E extends ContentType<E>> File createContentDirectory(E content) {
-        File outDir;
+        File outDir = null;
         if (content instanceof Actor) {
             outDir = new File(XMLOperator.getSavePathActor() + "\\actor" + content.getId());
         } else if(content instanceof Movie) {
             outDir = new File(XMLOperator.getSavePathMovie() + "\\movie" + content.getId());
-        } else {
-            logger.warn("Wrong input argument - \"{}\". Directory didn't created", content);
-            return null;
         }
         if (outDir.mkdir()) {
             logger.info("New directory \"{}\" created", outDir);
