@@ -296,6 +296,27 @@ public final class Actor implements ContentType<Actor> {
         }
     }
 
+
+    public void setName(String name) {
+        this.name = ContentType.checkForNullOrEmptyOrIllegalChar(name, Actor.NAME);
+    }
+
+    public void setSurname(String surname) {
+        this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(surname, Actor.SURNAME);
+    }
+
+    public void setNationality(String nationality) {
+        this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar(nationality, Actor.NATIONALITY);
+    }
+
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = ContentType.checkForNullOrEmptyOrIllegalChar(imagePath, Actor.IMAGE_PATH);
+    }
+
     public void printPretty() {
         System.out.println("ID          : " + id);
         System.out.println("FullName    : " + name + " " + surname);

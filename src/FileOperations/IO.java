@@ -24,16 +24,11 @@ public final class IO {
      */
     public static final String TMP_FILES = System.getProperty("user.dir").concat("\\tmp");
     /**
-     * Path of downloaded images
-     */
-    public static final String SAVED_IMAGES = System.getProperty("user.dir").concat("\\savedImages");
-    /**
      * File to be used when there is no available image of something on the web
      */
     public static final String NO_IMAGE = "resources\\iHaveNoImage.jpg";
 
     static {
-        new File(SAVED_IMAGES).mkdir();
         File tmpFiles = new File(TMP_FILES);
         if(!tmpFiles.mkdir()) {
             IO.deleteDirectoryRecursively(tmpFiles);

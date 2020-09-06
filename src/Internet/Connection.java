@@ -68,6 +68,9 @@ public class Connection {
         changeUrlTo(getMostSimilarTitleUrlFromQuery(desiredTitle));
     }
 
+    public Connection(URL websiteUrl) throws IOException {
+        changeUrlTo(websiteUrl.toString());
+    }
 
     public File downloadWebsite() throws IOException {
         String tmpFileName = "\\tmp_".concat(websiteUrl.getHost().replaceAll("(^.{3}\\.)|(\\..+)", ""))
@@ -293,7 +296,7 @@ public class Connection {
     public List<Actor> createActorsFromFilmwebLinks(List<String> actorUrls, ContentList<Actor> allActors) {
         List<Actor> actorList = new ArrayList<>();
         if(actorUrls == null || actorUrls.size() == 0 || allActors == null) {
-             logger.warn("Null or empty argument");
+             logger.warn("Null or empty argument passed to createActorsFromFilmwebLinks");
             return actorList;
         }
         for(String actorUrl : actorUrls) {
@@ -301,6 +304,11 @@ public class Connection {
                     try {
                         changeUrlTo(actorUrl);
                         Actor actor = createActorFromFilmwebLink();
+                        File actorDir = IO.createContentDirectory(actor);
+                        String downloadedImagePath = actorDir.toString().concat("\\").concat(actor.getReprName().concat(".jpg"));
+                        if( Connection.downloadImage(actor.getImagePath(), downloadedImagePath) ) {
+                            actor.setImagePath(downloadedImagePath);
+                        }
                         actorList.add(actor);
                         allActors.add(actor);
                     } catch (IOException | NullPointerException e) {
