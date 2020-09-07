@@ -21,6 +21,7 @@ public class DownloadAndProcessMovies extends Thread {
             this.movieFileList = movieFileList;
             this.allMovies = allMovies;
             this.allActors = allActors;
+            setName("DownloadAndProcess");
         }
 
         @Override

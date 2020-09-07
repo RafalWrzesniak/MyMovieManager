@@ -32,8 +32,6 @@ public final class XMLOperator {
     private static String SAVE_PATH_MOVIE;
     private static String SAVE_PATH_ACTOR;
     private static final Logger logger = LoggerFactory.getLogger(XMLOperator.class.getName());
-    public static final List<ContentType> NEW_OBJECTS = new ArrayList<>();
-    public static boolean AUTOSAVE = false;
 
     private XMLOperator() {}
 
@@ -61,23 +59,7 @@ public final class XMLOperator {
         }
         boolean made2 = new File(SAVE_PATH).mkdirs();
         updateRelativePaths();
-        Thread autosave = new Thread(() -> {
-            while(AUTOSAVE) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
-                if (NEW_OBJECTS.size() > 0) {
-                    System.out.println("Saving objects: " + XMLOperator.NEW_OBJECTS);
-                    for (int i = 0; i < NEW_OBJECTS.size(); i++) {
-                        saveContentToXML(NEW_OBJECTS.get(i));
-                    }
-                }
-            }
-        });
-        autosave.start();
     }
 
     private static void updateRelativePaths() {
@@ -137,19 +119,14 @@ public final class XMLOperator {
     }
 
     public static <E extends ContentType<E>> void saveContentToXML(E content) {
-        if(!XMLOperator.NEW_OBJECTS.contains(content)) return;
+        if(!AutoSave.NEW_OBJECTS.contains(content)) return;
         Document doc = createDoc();
         assert doc != null;
         createXmlStructure(content, doc);
         File contentDir = IO.createContentDirectory(content);
-        if(contentDir == null) {
-            logger.warn("Directory for \"{}\" doesn't exist, could't create XML", content.toString());
-            return;
-        }
         File targetFile = new File(contentDir.toString().concat("\\").concat(content.getReprName()).concat(".xml"));
         makeSimpleSave(doc, targetFile);
         logger.debug("Content \"{}\" properly saved in \"{}\"", content.toString(), targetFile);
-        NEW_OBJECTS.remove(content);
     }
 
     private static Document createDoc() {
@@ -247,7 +224,7 @@ public final class XMLOperator {
         }
         logger.info("New actor created successfully from file \"{}\"", inputFile);
         Actor actor = new Actor(map);
-        XMLOperator.NEW_OBJECTS.remove(actor);
+        AutoSave.NEW_OBJECTS.remove(actor);
         return actor;
     }
 
@@ -274,10 +251,10 @@ public final class XMLOperator {
         }
         logger.info("New movie created successfully from file \"{}\"", inputFile);
         Movie movie = new Movie(map, allActors);
-        XMLOperator.NEW_OBJECTS.remove(movie);
+        AutoSave.NEW_OBJECTS.remove(movie);
         Function<List<Actor>, Boolean> removeActorsFromListToSave = list -> {
             for(Actor actor : list) {
-                XMLOperator.NEW_OBJECTS.remove(actor);
+                AutoSave.NEW_OBJECTS.remove(actor);
             }
             return true;
         };
@@ -531,6 +508,8 @@ public final class XMLOperator {
         }
     }
 
-
 }
+
+
+
 

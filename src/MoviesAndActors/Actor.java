@@ -1,5 +1,6 @@
 package MoviesAndActors;
 
+import FileOperations.AutoSave;
 import FileOperations.IO;
 import FileOperations.XMLOperator;
 import org.slf4j.Logger;
@@ -385,10 +386,14 @@ public final class Actor implements ContentType<Actor> {
 
     @Override
     public void saveMe() {
-        if(!XMLOperator.NEW_OBJECTS.contains(this)) {
-            XMLOperator.NEW_OBJECTS.add(this);
-            logger.debug("Actor \"{}\" added to the list of new objects", this);
+        synchronized (AutoSave.NEW_OBJECTS) {
+            if(!AutoSave.NEW_OBJECTS.contains(this)) {
+                AutoSave.NEW_OBJECTS.add(this);
+                AutoSave.NEW_OBJECTS.notify();
+                logger.debug("Actor \"{}\" added to the list of new objects", this);
+            }
         }
+
     }
 
 

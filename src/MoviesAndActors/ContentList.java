@@ -1,5 +1,6 @@
 package MoviesAndActors;
 
+import FileOperations.AutoSave;
 import FileOperations.XMLOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +42,10 @@ public class ContentList<T extends ContentType<T>> {
         if(obj == null) {
             logger.warn("Null object will not be added to the list \"{}\"!", getListName());
         } else if(this.contains(obj)) {
-            logger.warn("\"{}\" is already on the {} list", obj.toString(), getListName());
-            XMLOperator.NEW_OBJECTS.remove(obj);
+            synchronized (AutoSave.NEW_OBJECTS) {
+                logger.warn("\"{}\" is already on the {} list", obj.toString(), getListName());
+                AutoSave.NEW_OBJECTS.remove(obj);
+            }
         } else {
             list.add(obj);
 //            XMLOperator.saveContentToXML(obj);

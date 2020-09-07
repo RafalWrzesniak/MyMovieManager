@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 import static java.util.Map.entry;
 
-public class Connection {
+public final class Connection {
 
     private URL websiteUrl;
     private URL mainMoviePage;
@@ -209,7 +209,7 @@ public class Connection {
         Pattern pattern = Pattern.compile("dateToCalc=new Date\\((.+?)\\)");
         Matcher matcher = pattern.matcher(line);
         if (matcher.find()) {
-            String[] split = matcher.group(1).split(",");
+            String[] split = matcher.group(1).replaceAll("2E3", "2000").split(",");
             return LocalDate.of(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])).toString();
         }
         return null;
@@ -244,7 +244,7 @@ public class Connection {
         }
         String birthday = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.BIRTHDAY), foundLine);
         if(birthday == null) return null;
-        String[] birthPlace = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NATIONALITY), foundLine)).replaceAll("\\(.+?\\)", "").split(", ");
+        String[] birthPlace = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NATIONALITY), foundLine)).replaceAll(" \\(.+?\\)", "").split(", ");
         String imageUrl = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_PATH), foundLine));
         String deathDay = extractDeathDateFromFilmwebLine(foundLine);
 
@@ -467,6 +467,8 @@ public class Connection {
         str = str.replaceAll("u0142", "ł");
         str = str.replaceAll("&oslash;", "ø");
         str = str.replaceAll("&euml;", "ë");
+        str = str.replaceAll("&scaron;", "š");
+        str = str.replaceAll("&yacute;", "ý");
         return str;
     }
 }
