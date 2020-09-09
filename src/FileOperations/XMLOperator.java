@@ -341,7 +341,7 @@ public final class XMLOperator {
         return allMovieLists;
     }
 
-    private static ContentList<Actor> createDefaultActorContentList() {
+    public static ContentList<Actor> createDefaultActorContentList() {
         File inputFile = new File(SAVE_PATH_ACTOR.concat("\\").concat(ContentList.ALL_ACTORS_DEFAULT.concat(".xml")));
         Element root = createRootElementFromXml(inputFile);
         if(root == null) {
@@ -350,10 +350,37 @@ public final class XMLOperator {
         }
         NodeList nodes = root.getElementsByTagName(Actor.class.getSimpleName().toLowerCase());
         ContentList<Actor> contentList = new ContentList<>(root.getElementsByTagName("listName").item(0).getTextContent());
+        List<String> actorsIds = new ArrayList<>();
         for(int i = 0; i < nodes.getLength(); i++) {
-            String id = nodes.item(i).getTextContent();
-            contentList.add(createActorFromXml(new File(SAVE_PATH_ACTOR.concat("\\").concat("actor").concat(id))));
+            actorsIds.add(nodes.item(i).getTextContent());
         }
+        List<Thread> actorThreads = new ArrayList<>();
+        for(int i = 0; i < 6; i++) {
+            Thread createActors = new Thread(() -> {
+                while(actorsIds.size() != 0) {
+                    String id;
+                    synchronized (actorsIds) {
+                        id = actorsIds.get(0);
+                        actorsIds.remove(0);
+                    }
+                    contentList.add(createActorFromXml(new File(SAVE_PATH_ACTOR.concat("\\").concat("actor").concat(id))));
+                }
+            });
+            createActors.setName("newActor" + i);
+            actorThreads.add(createActors);
+            createActors.start();
+
+            if(i == 5) {
+                boolean iAmStillWorking = true;
+                while(iAmStillWorking) {
+                    actorThreads.removeIf(thread -> thread.getState().equals(Thread.State.TERMINATED));
+                    if(actorThreads.size() == 0) {
+                        iAmStillWorking = false;
+                    }
+                }
+            }
+        }
+
         return contentList;
     }
 
@@ -377,12 +404,43 @@ public final class XMLOperator {
             return null;
         }
         ContentList<Movie> contentList = new ContentList<>(root.getElementsByTagName("listName").item(0).getTextContent());
+        List<String> moviesIds = new ArrayList<>();
         for(int i = 0; i < nodes.getLength(); i++) {
-            String id = nodes.item(i).getTextContent();
-            contentList.add(createMovieFromXml(new File(SAVE_PATH_MOVIE.concat("\\").concat("movie").concat(id)), defaultActors));
+            moviesIds.add(nodes.item(i).getTextContent());
         }
+        List<Thread> movieThreads = new ArrayList<>();
+        for(int i = 0; i < 6; i++) {
+            ContentList<Actor> finalDefaultActors = defaultActors;
+            Thread createMovies = new Thread(() -> {
+                while(moviesIds.size() != 0) {
+                    String id;
+                    synchronized (moviesIds) {
+                        id = moviesIds.get(0);
+                        moviesIds.remove(0);
+                    }
+                    contentList.add(createMovieFromXml(new File(SAVE_PATH_MOVIE.concat("\\").concat("movie").concat(id)), finalDefaultActors));
+                }
+            });
+            createMovies.setName("newMovie" + i);
+            movieThreads.add(createMovies);
+            createMovies.start();
+
+            if(i == 5) {
+                boolean iAmStillWorking = true;
+                while(iAmStillWorking) {
+                    movieThreads.removeIf(thread -> thread.getState().equals(Thread.State.TERMINATED));
+                    if(movieThreads.size() == 0) {
+                        iAmStillWorking = false;
+                    }
+                }
+            }
+        }
+
         return contentList;
     }
+
+
+
 
     private static ContentList<Actor> createActorContentList(File inputFile, ContentList<Actor> defaultAllActors) {
         Element root = createRootElementFromXml(inputFile);
@@ -420,41 +478,9 @@ public final class XMLOperator {
         return contentList;
     }
 
-    public static void exportAll() {
-        exportAll(new File(System.getProperty("user.dir")
-                .concat("\\MyMovieManager_exported_data_")
-                .concat(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME).replaceAll("\\..*$", "").replaceAll(":", "_")
-                .concat(".xml"))));
-    }
-    public static void exportAll(File exportFile) {
-        Document doc = createDoc();
-        assert doc != null;
-        Element rootElement = doc.createElement("exported");
-        doc.appendChild(rootElement);
 
-        Function<String, Boolean> copyNodesFromPath = path -> {
-            File xml;
-            for(File dir : Objects.requireNonNull(IO.listDirectory(new File(path)))) {
-                if(dir.isDirectory()) {
-                    xml = IO.getXmlFileFromDir(dir);
-                } else if(dir.toString().endsWith(".xml")) {
-                    xml = dir;
-                } else return false;
-                Element localRoot = createRootElementFromXml(xml);
-                assert localRoot != null;
-                rootElement.appendChild(doc.createTextNode("\n"));
-                rootElement.appendChild(doc.adoptNode(localRoot.cloneNode(true)));
-            }
-            return true;
-        };
-        copyNodesFromPath.apply(SAVE_PATH_ACTOR);
-        copyNodesFromPath.apply(SAVE_PATH_MOVIE);
-        rootElement.appendChild(doc.createTextNode("\n"));
-        makeSimpleSave(doc, exportFile);
-        logger.info("All data successfully exported to file \"{}\"", exportFile);
-    }
 
-    public static void importALl(File importFile) {
+    public static void convertImportFileToDirs(File importFile) {
         Element rootElement = createRootElementFromXml(importFile);
         if(rootElement == null || !rootElement.getTagName().equals("exported")) {
             logger.warn("Failed to import file \"{}\" - wrong XML", importFile);
@@ -508,7 +534,66 @@ public final class XMLOperator {
         }
     }
 
+
+    public static class ExportAll extends Thread {
+
+        private File exportFile;
+
+        public ExportAll(File exportFile) {
+            this.exportFile = exportFile;
+        }
+
+        public ExportAll() {
+        }
+
+        @Override
+        public void run() {
+            setName("Export");
+            if(exportFile != null) {
+                exportAll(exportFile);
+            } else {
+                exportAll(new File(System.getProperty("user.dir")
+                        .concat("\\MyMovieManager_exported_data_")
+                        .concat(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+                                .replaceAll("\\..*$", "")
+                                .replaceAll(":", "_")
+                                .concat(".xml"))));
+            }
+        }
+
+
+        private static void exportAll(File exportFile) {
+            Document doc = createDoc();
+            assert doc != null;
+            Element rootElement = doc.createElement("exported");
+            doc.appendChild(rootElement);
+
+            Function<String, Boolean> copyNodesFromPath = path -> {
+                File xml;
+                for(File dir : Objects.requireNonNull(IO.listDirectory(new File(path)))) {
+                    if(dir.isDirectory()) {
+                        xml = IO.getXmlFileFromDir(dir);
+                    } else if(dir.toString().endsWith(".xml")) {
+                        xml = dir;
+                    } else return false;
+                    Element localRoot = createRootElementFromXml(xml);
+                    assert localRoot != null;
+                    rootElement.appendChild(doc.createTextNode("\n"));
+                    rootElement.appendChild(doc.adoptNode(localRoot.cloneNode(true)));
+                }
+                return true;
+            };
+            copyNodesFromPath.apply(SAVE_PATH_ACTOR);
+            copyNodesFromPath.apply(SAVE_PATH_MOVIE);
+            rootElement.appendChild(doc.createTextNode("\n"));
+            makeSimpleSave(doc, exportFile);
+            logger.info("All data successfully exported to file \"{}\"", exportFile);
+        }
+
+    }
 }
+
+
 
 
 
