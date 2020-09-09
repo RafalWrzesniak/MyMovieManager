@@ -87,8 +87,10 @@ public final class Connection {
         try (InputStream inputStream = new URL(imageUrl).openStream()) {
             Files.copy(inputStream, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
+            logger.warn("Failed to download image from \"{}\"", imageUrl);
             return false;
         }
+        logger.debug("Image downloaded from \"{}\"", imageUrl);
         return true;
     }
 

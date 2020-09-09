@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-public class DownloadAndProcessMovies extends Thread {
+public final class DownloadAndProcessMovies extends Thread {
 
         private final List<File> movieFileList;
         private final ContentList<Actor> allActors;

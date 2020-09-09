@@ -12,12 +12,11 @@ public final class AutoSave extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(AutoSave.class.getName());
     public static final List<ContentType> NEW_OBJECTS = new ArrayList<>();
 
-    {
-        setName("AutoSave");
-    }
 
     @Override
     public void run() {
+        setName("AutoSave");
+        logger.info("AutoSave thread started");
         boolean run = true;
         while (run) {
             synchronized (NEW_OBJECTS) {
