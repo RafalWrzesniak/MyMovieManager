@@ -84,7 +84,7 @@ public final class Actor implements ContentType<Actor> {
         }
         logger.info("New actor created: {}", this.toString());
         saveMe();
-//        IO.createContentDirectory(this);
+        IO.createContentDirectory(this);
     }
 
 
@@ -170,6 +170,8 @@ public final class Actor implements ContentType<Actor> {
         } else if(string.equals("-")) return null;
         if(string.matches("^\\d{4}$")) {
             return LocalDate.of(Integer.parseInt(string), 1, 1);
+        } else if(string.matches("^\\d{4}-\\d{2}$")) {
+            return LocalDate.of(Integer.parseInt(string.substring(0, 4)), Integer.parseInt(string.substring(5)), 1);
         }
         return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
     }

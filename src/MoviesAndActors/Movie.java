@@ -83,7 +83,7 @@ public final class Movie implements ContentType<Movie> {
             classMovieId++;
         }
         logger.info("New movie \"{}\" created", this.toString());
-//        IO.createContentDirectory(this);
+        IO.createContentDirectory(this);
         iAmFromConstructor = false;
         saveMe();
     }
@@ -539,10 +539,10 @@ public final class Movie implements ContentType<Movie> {
         if(movie == null) {
             throw new IllegalArgumentException("Cannot compare to null!");
         }
-        if(rate != 0 && movie.getRate() != 0) {
-            return (int) (this.getRate() - movie.getRate()) * 100;
-        }
-        return title.compareToIgnoreCase(movie.getTitle());
+//        if(rate != 0 && movie.getRate() != 0) {
+//            return (int) (this.getRate() - movie.getRate()) * 100;
+//        }
+        return title.concat(premiere.toString()).compareToIgnoreCase(movie.getTitle().concat(movie.premiere.toString()));
     }
 
     @Override

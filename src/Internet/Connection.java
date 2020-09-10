@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLException;
 import java.io.*;
 import java.net.*;
 import java.nio.channels.Channels;
@@ -122,7 +123,12 @@ public final class Connection {
         URLConnection con;
         BufferedReader bufferedReader;
         con = websiteUrl.openConnection();
-        InputStream inputStream = con.getInputStream();
+        InputStream inputStream;
+        try {
+            inputStream = con.getInputStream();
+        } catch (SSLException e) {
+            return null;
+        }
         bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         while ((line = bufferedReader.readLine()) != null) {

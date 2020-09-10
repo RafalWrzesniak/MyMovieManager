@@ -124,7 +124,11 @@ public final class XMLOperator {
         assert doc != null;
         createXmlStructure(content, doc);
         File contentDir = IO.createContentDirectory(content);
-        File targetFile = new File(contentDir.toString().concat("\\").concat(content.getReprName()).concat(".xml"));
+        File targetFile = new File(
+                contentDir.toString()
+                .concat("\\")
+                .concat(content.getReprName().replaceAll("[]\\[*./:;|,\"]", ""))
+                .concat(".xml"));
         makeSimpleSave(doc, targetFile);
         logger.debug("Content \"{}\" properly saved in \"{}\"", content.toString(), targetFile);
     }
