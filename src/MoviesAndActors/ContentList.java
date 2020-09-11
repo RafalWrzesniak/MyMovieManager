@@ -39,6 +39,14 @@ public class ContentList<T extends ContentType<T>> {
     }
 
     public synchronized void add(T obj) {
+        addFromXml(obj);
+        if(list.size() == 1) {
+            XMLOperator.createListFile(this);
+        }
+        XMLOperator.updateSavedContentListWith(this, obj);
+    }
+
+    public synchronized void addFromXml(T obj) {
         if(obj == null) {
             logger.warn("Null object will not be added to the list \"{}\"!", getListName());
             return;
@@ -50,12 +58,7 @@ public class ContentList<T extends ContentType<T>> {
                 return;
             }
         }
-
         list.add(obj);
-        if(list.size() == 1) {
-            XMLOperator.createListFile(this);
-        }
-        XMLOperator.updateSavedContentListWith(this, obj);
         logger.debug("\"{}\" added to \"{}\"", obj.toString(), getListName());
     }
 

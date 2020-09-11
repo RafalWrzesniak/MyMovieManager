@@ -78,7 +78,7 @@ public final class Movie implements ContentType<Movie> {
         for(String field : fieldMap.keySet()) {
             setFieldWithList(field, fieldMap.get(field));
         }
-        if(id == 0) {
+        if(id == -1) {
             id = classMovieId;
             classMovieId++;
         }
@@ -176,18 +176,14 @@ public final class Movie implements ContentType<Movie> {
             } else if(value instanceof String) {
                 @SuppressWarnings("unchecked")
                 List<String> list = (List<String>) Movie.class.getDeclaredField(field).get(this);
-                if(!list.contains(value)) {
-                    list.add((String) value);
-                    Movie.class.getDeclaredField(field).set(this, list);
-                } else {
+                String fieldName = Movie.class.getDeclaredField(field).getName();
+                if (list.contains(value)) {
                     logger.warn("Unsuccessful set of \"{}\" in \"{}\". \"{}\" is already on the list", field, this, value);
                     return;
-                }
-            } else {
-                logger.warn("Unsuccessful set of \"{}\" in \"{}\". \"{}\" is wrong type.", field, this, value);
-                return;
+                } else if(fieldName.equals("cast") || fieldName.equals("directors") || fieldName.equals("writers")) return;
+                list.add((String) value);
+                Movie.class.getDeclaredField(field).set(this, list);
             }
-//            logger.debug("Field \"{}\" of \"{}\" extended by \"{}\"",  field, this.toString(), value);
             saveMe();
         } catch (IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();

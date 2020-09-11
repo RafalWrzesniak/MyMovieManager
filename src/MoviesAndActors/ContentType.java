@@ -22,6 +22,9 @@ public interface ContentType<T> extends Comparable<T> {
             throw new IllegalArgumentException(String.format("%s argument cannot be empty!", argName));
         }
 
+        if(stringToCheck.matches(".*?(&.+;).*?")) {
+            throw new IllegalArgumentException(String.format("%s argument \"%s\" contains some not formatted signs", argName, stringToCheck));
+        }
         Pattern correctCharPattern;
         Pattern incorrectCharPattern;
         correctCharPattern = Pattern.compile("^(?U)[\\w\\W]+");
