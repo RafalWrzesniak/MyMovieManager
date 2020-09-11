@@ -95,6 +95,20 @@ public final class Connection {
         return true;
     }
 
+    public String getImageUrl(boolean movie) throws IOException {
+        String foundLine;
+        if(movie) {
+            foundLine = grepLineFromWebsite(MOVIE_LINE_KEY);
+            if(!foundLine.contains(MOVIE_LINE_KEY2)){
+                foundLine = foundLine.concat(grepLineFromWebsite(MOVIE_LINE_KEY2));
+            }
+            return extractItemFromFilmwebLine(MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Movie.IMAGE_PATH), foundLine);
+        } else {
+            foundLine = grepLineFromWebsite(ACTOR_LINE_KEY);
+            return extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_PATH), foundLine);
+        }
+    }
+
     public void changeUrlTo(String newUrl) throws IOException {
         if(newUrl == null) {
             logger.warn("Null as input - cannot change URL to null");
@@ -286,6 +300,7 @@ public final class Connection {
             movieData.replace(Movie.PREMIERE, Collections.singletonList(extractItemFromFilmwebLine("releaseWorldString", foundLine)));
         }
         movieData.put(Movie.FILMWEB, Collections.singletonList(mainMoviePage.toString()));
+        movieData.put(Movie.ID, Collections.singletonList("-1"));
 
         logger.info("Data properly grabbed from \"{}\"", websiteUrl);
         return movieData;
@@ -330,6 +345,7 @@ public final class Connection {
     public Movie createMovieFromFilmwebLink(ContentList<Actor> allActors) throws IOException, NullPointerException {
         Movie movie = new Movie(grabBasicMovieDataFromFilmwebAndCreateMovieMap());
         if(movie.getPremiere() == null) throw new NullPointerException("Couldn't find proper data of " + movie.getTitle());
+
 
         changeMovieUrlToCastActors();
         List<String> castUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST));
@@ -477,6 +493,7 @@ public final class Connection {
         str = str.replaceAll("&euml;", "ë");
         str = str.replaceAll("&scaron;", "š");
         str = str.replaceAll("&yacute;", "ý");
+        str = str.replaceAll("&aring;", "å");
         return str;
     }
 }
