@@ -532,15 +532,15 @@ public final class XMLOperator {
     }
 
 
-    public static class ExportAll extends Thread {
+    public static class ExportAllToXml extends Thread {
 
         private File exportFile;
 
-        public ExportAll(File exportFile) {
+        public ExportAllToXml(File exportFile) {
             this.exportFile = exportFile;
         }
 
-        public ExportAll() {
+        public ExportAllToXml() {
         }
 
         @Override
@@ -590,11 +590,11 @@ public final class XMLOperator {
 
     }
 
-    public static class ImportData extends ReadAllDataFromFiles {
+    public static class ImportDataFromXml extends ReadAllDataFromFiles {
 
         private final File importFile;
 
-        public ImportData(File importFile) {
+        public ImportDataFromXml(File importFile) {
             this.importFile = importFile;
         }
 

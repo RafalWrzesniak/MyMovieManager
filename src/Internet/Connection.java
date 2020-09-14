@@ -331,6 +331,8 @@ public final class Connection {
                         String downloadedImagePath = actorDir.toString().concat("\\").concat(actor.getReprName().concat(".jpg"));
                         if( Connection.downloadImage(actor.getImagePath(), downloadedImagePath) ) {
                             actor.setImagePath(downloadedImagePath);
+                        } else {
+                            actor.setImagePath(IO.NO_IMAGE);
                         }
                         actorList.add(actor);
                         allActors.add(actor);
