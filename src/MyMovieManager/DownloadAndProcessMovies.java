@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class DownloadAndProcessMovies extends Thread {
@@ -25,19 +26,36 @@ public final class DownloadAndProcessMovies extends Thread {
         this.movieFileList = movieFileList;
         this.allMovies = allMovies;
         this.allActors = allActors;
-        setName("DownloadAndProcess#" + getId());
+        setName("DownloadAndProcess");
     }
 
     @Override
     public void run() {
         logger.info("Thread \"" + getName() + "\" started");
-        while (movieFileList.size() != 0) {
-            File movieFile;
-            synchronized (movieFileList) {
-                movieFile = movieFileList.get(0);
-                movieFileList.remove(0);
+        List<Thread> threads = new ArrayList<>();
+        int numberOfThreads = movieFileList.size() > 20 ? 5 : 3;
+        for(int i = 0; i < numberOfThreads; i++) {
+            Thread downloadAndProcess = new Thread(() -> {
+                while (movieFileList.size() != 0) {
+                    File movieFile;
+                    synchronized (movieFileList) {
+                        movieFile = movieFileList.get(0);
+                        movieFileList.remove(0);
+                    }
+                    handleMovieFromFile(movieFile, allMovies, allActors);
+                }
+            });
+            downloadAndProcess.setName("DAP#" + i);
+            threads.add(downloadAndProcess);
+            downloadAndProcess.start();
+        }
+
+        for(Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                logger.warn("Thread \"{}\" crashed", thread.getName());
             }
-            handleMovieFromFile(movieFile, allMovies, allActors);
         }
         logger.info("Thread \"" + getName() + "\" finished");
     }
@@ -56,6 +74,8 @@ public final class DownloadAndProcessMovies extends Thread {
                     .concat(movie.getReprName().concat(".jpg"));
             if( Connection.downloadImage(movie.getImagePath(), downloadedImagePath) ) {
                 movie.setImagePath(downloadedImagePath);
+            } else {
+                movie.setImagePath(IO.NO_IMAGE);
             }
         } catch (IOException | NullPointerException e) {
             logger.warn("Unexpected error while downloading from \"{}\" - \"{}\"", movieUrl, e.getMessage());
@@ -81,6 +101,8 @@ public final class DownloadAndProcessMovies extends Thread {
                     .concat(".jpg");
             if( Connection.downloadImage(movie.getImagePath(), downloadedImagePath) ) {
                 movie.setImagePath(downloadedImagePath);
+            } else {
+                movie.setImagePath(IO.NO_IMAGE);
             }
         } catch (IOException | NullPointerException e) {
             logger.warn("Unexpected error while downloading \"{}\" - \"{}\"", movieFile.getName(), e.getMessage());
