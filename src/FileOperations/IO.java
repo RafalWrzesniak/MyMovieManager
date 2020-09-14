@@ -10,8 +10,13 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Fully static and final class with private constructor to manage some I/O operations
@@ -261,6 +266,126 @@ public final class IO {
         }
     }
 
+    public static class ExportAll extends Thread {
+
+        File outPutFile;
+
+        public ExportAll(File outPutFile) {
+            if(outPutFile != null) {
+                if(!outPutFile.getName().endsWith(".zip")) {
+                    outPutFile = new File(outPutFile.getName().concat(".zip"));
+                }
+            }
+            this.outPutFile = outPutFile;
+        }
+
+        public ExportAll() {
+        }
+
+        @Override
+        public void run() {
+            setName("ExportAll");
+            if(outPutFile == null) {
+                outPutFile = new File(
+                        System.getProperty("user.dir")
+                        .concat("\\MyMovieManager_exported_data_")
+                        .concat(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+                        .replaceAll("\\..*$", "")
+                        .replaceAll(":", "_")
+                        .concat(".zip")));
+            }
+            try {
+                zipFile(new File(XMLOperator.getSavePath()), outPutFile);
+                logger.info("All data was successfully zipped end exported to \"{}\"", outPutFile);
+            } catch (IOException e) {
+                logger.warn("Failed to ExportAll and ZIP file");
+            }
+
+        }
+
+        private void zipFile(File fileToZip, File zipOut) throws IOException {
+            ZipOutputStream zipOutStream = new ZipOutputStream(new FileOutputStream(zipOut.toString()));
+            zipFile(fileToZip, "exported", zipOutStream);
+            zipOutStream.close();
+        }
+
+        private void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
+            if(fileToZip == null) return;
+            List<File> files = IO.listDirectory(fileToZip);
+            if(files.size() == 0) files.add(fileToZip);
+            for(File file : files) {
+                if(file.isDirectory()) {
+                    zipFile(file, fileName.concat("\\").concat(file.getName()), zipOut);
+                } else {
+                    FileInputStream fis = new FileInputStream(file);
+                    ZipEntry zipEntry = new ZipEntry(fileName.concat("\\").concat(file.getName()));
+                    zipOut.putNextEntry(zipEntry);
+                    byte[] bytes = new byte[1024];
+                    int length;
+                    while((length = fis.read(bytes)) >= 0) {
+                        zipOut.write(bytes, 0, length);
+                    }
+                    zipOut.closeEntry();
+                    fis.close();
+                }
+            }
+        }
+
+
+
+    }
+
+    public static class ImportAll extends Thread {
+
+        File inputFile;
+
+        public ImportAll(File inputFile) {
+            this.inputFile = inputFile;
+        }
+
+        @Override
+        public void run() {
+            setName("ImportAll");
+            try {
+                deleteDirectoryRecursively(new File(XMLOperator.getSavePath()));
+                unZipFile();
+                logger.info("Successfully imported data from \"{}\"", inputFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+                logger.warn("Failed to import file \"{}\"", inputFile);
+            }
+        }
+
+        private void unZipFile() throws IOException{
+            File destDir = new File(XMLOperator.getSavePath());
+            byte[] buffer = new byte[1024];
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile));
+            ZipEntry zipEntry = zis.getNextEntry();
+            while (zipEntry != null) {
+                String zipName;
+                if(zipEntry.getName().startsWith("exported")) {
+                    zipName = zipEntry.getName().substring(zipEntry.getName().indexOf('\\'));
+                } else throw new IOException("Wrong ZIP file, can't import data");
+                String relPath = zipName.substring(0, zipName.lastIndexOf('\\'));
+                new File(destDir, relPath).mkdirs();
+                File newFile = new File(destDir, zipName);
+                FileOutputStream fos = new FileOutputStream(newFile);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+                fos.close();
+                zipEntry = zis.getNextEntry();
+            }
+            zis.closeEntry();
+            zis.close();
+        }
+
+
+
+
+
+    }
 
 
 }
