@@ -17,12 +17,13 @@ public final class AutoSave extends Thread {
     public void run() {
         setName("AutoSave");
         logger.info("AutoSave thread started");
-        while (true) {
+        boolean run = true;
+        while (run) {
             synchronized (NEW_OBJECTS) {
                 try {
                     NEW_OBJECTS.wait();
                 } catch (InterruptedException e) {
-                    break;
+                    run = false;
                 }
                 if (NEW_OBJECTS.size() > 0) {
                     logger.info("Saving objects: \"{}\"", NEW_OBJECTS);

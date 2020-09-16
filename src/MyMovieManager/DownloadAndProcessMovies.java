@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,9 +72,8 @@ public final class DownloadAndProcessMovies extends Thread {
             allMovies.add(movie);
             movie.printPretty();
             File movieDir = IO.createContentDirectory(movie);
-            String downloadedImagePath = movieDir.toString().replaceAll(":", "").concat("\\")
-                    .concat(movie.getReprName().concat(".jpg"));
-            if( Connection.downloadImage(movie.getImagePath(), downloadedImagePath) ) {
+            Path downloadedImagePath = Paths.get(movieDir.toString(), movie.getReprName().replaceAll(":", "").concat(".jpg"));
+            if( Connection.downloadImage(movie.getImageUrl(), downloadedImagePath) ) {
                 movie.setImagePath(downloadedImagePath);
             } else {
                 movie.setImagePath(IO.NO_IMAGE);
@@ -93,13 +94,10 @@ public final class DownloadAndProcessMovies extends Thread {
             movie.printPretty();
             IO.createSummaryImage(movie, movieFile);
             File movieDir = IO.createContentDirectory(movie);
-            String downloadedImagePath =
-                    movieDir
-                    .toString()
-                    .concat("\\")
-                    .concat(movie.getReprName().replaceAll("[]\\[*./:;|,\"]", ""))
-                    .concat(".jpg");
-            if( Connection.downloadImage(movie.getImagePath(), downloadedImagePath) ) {
+            Path downloadedImagePath = Paths.get(
+                    movieDir.toString(),
+                    movie.getReprName().replaceAll("[]\\[*./:;|,\"]", "").concat(".jpg"));
+            if( Connection.downloadImage(movie.getImageUrl(), downloadedImagePath) ) {
                 movie.setImagePath(downloadedImagePath);
             } else {
                 movie.setImagePath(IO.NO_IMAGE);

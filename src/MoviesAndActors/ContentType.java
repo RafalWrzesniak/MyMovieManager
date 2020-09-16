@@ -8,6 +8,7 @@ public interface ContentType<T> extends Comparable<T> {
     String ID = "id";
     String IMAGE_PATH = "imagePath";
     String FILMWEB = "filmweb";
+    String IMAGE_URL = "imageUrl";
 
     boolean searchFor(String strToFind);
     int getId();

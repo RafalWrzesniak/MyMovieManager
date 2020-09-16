@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -151,7 +152,7 @@ class MovieTest {
     @Test
     void setCoverPath() {
         setUp();
-        movie.setImagePath("E:\\xInne\\dk.jpg");
+        movie.setImagePath(Paths.get("E:\\xInne\\dk.jpg"));
         assertEquals("E:\\xInne\\dk.jpg", movie.getImagePath());
     }
 

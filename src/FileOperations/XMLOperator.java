@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,21 +31,27 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public final class XMLOperator {
 
-    private static String SAVE_PATH;
-    private static String SAVE_PATH_MOVIE;
-    private static String SAVE_PATH_ACTOR;
+    private static Path SAVE_PATH;
+    private static Path SAVE_PATH_MOVIE;
+    private static Path SAVE_PATH_ACTOR;
     private static final Logger logger = LoggerFactory.getLogger(XMLOperator.class.getName());
 
     private XMLOperator() {}
 
     static {
+        initCfg();
+    }
+
+    private static void initCfg() {
         File cfg = new File("resources\\config.cfg");
         if(cfg.exists() && !cfg.isDirectory()) {
             Document doc = createDocToRead(cfg);
             if(doc != null) {
                 Element root = doc.getDocumentElement();
                 NodeList element = root.getElementsByTagName("SAVE_PATH");
-                SAVE_PATH = element.item(0).getChildNodes().item(0).getTextContent();
+                SAVE_PATH = Paths.get(element.item(0).getChildNodes().item(0).getTextContent());
+                element = root.getElementsByTagName("MAIN_MOVIE_FOLDER");
+//                SAVE_PATH = element.item(0).getChildNodes().item(0).getTextContent();
             }
         } else {
             Document doc = createDoc();
@@ -57,35 +64,35 @@ public final class XMLOperator {
             }
             updateParamInCfg("SAVE_PATH", System.getProperty("user.dir").concat("\\savedData"));
             boolean made1 = new File(System.getProperty("user.dir").concat("\\savedData")).mkdir();
-            SAVE_PATH = System.getProperty("user.dir").concat("\\savedData");
+//            SAVE_PATH = System.getProperty("user.dir").concat("\\savedData");
+            SAVE_PATH = Paths.get(System.getProperty("user.dir"), "savedData");
         }
-        boolean made2 = new File(SAVE_PATH).mkdirs();
+        boolean made2 =  SAVE_PATH.toFile().mkdirs();
         updateRelativePaths();
-
     }
 
     public static void changeSavePath(File newDirectory) {
         if(newDirectory != null && newDirectory.mkdir()) {
             try {
-                Files.move(Paths.get(SAVE_PATH), newDirectory.toPath(), REPLACE_EXISTING);
+                Files.move(SAVE_PATH, newDirectory.toPath(), REPLACE_EXISTING);
             } catch (IOException e) {
                 e.printStackTrace();
             }
             updateParamInCfg("SAVE_PATH", newDirectory.toString());
-            SAVE_PATH = newDirectory.getPath();
+            SAVE_PATH = newDirectory.toPath();
             updateRelativePaths();
         } else {
             logger.warn("Couldn't change SAVE_PATH to \"{}\". SAVE_PATH is still \"{}\"", newDirectory, SAVE_PATH);
         }
     }
 
-    public static String getSavePath() {
+    public static Path getSavePath() {
         return SAVE_PATH;
     }
-    public static String getSavePathActor() {
+    public static Path getSavePathActor() {
         return SAVE_PATH_ACTOR;
     }
-    public static String getSavePathMovie() {
+    public static Path getSavePathMovie() {
         return SAVE_PATH_MOVIE;
     }
 
@@ -105,14 +112,11 @@ public final class XMLOperator {
     }
 
 
-
-
-
     private static void updateRelativePaths() {
-        boolean made1 = new File(SAVE_PATH + "\\" + Movie.class.getSimpleName()).mkdir();
-        boolean made2 = new File(SAVE_PATH + "\\" + Actor.class.getSimpleName()).mkdir();
-        SAVE_PATH_MOVIE = SAVE_PATH + "\\" + Movie.class.getSimpleName();
-        SAVE_PATH_ACTOR = SAVE_PATH + "\\" + Actor.class.getSimpleName();
+        SAVE_PATH_MOVIE = Paths.get(SAVE_PATH.toString(), Movie.class.getSimpleName());
+        SAVE_PATH_ACTOR = Paths.get(SAVE_PATH.toString(), Actor.class.getSimpleName());
+        boolean made1 = SAVE_PATH_MOVIE.toFile().mkdir();
+        boolean made2 = SAVE_PATH_ACTOR.toFile().mkdir();
 
     }
 
@@ -218,11 +222,11 @@ public final class XMLOperator {
         if(list == null || list.size() == 0) throw new IllegalArgumentException("List argument cannot be null or empty!");
         String type;
         if(list.get(0) instanceof Actor) {
-            savedFile = new File(SAVE_PATH_ACTOR.concat("\\").concat(list.getListName()).concat(".xml"));
+            savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
             type = Actor.class.getSimpleName();
         }
         else if(list.get(0) instanceof Movie) {
-            savedFile = new File(SAVE_PATH_MOVIE.concat("\\").concat(list.getListName()).concat(".xml"));
+            savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
             type = Movie.class.getSimpleName();
         }
         else throw new IllegalArgumentException("Wrong list type!");
@@ -247,8 +251,8 @@ public final class XMLOperator {
     public static <E extends ContentType<E>> void updateSavedContentListWith(ContentList<E> list, E content) {
         File savedFile;
         if(list == null || list.size() == 0) return;
-        if(list.get(0) instanceof Actor) savedFile = new File(SAVE_PATH_ACTOR.concat("\\").concat(list.getListName()).concat(".xml"));
-        else if(list.get(0) instanceof Movie) savedFile = new File(SAVE_PATH_MOVIE.concat("\\").concat(list.getListName()).concat(".xml"));
+        if(list.get(0) instanceof Actor) savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
+        else if(list.get(0) instanceof Movie) savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
         else return;
 
         Document doc = createDocToRead(savedFile);
@@ -308,7 +312,7 @@ public final class XMLOperator {
             List<ContentList<Actor>> allActorLists = new ArrayList<>();
             ContentList<Actor> defaultAllActors = createDefaultActorContentList();
             allActorLists.add(defaultAllActors);
-            for(File file : Objects.requireNonNull(IO.listDirectory(new File(SAVE_PATH_ACTOR)))) {
+            for(File file : Objects.requireNonNull(IO.listDirectory(SAVE_PATH_ACTOR.toFile()))) {
                 if(file.getName().endsWith(".xml") && !file.getName().matches(ContentList.ALL_ACTORS_DEFAULT.concat(".xml"))) {
                     allActorLists.add(createActorContentList(file, defaultAllActors));
                     logger.info("ContentList<Actor> \"{}\" successfully read from file \"{}\"", file.getName().replaceAll("\\.xml$", "") ,file);
@@ -321,7 +325,7 @@ public final class XMLOperator {
             List<ContentList<Movie>> allMovieLists = new ArrayList<>();
             ContentList<Movie> defaultAllMovies = createDefaultMovieContentList(allActorsContentLists);
             allMovieLists.add(defaultAllMovies);
-            for(File file : Objects.requireNonNull(IO.listDirectory(new File(SAVE_PATH_MOVIE)))) {
+            for(File file : Objects.requireNonNull(IO.listDirectory(SAVE_PATH_MOVIE.toFile()))) {
                 if(file.toString().endsWith(".xml") && !file.getName().matches(ContentList.ALL_MOVIES_DEFAULT.concat(".xml"))) {
                     allMovieLists.add(createMovieContentList(file, defaultAllMovies));
                     logger.info("ContentList<Movie> \"{}\" successfully read from file \"{}\"", file.getName().replaceAll("\\.xml$", "") ,file);
@@ -368,7 +372,7 @@ public final class XMLOperator {
 
 
         private static ContentList<Actor> createDefaultActorContentList() {
-            File inputFile = new File(SAVE_PATH_ACTOR.concat("\\").concat(ContentList.ALL_ACTORS_DEFAULT.concat(".xml")));
+            File inputFile = Paths.get(SAVE_PATH_ACTOR.toString(), ContentList.ALL_ACTORS_DEFAULT.concat(".xml")).toFile();
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
                 logger.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
@@ -390,7 +394,9 @@ public final class XMLOperator {
                             id = actorsIds.get(0);
                             actorsIds.remove(0);
                         }
-                        contentList.addFromXml(createActorFromXml(new File(SAVE_PATH_ACTOR.concat("\\").concat("actor").concat(id))));
+                        contentList.addFromXml(
+                                createActorFromXml(
+                                        Paths.get(SAVE_PATH_ACTOR.toString(), "actor", id).toFile()));
                     }
                 });
                 createActors.setName("newActor" + i);
@@ -412,7 +418,7 @@ public final class XMLOperator {
         }
 
         private static ContentList<Movie> createDefaultMovieContentList(List<ContentList<Actor>> allActorsContentLists) {
-            File inputFile = new File(SAVE_PATH_MOVIE.concat("\\").concat(ContentList.ALL_MOVIES_DEFAULT.concat(".xml")));
+            File inputFile = Paths.get(SAVE_PATH_MOVIE.toString(), ContentList.ALL_MOVIES_DEFAULT.concat(".xml")).toFile();
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
                 logger.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
@@ -446,7 +452,10 @@ public final class XMLOperator {
                             id = moviesIds.get(0);
                             moviesIds.remove(0);
                         }
-                        contentList.addFromXml(createMovieFromXml(new File(SAVE_PATH_MOVIE.concat("\\").concat("movie").concat(id)), finalDefaultActors));
+                        contentList.addFromXml(
+                                createMovieFromXml(
+                                        Paths.get(SAVE_PATH_MOVIE.toString(), "movie", id).toFile(),
+                                        finalDefaultActors));
                     }
                 });
                 createMovies.setName("newMovie" + i);
@@ -566,9 +575,9 @@ public final class XMLOperator {
             Element rootElement = doc.createElement("exported");
             doc.appendChild(rootElement);
 
-            Function<String, Boolean> copyNodesFromPath = path -> {
+            Function<Path, Boolean> copyNodesFromPath = path -> {
                 File xml;
-                for(File dir : Objects.requireNonNull(IO.listDirectory(new File(path)))) {
+                for(File dir : Objects.requireNonNull(IO.listDirectory(path.toFile()))) {
                     if(dir.isDirectory()) {
                         xml = IO.getXmlFileFromDir(dir);
                     } else if(dir.toString().endsWith(".xml")) {
@@ -651,7 +660,7 @@ public final class XMLOperator {
                     Element localRoot = doc.getDocumentElement();
 
                     String reprName = "crashed";
-                    File outDir = new File(SAVE_PATH);
+                    File outDir = new File(SAVE_PATH.toUri());
                     if(content.equals(Actor.class.getSimpleName())) {
                         String contentId = localRoot.getElementsByTagName(ContentType.ID).item(0).getTextContent();
                         reprName = localRoot.getElementsByTagName(Actor.NAME).item(0).getTextContent().concat("_")
@@ -666,8 +675,8 @@ public final class XMLOperator {
                     } else if(content.equals(ContentList.class.getSimpleName())) {
                         reprName = localRoot.getElementsByTagName("listName").item(0).getTextContent();
                         String type = localRoot.getElementsByTagName("type").item(0).getTextContent();
-                        if(type.equals(Actor.class.getSimpleName())) outDir = new File(SAVE_PATH_ACTOR);
-                        else if(type.equals(Movie.class.getSimpleName())) outDir = new File(SAVE_PATH_MOVIE);
+                        if(type.equals(Actor.class.getSimpleName())) outDir = SAVE_PATH_ACTOR.toFile();
+                        else if(type.equals(Movie.class.getSimpleName())) outDir = SAVE_PATH_MOVIE.toFile();
                     }
 
                     boolean made = outDir.mkdir();
@@ -677,8 +686,8 @@ public final class XMLOperator {
                 return true;
             };
 
-            if(IO.deleteDirectoryRecursively(new File(SAVE_PATH))) {
-                if(new File(SAVE_PATH).mkdir()) updateRelativePaths();
+            if(IO.deleteDirectoryRecursively(SAVE_PATH.toFile())) {
+                if(SAVE_PATH.toFile().mkdir()) updateRelativePaths();
                 if(saveAllContentsToFiles.apply(Movie.class.getSimpleName()) &&
                         saveAllContentsToFiles.apply(Actor.class.getSimpleName()) &&
                         saveAllContentsToFiles.apply(ContentList.class.getSimpleName())

@@ -14,6 +14,7 @@ import java.net.*;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
@@ -40,7 +41,7 @@ public final class Connection {
             entry(Actor.NAME,        "name"),
             entry(Actor.NATIONALITY, "birthPlace"),
             entry(Actor.BIRTHDAY,    "itemprop=\"birthDate\" content"),
-            entry(Actor.IMAGE_PATH,  "itemprop=\"image\" src")
+            entry(Actor.IMAGE_URL,  "itemprop=\"image\" src")
     );
     private static final Map<String, String> MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
             entry(Movie.TITLE,      "data-title"),
@@ -50,7 +51,7 @@ public final class Connection {
             entry(Movie.RATE,       "data-rate"),
             entry(Movie.RATE_COUNT, "dataRating-count"),
             entry(Movie.DESCRIPTION,"itemprop=\"description\""),
-            entry(Movie.IMAGE_PATH, "itemprop=\"image\" content")
+            entry(Movie.IMAGE_URL, "itemprop=\"image\" content")
     );
     private static final Map<String, String> MOVIE_CLASS_LIST_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
             entry(Movie.GENRES,     "genres"),
@@ -74,38 +75,43 @@ public final class Connection {
     }
 
     public File downloadWebsite() throws IOException {
-        String tmpFileName = "\\tmp_".concat(websiteUrl.getHost().replaceAll("(^.{3}\\.)|(\\..+)", ""))
-                .concat("_").concat(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
-                        .replaceAll("\\..*$", "").replaceAll(":", "_")).concat(".html");
+        Path tmpFileName = Paths.get(
+                "tmp_",
+                websiteUrl.getHost().replaceAll("(^.{3}\\.)|(\\..+)", ""),
+                "_",
+                LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+                        .replaceAll("\\..*$", "")
+                        .replaceAll(":", "_"),
+                ".html");
         ReadableByteChannel rbc = Channels.newChannel(websiteUrl.openStream());
-        FileOutputStream fos = new FileOutputStream(IO.TMP_FILES.concat(tmpFileName));
+        FileOutputStream fos = new FileOutputStream(IO.TMP_FILES.resolve(tmpFileName).toString());
         fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-        return new File(IO.TMP_FILES.concat(tmpFileName));
+        return IO.TMP_FILES.resolve(tmpFileName).toFile();
     }
 
 
-    public static boolean downloadImage(String imageUrl, String fileName) {
-        try (InputStream inputStream = new URL(imageUrl).openStream()) {
-            Files.copy(inputStream, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
+    public static boolean downloadImage(URL fromImageUrl, Path toFileName) {
+        try (InputStream inputStream = fromImageUrl.openStream()) {
+            Files.copy(inputStream, toFileName, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            logger.warn("Failed to download image from \"{}\"", imageUrl);
+            logger.warn("Failed to download image from \"{}\"", fromImageUrl);
             return false;
         }
-        logger.debug("Image downloaded from \"{}\"", imageUrl);
+        logger.debug("Image downloaded from \"{}\"", fromImageUrl);
         return true;
     }
 
-    public String getImageUrl(boolean movie) throws IOException {
+    public URL getImageUrl(boolean movie) throws IOException {
         String foundLine;
         if(movie) {
             foundLine = grepLineFromWebsite(MOVIE_LINE_KEY);
             if(!foundLine.contains(MOVIE_LINE_KEY2)){
                 foundLine = foundLine.concat(grepLineFromWebsite(MOVIE_LINE_KEY2));
             }
-            return extractItemFromFilmwebLine(MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Movie.IMAGE_PATH), foundLine);
+            return new URL(Objects.requireNonNull(extractItemFromFilmwebLine(MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Movie.IMAGE_PATH), foundLine)));
         } else {
             foundLine = grepLineFromWebsite(ACTOR_LINE_KEY);
-            return extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_PATH), foundLine);
+            return new URL(Objects.requireNonNull(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_PATH), foundLine)));
         }
     }
 
@@ -259,15 +265,21 @@ public final class Connection {
         Map<String, String> actorData = new HashMap<>();
         String foundLine = grepLineFromWebsite(ACTOR_LINE_KEY);
 
-        String fullName = Objects.requireNonNull(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine)).replaceAll(" [iIvVxX]+", "").replaceAll(" (Jr\\.)|(Sr\\.)", "");
+        String fullName = Objects.requireNonNull(
+                extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine))
+                .replaceAll(" [iIvVxX]+", "")
+                .replaceAll(" (Jr\\.)|(Sr\\.)", "");
         if(!fullName.contains(" ")) {
-            fullName = Objects.requireNonNull(extractItemFromFilmwebLine("additionalName", foundLine)).replaceAll(" [iIvVxX]+", "").replaceAll(" (Jr\\.)|(Sr\\.)", "");
+            fullName = Objects.requireNonNull(
+                    extractItemFromFilmwebLine("additionalName", foundLine))
+                    .replaceAll(" [iIvVxX]+", "")
+                    .replaceAll(" (Jr\\.)|(Sr\\.)", "");
             if(!fullName.contains(" ")) return null;
         }
         String birthday = extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.BIRTHDAY), foundLine);
         if(birthday == null) return null;
         String[] birthPlace = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NATIONALITY), foundLine)).replaceAll(" \\(.+?\\)", "").split(", ");
-        String imageUrl = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_PATH), foundLine));
+        String imageUrl = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_URL), foundLine));
         String deathDay = extractDeathDateFromFilmwebLine(foundLine);
 
         actorData.put(Actor.NAME, fullName.substring(0, fullName.lastIndexOf(" ")));
@@ -276,7 +288,7 @@ public final class Connection {
         actorData.put(Actor.NATIONALITY, birthPlace[birthPlace.length - 1]);
         actorData.put(Actor.FILMWEB, websiteUrl.toString());
         actorData.put(Actor.DEATH_DAY, deathDay);
-        actorData.put(Actor.IMAGE_PATH, imageUrl);
+        actorData.put(Actor.IMAGE_URL, imageUrl);
 
         logger.info("Data properly grabbed from \"{}\"", websiteUrl);
         return new Actor(actorData);
@@ -328,8 +340,9 @@ public final class Connection {
                         changeUrlTo(actorUrl);
                         Actor actor = createActorFromFilmwebLink();
                         File actorDir = IO.createContentDirectory(actor);
-                        String downloadedImagePath = actorDir.toString().concat("\\").concat(actor.getReprName().concat(".jpg"));
-                        if( Connection.downloadImage(actor.getImagePath(), downloadedImagePath) ) {
+                        assert actor != null;
+                        Path downloadedImagePath = Paths.get(actorDir.toString(), actor.getReprName().concat(".jpg"));
+                        if( Connection.downloadImage(actor.getImageUrl(), downloadedImagePath) ) {
                             actor.setImagePath(downloadedImagePath);
                         } else {
                             actor.setImagePath(IO.NO_IMAGE);
@@ -337,7 +350,8 @@ public final class Connection {
                         actorList.add(actor);
                         allActors.add(actor);
                     } catch (IOException | NullPointerException e) {
-                        logger.warn("Can't get data from \"{}\"", actorUrl);
+                        e.printStackTrace();
+                        logger.warn("Can't get data from \"{}\" because of \"{}\"", actorUrl, e.getMessage());
                     }
                 } else actorList.add(allActors.find(actorUrl).get(0));
         }

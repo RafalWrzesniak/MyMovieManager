@@ -10,6 +10,8 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -27,14 +29,14 @@ public final class IO {
     /**
      * Path for files that are needed only for some time
      */
-    public static final String TMP_FILES = System.getProperty("user.dir").concat("\\tmp");
+    public static final Path TMP_FILES = Paths.get(System.getProperty("user.dir"), "tmp");
     /**
      * File to be used when there is no available image of something on the web
      */
-    public static final String NO_IMAGE = "resources\\iHaveNoImage.jpg";
+    public static final Path NO_IMAGE = Paths.get("resources", "iHaveNoImage.jpg");
 
     static {
-        File tmpFiles = new File(TMP_FILES);
+        File tmpFiles = TMP_FILES.toFile();
         if(!tmpFiles.mkdir()) {
             IO.deleteDirectoryRecursively(tmpFiles);
             tmpFiles.mkdir();
@@ -295,7 +297,7 @@ public final class IO {
                         .concat(".zip")));
             }
             try {
-                zipFile(new File(XMLOperator.getSavePath()), outPutFile);
+                zipFile(XMLOperator.getSavePath().toFile(), outPutFile);
                 logger.info("All data was successfully zipped end exported to \"{}\"", outPutFile);
             } catch (IOException e) {
                 logger.warn("Failed to ExportAll and ZIP file");
@@ -347,7 +349,7 @@ public final class IO {
         public void run() {
             setName("ImportAll");
             try {
-                deleteDirectoryRecursively(new File(XMLOperator.getSavePath()));
+                deleteDirectoryRecursively(XMLOperator.getSavePath().toFile());
                 unZipFile();
                 logger.info("Successfully imported data from \"{}\"", inputFile);
             } catch (IOException e) {
@@ -357,7 +359,7 @@ public final class IO {
         }
 
         private void unZipFile() throws IOException{
-            File destDir = new File(XMLOperator.getSavePath());
+            File destDir = XMLOperator.getSavePath().toFile();
             byte[] buffer = new byte[1024];
             ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile));
             ZipEntry zipEntry = zis.getNextEntry();

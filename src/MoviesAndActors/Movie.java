@@ -7,6 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -32,14 +36,15 @@ public final class Movie implements ContentType<Movie> {
     private List<String> genres = new ArrayList<>();
     private List<String> production = new ArrayList<>();
     private String description;
-    private String imagePath;
+    private Path imagePath;
+    private URL imageUrl;
     private String filmweb;
     private static int classMovieId;
     public static String TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", DURATION = "duration",
             RATE = "rate", RATE_COUNT = "rateCount", CAST = "cast", DIRECTORS = "directors", WRITERS = "writers",
             GENRES = "genres", PRODUCTION = "production", DESCRIPTION = "description";
     public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ContentType.ID, TITLE, TITLE_ORG, PREMIERE, DURATION,
-            RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, IMAGE_PATH, FILMWEB));
+            RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, IMAGE_PATH, IMAGE_URL, FILMWEB));
     private boolean iAmFromConstructor = false;
 
 
@@ -48,7 +53,7 @@ public final class Movie implements ContentType<Movie> {
     }
 
     public static void updateClassMovieId() {
-        File movieDir = new File(XMLOperator.getSavePathMovie());
+        File movieDir = XMLOperator.getSavePathMovie().toFile();
         List<String> files = IO.getFileNamesInDirectory(movieDir);
         if(files.size() == 0) {
             classMovieId = 0;
@@ -107,11 +112,18 @@ public final class Movie implements ContentType<Movie> {
         try {
             if (Movie.class.getDeclaredField(field).toString().contains("java.time.LocalDate")) {
                 Movie.class.getDeclaredField(field).set(this, convertStrToLocalDate(String.valueOf(value)));
-            } else {
+            }
+            else if (Movie.class.getDeclaredField(field).toString().contains("java.net.URL")) {
+                Movie.class.getDeclaredField(field).set(this, new URL(String.valueOf(value)));
+            }
+            else if (Movie.class.getDeclaredField(field).toString().contains("java.nio.file.Path")) {
+                Movie.class.getDeclaredField(field).set(this, Paths.get(String.valueOf(value)));
+            }
+            else {
                 Movie.class.getDeclaredField(field).set(this, ContentType.checkForNullOrEmptyOrIllegalChar(String.valueOf(value), field));
             }
             saveMe();
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException | MalformedURLException e) {
             e.printStackTrace();
         }
     }
@@ -230,10 +242,13 @@ public final class Movie implements ContentType<Movie> {
         setFieldString(DESCRIPTION, description);
     }
 
-    public void setImagePath(String imagePath) {
-        setFieldString(IMAGE_PATH, imagePath);
+    public void setImagePath(Path imagePath) {
+        setFieldString(IMAGE_PATH, imagePath.toString());
     }
 
+    public void setImageUrl(URL imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     //production
     public void addProduction(String production) {
@@ -347,8 +362,12 @@ public final class Movie implements ContentType<Movie> {
         return premiere;
     }
 
-    public String getImagePath() {
+    public Path getImagePath() {
         return imagePath;
+    }
+
+    public URL getImageUrl() {
+        return imageUrl;
     }
 
     public List<String> getProduction() {
@@ -431,7 +450,7 @@ public final class Movie implements ContentType<Movie> {
         map.put(ID, String.valueOf(id));
         map.put(TITLE, title);
         map.put(TITLE_ORG, titleOrg);
-        map.put(PREMIERE, premiere.toString());
+        map.put(PREMIERE, premiere != null ? premiere.toString() : null);
         map.put(DURATION, String.valueOf(duration));
         map.put(RATE, String.valueOf(rate));
         map.put(RATE_COUNT, String.valueOf(rateCount));
@@ -441,7 +460,8 @@ public final class Movie implements ContentType<Movie> {
         map.put(GENRES, getFromList.apply(genres));
         map.put(PRODUCTION, getFromList.apply(production));
         map.put(DESCRIPTION, getDescription());
-        map.put(IMAGE_PATH, imagePath);
+        map.put(IMAGE_PATH, imagePath != null ? imagePath.toString() : null);
+        map.put(IMAGE_URL, imageUrl != null ? imageUrl.toString() : null);
         map.put(FILMWEB, filmweb);
         return map;
     }

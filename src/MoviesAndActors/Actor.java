@@ -7,6 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -23,7 +27,8 @@ public final class Actor implements ContentType<Actor> {
     private LocalDate birthday;
     private LocalDate deathDay;
     private int age;
-    private String imagePath;
+    private Path imagePath;
+    private URL imageUrl;
     private String filmweb;
     private static int classActorId;
     // actor
@@ -40,14 +45,14 @@ public final class Actor implements ContentType<Actor> {
             PLAYED_IN_MOVIES = "playedInMovies", DIRECTED_MOVIES = "directedMovies", WROTE_MOVIES = "writtenMovies",
             DEATH_DAY = "deathDay";
     public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ID, NAME, SURNAME, NATIONALITY, BIRTHDAY,
-            DEATH_DAY, IMAGE_PATH, FILMWEB, PLAYED_IN_MOVIES, DIRECTED_MOVIES, WROTE_MOVIES));
+            DEATH_DAY, IMAGE_PATH, IMAGE_URL, FILMWEB, PLAYED_IN_MOVIES, DIRECTED_MOVIES, WROTE_MOVIES));
 
     static {
         updateClassActorId();
     }
 
     public static void updateClassActorId() {
-        File actorDir = new File(XMLOperator.getSavePathActor());
+        File actorDir = XMLOperator.getSavePathActor().toFile();
         List<String> files = IO.getFileNamesInDirectory(actorDir);
         if(files.size() == 0) {
             classActorId = 0;
@@ -68,7 +73,8 @@ public final class Actor implements ContentType<Actor> {
         this.name = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(NAME), "Name");
         this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(SURNAME), "Surname");
         this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar( actorMap.get(NATIONALITY), "Nationality");
-        this.imagePath = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(IMAGE_PATH), "imagePath");
+        try { this.imagePath = Paths.get(actorMap.get(IMAGE_PATH)); } catch (NullPointerException ignored) { }
+        try { this.imageUrl = new URL(actorMap.get(IMAGE_URL)); } catch (MalformedURLException ignored) { }
         this.filmweb = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(FILMWEB), "filmweb");
         this.birthday = convertBdStringToLocalDate(actorMap.get(Actor.BIRTHDAY));
         if(actorMap.get(Actor.DEATH_DAY) != null) {
@@ -133,6 +139,15 @@ public final class Actor implements ContentType<Actor> {
         return filmweb;
     }
 
+    public URL getImageUrl() {
+        return imageUrl;
+    }
+
+    public Path getImagePath() {
+        return imagePath;
+    }
+
+
     @Override
     public Map<String, String> getAllFieldsAsStrings() {
         Function<List<Movie>, String> getMovieId = movies -> {
@@ -152,7 +167,8 @@ public final class Actor implements ContentType<Actor> {
         map.put(NATIONALITY, nationality);
         map.put(BIRTHDAY, getBirthday().toString());
         if(deathDay != null) map.put(DEATH_DAY, deathDay.toString());
-        map.put(ContentType.IMAGE_PATH, imagePath);
+        map.put(ContentType.IMAGE_PATH, imagePath != null ? imagePath.toString() : null);
+        map.put(ContentType.IMAGE_URL, imageUrl != null ? imageUrl.toString() : null);
         map.put(ContentType.FILMWEB, filmweb);
         map.put(PLAYED_IN_MOVIES, getMovieId.apply(playedInMovies));
         map.put(DIRECTED_MOVIES, getMovieId.apply(directedMovies));
@@ -160,9 +176,6 @@ public final class Actor implements ContentType<Actor> {
         return map;
     }
 
-    public String getImagePath() {
-        return imagePath;
-    }
 
     public static LocalDate convertBdStringToLocalDate(String string) {
         if(string == null || string.isEmpty()) {
@@ -199,23 +212,23 @@ public final class Actor implements ContentType<Actor> {
         setAge();
     }
 
-    public void setIsAnActor(boolean actor) {
+    public void setIsAnActor(boolean isActor) {
         if(!this.isActor) {
-            this.isActor = actor;
+            this.isActor = isActor;
             logger.debug("\"{}\" is now an actor", this.toString());
         }
     }
 
-    public void setIsADirector(boolean director) {
+    public void setIsADirector(boolean isDirector) {
         if(!this.isDirector) {
-            this.isDirector = director;
+            this.isDirector = isDirector;
             logger.debug("\"{}\" is now a director", this.toString());
         }
     }
 
-    public void setIsAWriter(boolean writer) {
+    public void setIsAWriter(boolean isWriter) {
         if(!this.isWriter) {
-            this.isWriter = writer;
+            this.isWriter = isWriter;
             logger.debug("\"{}\" is now a writer", this.toString());
         }
     }
@@ -316,8 +329,12 @@ public final class Actor implements ContentType<Actor> {
         this.birthday = birthday;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = ContentType.checkForNullOrEmptyOrIllegalChar(imagePath, Actor.IMAGE_PATH);
+    public void setImagePath(Path imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public void setImageUrl(URL imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public void printPretty() {
