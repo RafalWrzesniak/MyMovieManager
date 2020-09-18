@@ -24,6 +24,8 @@ public final class DownloadAndProcessMovies extends Thread {
     private final ContentList<Actor> allActors;
     private final ContentList<Movie> allMovies;
 
+    private final List<Movie> downloadedMovies = new ArrayList<>();
+
     public DownloadAndProcessMovies(List<File> movieFileList, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
         this.movieFileList = movieFileList;
         this.allMovies = allMovies;
@@ -33,7 +35,7 @@ public final class DownloadAndProcessMovies extends Thread {
 
     @Override
     public void run() {
-        logger.info("Thread \"" + getName() + "\" started");
+        logger.info("Thread \"{}\" started", getName());
         List<Thread> threads = new ArrayList<>();
         int numberOfThreads = movieFileList.size() > 20 ? 5 : 3;
         for(int i = 0; i < numberOfThreads; i++) {
@@ -44,7 +46,10 @@ public final class DownloadAndProcessMovies extends Thread {
                         movieFile = movieFileList.get(0);
                         movieFileList.remove(0);
                     }
-                    handleMovieFromFile(movieFile, allMovies, allActors);
+                    Movie movie = handleMovieFromFile(movieFile, allMovies, allActors);
+                    if(movie != null) {
+                        downloadedMovies.add(movie);
+                    }
                 }
             });
             downloadAndProcess.setName("DAP#" + i);
@@ -63,9 +68,9 @@ public final class DownloadAndProcessMovies extends Thread {
     }
 
 
-    public static void handleMovieFromUrl(URL movieUrl, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
+    public static Movie handleMovieFromUrl(URL movieUrl, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
         Connection connection;
-        Movie movie;
+        Movie movie = null;
         try {
             connection = new Connection(movieUrl);
             movie = connection.createMovieFromFilmwebLink(allActors);
@@ -81,12 +86,13 @@ public final class DownloadAndProcessMovies extends Thread {
         } catch (IOException | NullPointerException e) {
             logger.warn("Unexpected error while downloading from \"{}\" - \"{}\"", movieUrl, e.getMessage());
         }
-
+        return movie;
     }
 
-    public static void handleMovieFromFile(File movieFile, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
+    public static Movie handleMovieFromFile(File movieFile, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
+        long startTime = System.nanoTime();
         Connection connection;
-        Movie movie;
+        Movie movie = null;
         try {
             connection = new Connection(movieFile.getName());
             movie = connection.createMovieFromFilmwebLink(allActors);
@@ -102,9 +108,16 @@ public final class DownloadAndProcessMovies extends Thread {
             } else {
                 movie.setImagePath(IO.NO_IMAGE);
             }
+
+            long estimatedTime = System.nanoTime() - startTime;
+            logger.debug("Movie \"{}\" downloaded and saved in \"{}\" [s]", movie, ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
         } catch (IOException | NullPointerException e) {
             logger.warn("Unexpected error while downloading \"{}\" - \"{}\"", movieFile.getName(), e.getMessage());
         }
+        return movie;
     }
 
+    public List<Movie> getDownloadedMovies() {
+        return downloadedMovies;
+    }
 }

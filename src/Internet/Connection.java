@@ -91,6 +91,7 @@ public final class Connection {
 
 
     public static boolean downloadImage(URL fromImageUrl, Path toFileName) {
+        if(fromImageUrl == null || toFileName == null) return false;
         try (InputStream inputStream = fromImageUrl.openStream()) {
             Files.copy(inputStream, toFileName, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -350,8 +351,8 @@ public final class Connection {
                         actorList.add(actor);
                         allActors.add(actor);
                     } catch (IOException | NullPointerException e) {
-                        e.printStackTrace();
-                        logger.warn("Can't get data from \"{}\" because of \"{}\"", actorUrl, e.getMessage());
+//                        e.printStackTrace();
+                        logger.warn("Can't get data from \"{}\" because of \"{}\" in thread \"{}\"", actorUrl, e.getMessage(), Thread.currentThread());
                     }
                 } else actorList.add(allActors.find(actorUrl).get(0));
         }

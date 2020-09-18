@@ -4,9 +4,9 @@
 /src/xMain/
 /savedData/
 /savedImages/
+/tmp
+/resources
 .gitignore
 MyMovieManager.iml
 MyMovieManager_exported.xml
 /.idea/misc.xml
-/tmp
-/resources/iHaveNoImage.jpg

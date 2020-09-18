@@ -52,8 +52,8 @@ public final class Movie implements ContentType<Movie> {
         updateClassMovieId();
     }
 
-    public static void updateClassMovieId() {
-        File movieDir = XMLOperator.getSavePathMovie().toFile();
+    public synchronized static void updateClassMovieId() {
+        File movieDir = IO.getSavePathMovie().toFile();
         List<String> files = IO.getFileNamesInDirectory(movieDir);
         if(files.size() == 0) {
             classMovieId = 0;
@@ -71,7 +71,18 @@ public final class Movie implements ContentType<Movie> {
 
 
     public Movie(Map<String, List<String>> fieldMap, ContentList<Actor> allActors) {
-        this(fieldMap);
+        updateClassMovieId();
+        iAmFromConstructor = true;
+        for(String field : fieldMap.keySet()) {
+            setFieldWithList(field, fieldMap.get(field));
+        }
+        if(id == -1) {
+            id = classMovieId;
+            classMovieId++;
+        }
+        logger.info("New movie \"{}\" created", this.toString());
+        IO.createContentDirectory(this);
+        iAmFromConstructor = false;
         setFieldWithList("cast", allActors.convertStrIdsToObjects(fieldMap.get("cast")));
         setFieldWithList("directors", allActors.convertStrIdsToObjects(fieldMap.get("directors")));
         setFieldWithList("writers", allActors.convertStrIdsToObjects(fieldMap.get("writers")));

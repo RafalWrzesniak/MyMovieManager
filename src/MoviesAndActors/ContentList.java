@@ -15,6 +15,7 @@ public class ContentList<T extends ContentType<T>> {
     private static final Logger logger = LoggerFactory.getLogger(ContentList.class.getName());
     public static final String ALL_ACTORS_DEFAULT = "allActors";
     public static final String ALL_MOVIES_DEFAULT = "allMovies";
+    public static final String MOVIES_TO_WATCH = "moviesToWatch";
     private final List<T> list = new ArrayList<>();
     private final String listName;
 
@@ -133,9 +134,10 @@ public class ContentList<T extends ContentType<T>> {
     }
 
     public static <E extends ContentType<E>> ContentList<E> getContentListFromListByName(List<ContentList<E>> contentLists, String listName) {
+        if(contentLists == null) return null;
         ContentList<E> desiredContentList = null;
         for(ContentList<E> contentList : contentLists) {
-            if (contentList.getListName().equals(listName)) {
+            if (contentList != null && contentList.getListName().equals(listName)) {
                 desiredContentList = contentList;
             }
         }

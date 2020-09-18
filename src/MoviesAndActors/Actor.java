@@ -52,7 +52,7 @@ public final class Actor implements ContentType<Actor> {
     }
 
     public static void updateClassActorId() {
-        File actorDir = XMLOperator.getSavePathActor().toFile();
+        File actorDir = IO.getSavePathActor().toFile();
         List<String> files = IO.getFileNamesInDirectory(actorDir);
         if(files.size() == 0) {
             classActorId = 0;
@@ -85,11 +85,11 @@ public final class Actor implements ContentType<Actor> {
         if(id == -1) {
             this.id = classActorId;
             classActorId++;
+            saveMe();
         } else {
             this.id = id;
         }
         logger.info("New actor created: {}", this.toString());
-        saveMe();
         IO.createContentDirectory(this);
     }
 
