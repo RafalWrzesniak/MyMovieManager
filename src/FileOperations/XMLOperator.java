@@ -19,7 +19,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -27,73 +26,25 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public final class XMLOperator {
 
     private static Path SAVE_PATH;
     private static Path SAVE_PATH_MOVIE;
     private static Path SAVE_PATH_ACTOR;
+
     private static final Logger logger = LoggerFactory.getLogger(XMLOperator.class.getName());
 
     private XMLOperator() {}
 
     static {
-        initCfg();
+        setLocalPaths();
     }
 
-    private static void initCfg() {
-        File cfg = new File("resources\\config.cfg");
-        if(cfg.exists() && !cfg.isDirectory()) {
-            Document doc = createDocToRead(cfg);
-            if(doc != null) {
-                Element root = doc.getDocumentElement();
-                NodeList element = root.getElementsByTagName("SAVE_PATH");
-                SAVE_PATH = Paths.get(element.item(0).getChildNodes().item(0).getTextContent());
-                element = root.getElementsByTagName("MAIN_MOVIE_FOLDER");
-//                SAVE_PATH = element.item(0).getChildNodes().item(0).getTextContent();
-            }
-        } else {
-            Document doc = createDoc();
-            if(doc != null) {
-                Element rootElement = doc.createElement("config");
-                doc.appendChild(rootElement);
-                Element element = doc.createElement("SAVE_PATH");
-                rootElement.appendChild(element);
-                makeSimpleSave(doc, cfg);
-            }
-            updateParamInCfg("SAVE_PATH", System.getProperty("user.dir").concat("\\savedData"));
-            boolean made1 = new File(System.getProperty("user.dir").concat("\\savedData")).mkdir();
-//            SAVE_PATH = System.getProperty("user.dir").concat("\\savedData");
-            SAVE_PATH = Paths.get(System.getProperty("user.dir"), "savedData");
-        }
-        boolean made2 =  SAVE_PATH.toFile().mkdirs();
-        updateRelativePaths();
-    }
-
-    public static void changeSavePath(File newDirectory) {
-        if(newDirectory != null && newDirectory.mkdir()) {
-            try {
-                Files.move(SAVE_PATH, newDirectory.toPath(), REPLACE_EXISTING);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            updateParamInCfg("SAVE_PATH", newDirectory.toString());
-            SAVE_PATH = newDirectory.toPath();
-            updateRelativePaths();
-        } else {
-            logger.warn("Couldn't change SAVE_PATH to \"{}\". SAVE_PATH is still \"{}\"", newDirectory, SAVE_PATH);
-        }
-    }
-
-    public static Path getSavePath() {
-        return SAVE_PATH;
-    }
-    public static Path getSavePathActor() {
-        return SAVE_PATH_ACTOR;
-    }
-    public static Path getSavePathMovie() {
-        return SAVE_PATH_MOVIE;
+    static void setLocalPaths() {
+        SAVE_PATH = IO.getSavePath();
+        SAVE_PATH_MOVIE = IO.getSavePathMovie();
+        SAVE_PATH_ACTOR = IO.getSavePathActor();
     }
 
     public static <E extends ContentType<E>> void saveContentToXML(E content) {
@@ -112,25 +63,8 @@ public final class XMLOperator {
     }
 
 
-    private static void updateRelativePaths() {
-        SAVE_PATH_MOVIE = Paths.get(SAVE_PATH.toString(), Movie.class.getSimpleName());
-        SAVE_PATH_ACTOR = Paths.get(SAVE_PATH.toString(), Actor.class.getSimpleName());
-        boolean made1 = SAVE_PATH_MOVIE.toFile().mkdir();
-        boolean made2 = SAVE_PATH_ACTOR.toFile().mkdir();
 
-    }
-
-    private static void updateParamInCfg(String parameter, String value) {
-        File cfg = new File("resources\\config.cfg");
-        Document doc = createDocToRead(cfg);
-        if(doc == null) return;
-        NodeList savePath = doc.getElementsByTagName(parameter);
-        savePath.item(0).setTextContent(value);
-        makeSimpleSave(doc, cfg);
-        logger.info("Parameter \"{}\" changed to \"{}\" in config.cfg", parameter, value);
-    }
-
-    private static void makeSimpleSave(Document doc, File toFile) {
+    static void makeSimpleSave(Document doc, File toFile) {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer;
         try {
@@ -143,7 +77,7 @@ public final class XMLOperator {
         }
     }
 
-    private static Document createDoc() {
+    static Document createDoc() {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -154,7 +88,7 @@ public final class XMLOperator {
         return null;
     }
 
-    private static Document createDocToRead(File inputFile) {
+    static Document createDocToRead(File inputFile) {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -286,7 +220,14 @@ public final class XMLOperator {
             allMoviesLists = createAllMoviesContentListsFromXml(allActorsLists);
 
             allActors = ContentList.getContentListFromListByName(allActorsLists, ContentList.ALL_ACTORS_DEFAULT);
+            if(allActors == null) {
+                allActors = new ContentList<>(ContentList.ALL_ACTORS_DEFAULT);
+            }
             allMovies = ContentList.getContentListFromListByName(allMoviesLists, ContentList.ALL_MOVIES_DEFAULT);
+            if(allMovies == null) {
+                allMovies = new ContentList<>(ContentList.ALL_MOVIES_DEFAULT);
+            }
+
             logger.info("All data read from files");
         }
 
@@ -396,7 +337,7 @@ public final class XMLOperator {
                         }
                         contentList.addFromXml(
                                 createActorFromXml(
-                                        Paths.get(SAVE_PATH_ACTOR.toString(), "actor", id).toFile()));
+                                        Paths.get(SAVE_PATH_ACTOR.toString(), "actor".concat(id)).toFile()));
                     }
                 });
                 createActors.setName("newActor" + i);
@@ -454,7 +395,7 @@ public final class XMLOperator {
                         }
                         contentList.addFromXml(
                                 createMovieFromXml(
-                                        Paths.get(SAVE_PATH_MOVIE.toString(), "movie", id).toFile(),
+                                        Paths.get(SAVE_PATH_MOVIE.toString(), "movie".concat(id)).toFile(),
                                         finalDefaultActors));
                     }
                 });
@@ -687,7 +628,7 @@ public final class XMLOperator {
             };
 
             if(IO.deleteDirectoryRecursively(SAVE_PATH.toFile())) {
-                if(SAVE_PATH.toFile().mkdir()) updateRelativePaths();
+                if(SAVE_PATH.toFile().mkdir()) IO.updateRelativePaths();
                 if(saveAllContentsToFiles.apply(Movie.class.getSimpleName()) &&
                         saveAllContentsToFiles.apply(Actor.class.getSimpleName()) &&
                         saveAllContentsToFiles.apply(ContentList.class.getSimpleName())
