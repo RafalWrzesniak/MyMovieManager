@@ -3,7 +3,7 @@ package FileOperations;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentType;
 import MoviesAndActors.Movie;
-import MyMovieManager.MovieMainFolderProcess;
+import MyMovieManager.MovieMainFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -42,7 +42,7 @@ public final class IO {
      */
     public static final Path NO_IMAGE = Paths.get("resources", "iHaveNoImage.jpg");
     /**
-     * File that contains last saw files in {@link MovieMainFolderProcess#getMainMovieFolder()}
+     * File that contains last saw files in {@link MovieMainFolder#getMainMovieFolder()}
      */
     public static final File LAST_RIDE = Paths.get("resources", "lastRide.xml").toFile();
 
@@ -72,7 +72,7 @@ public final class IO {
                 NodeList element = root.getElementsByTagName("SAVE_PATH");
                 SAVE_PATH = Paths.get(element.item(0).getChildNodes().item(0).getTextContent());
                 element = root.getElementsByTagName("MAIN_MOVIE_FOLDER");
-                MovieMainFolderProcess.setMainMovieFolder(new File(element.item(0).getChildNodes().item(0).getTextContent()));
+                MovieMainFolder.setMainMovieFolder(new File(element.item(0).getChildNodes().item(0).getTextContent()));
             }
         } else {
             Document doc = XMLOperator.createDoc();
@@ -484,41 +484,62 @@ public final class IO {
     }
 
 
-    public static void writeStateOfMainMovieFolder() {
-        List<String> files = IO.getFileNamesInDirectory(MovieMainFolderProcess.getMainMovieFolder());
+    public static void writeLastRideFile(Map<File, Integer> map) {
         Document doc = XMLOperator.createDoc();
         if(doc != null) {
             Element rootElement = doc.createElement("LastRide");
-            rootElement.appendChild(doc.createTextNode("\n\t"));
             doc.appendChild(rootElement);
 
-            for(String name : files) {
-                Element element = doc.createElement("folder");
-                element.setTextContent(name);
-                rootElement.appendChild(element);
+            for(Map.Entry<File, Integer> entry : map.entrySet()) {
                 rootElement.appendChild(doc.createTextNode("\n\t"));
+                Element element = doc.createElement("folder");
+                element.appendChild(doc.createTextNode("\n\t\t"));
+                Element name = doc.createElement("name");
+                name.setTextContent(entry.getKey().toString());
+                element.appendChild(name);
+
+                element.appendChild(doc.createTextNode("\n\t\t"));
+                Element id = doc.createElement("id");
+                id.setTextContent(String.valueOf(entry.getValue()));
+                element.appendChild(id);
+                element.appendChild(doc.createTextNode("\n\t"));
+                rootElement.appendChild(element);
             }
+            rootElement.appendChild(doc.createTextNode("\n"));
             XMLOperator.makeSimpleSave(doc, LAST_RIDE);
-            logger.info("Saved \"{}\" files from MainMovieFolder to lastly saw file", files.size());
+            logger.info("Saved \"{}\" files from MainMovieFolder to lastly saw file", map.size());
         } else {
             logger.warn("Couldn't save state of MainMovieFolder");
         }
 
     }
 
-    public static List<String> readStateOfMainMovieFolder() {
-        List<String> lastSawFolder = new ArrayList<>();
+    public static Map<File, Integer> readLastStateOfMainMovieFolder() {
+        Map<File, Integer> lastState = new HashMap<>();
         Document doc = XMLOperator.createDocToRead(LAST_RIDE);
         if(doc != null) {
             Element root = doc.getDocumentElement();
             NodeList elements = root.getElementsByTagName("folder");
             for(int i = 0; i < elements.getLength(); i++) {
-                lastSawFolder.add(elements.item(i).getChildNodes().item(0).getTextContent());
+                NodeList child = elements.item(i).getChildNodes();
+                File file = null;
+                int id = -1;
+                for(int k = 0; k < child.getLength(); k++) {
+                    if(child.item(k).getNodeName().equals("name")) {
+                        file = new File(child.item(k).getTextContent());
+                    }
+                    if(child.item(k).getNodeName().equals("id")) {
+                        id = Integer.parseInt(child.item(k).getTextContent());
+                    }
+                }
+                if(file != null && id != -1) {
+                    lastState.putIfAbsent(file, id);
+                }
             }
         } else {
-            logger.warn("Couldn't read data from \"{}\"", MovieMainFolderProcess.getMainMovieFolder());
+            logger.warn("Couldn't read data from \"{}\"", MovieMainFolder.getMainMovieFolder());
         }
-        return lastSawFolder;
+        return lastState;
     }
 
 
