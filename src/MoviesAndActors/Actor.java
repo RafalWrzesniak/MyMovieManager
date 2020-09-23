@@ -2,7 +2,6 @@ package MoviesAndActors;
 
 import FileOperations.AutoSave;
 import FileOperations.IO;
-import FileOperations.XMLOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +89,6 @@ public final class Actor implements ContentType<Actor> {
             this.id = id;
         }
         logger.info("New actor created: {}", this.toString());
-        IO.createContentDirectory(this);
     }
 
 
@@ -377,9 +375,7 @@ public final class Actor implements ContentType<Actor> {
         if (this == o) return true;
         if (!(o instanceof Actor)) return false;
         Actor actor = (Actor) o;
-        return getName().equals(actor.getName()) &&
-                getSurname().equals(actor.getSurname()) &&
-                getBirthday().equals(actor.getBirthday());
+        return filmweb.equals(actor.getFilmweb());
     }
 
     @Override
@@ -400,7 +396,7 @@ public final class Actor implements ContentType<Actor> {
         if(actor == null) {
             throw new IllegalArgumentException("Cannot compare to null!");
         }
-        return this.getNameAndSurname().compareTo(actor.getNameAndSurname());
+        return filmweb.compareTo(actor.getFilmweb());
     }
 
     @Override

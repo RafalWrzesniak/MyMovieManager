@@ -200,7 +200,14 @@ public final class XMLOperator {
         makeSimpleSave(doc, savedFile);
     }
 
-
+    public static <E extends ContentType<E>> void removeContentList(ContentList<E> list) {
+        File savedFile;
+        if(list == null || list.size() == 0) return;
+        if(list.get(0) instanceof Actor) savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
+        else if(list.get(0) instanceof Movie) savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
+        else return;
+        logger.info("Attempt to remove list \"{}\" ends with status: \"{}\"", savedFile.getName(), savedFile.delete());
+    }
 
 
 
@@ -211,6 +218,7 @@ public final class XMLOperator {
         private List<ContentList<Movie>> allMoviesLists;
         private ContentList<Actor> allActors;
         private ContentList<Movie> allMovies;
+        private ContentList<Movie> moviesToWatch;
 
 
         @Override
@@ -227,10 +235,16 @@ public final class XMLOperator {
             if(allMovies == null) {
                 allMovies = new ContentList<>(ContentList.ALL_MOVIES_DEFAULT);
             }
-
+            moviesToWatch = ContentList.getContentListFromListByName(allMoviesLists, ContentList.MOVIES_TO_WATCH);
+            if(moviesToWatch == null) {
+                moviesToWatch = new ContentList<>(ContentList.MOVIES_TO_WATCH);
+            }
             logger.info("All data read from files");
         }
 
+        public ContentList<Movie> getMoviesToWatch() {
+            return moviesToWatch;
+        }
 
         public ContentList<Actor> getAllActors() {
             return allActors;

@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -32,35 +31,48 @@ public class ContentList<T extends ContentType<T>> {
     }
 
     public int indexOf(T obj) {
-        return Collections.binarySearch(list, obj);
+//        Collections.sort(list);
+//        return Collections.binarySearch(list, obj);
+        return list.indexOf(obj);
     }
 
     public T get(int index) {
         return list.get(index);
     }
 
-    public synchronized void add(T obj) {
-        addFromXml(obj);
-        if(list.size() == 1) {
-            XMLOperator.createListFile(this);
+    public T get(T object) {
+        if(contains(object)) {
+            return list.get(indexOf(object));
         }
-        XMLOperator.updateSavedContentListWith(this, obj);
+        return null;
     }
 
-    public synchronized void addFromXml(T obj) {
+    public synchronized boolean add(T obj) {
+        if(addFromXml(obj)) {
+            if(list.size() == 1) {
+                XMLOperator.createListFile(this);
+            }
+            XMLOperator.updateSavedContentListWith(this, obj);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean addFromXml(T obj) {
         if(obj == null) {
             logger.warn("Null object will not be added to the list \"{}\"!", getListName());
-            return;
+            return false;
         }
         if(contains(obj)) {
             synchronized (AutoSave.NEW_OBJECTS) {
-                logger.warn("\"{}\" is already on the {} list", obj.toString(), getListName());
+                logger.warn("\"{}\" is already on the {} list", get(obj).toString(), getListName());
                 AutoSave.NEW_OBJECTS.remove(obj);
-                return;
+                return false;
             }
         }
         list.add(obj);
         logger.debug("\"{}\" added to \"{}\"", obj.toString(), getListName());
+        return true;
     }
 
     public void addAll(List<T> objList) {
@@ -91,6 +103,7 @@ public class ContentList<T extends ContentType<T>> {
     }
 
     public void clear() {
+        XMLOperator.removeContentList(this);
         list.clear();
         logger.debug("\"{}\" cleared", getListName());
     }

@@ -2,7 +2,6 @@ package MoviesAndActors;
 
 import FileOperations.AutoSave;
 import FileOperations.IO;
-import FileOperations.XMLOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +80,6 @@ public final class Movie implements ContentType<Movie> {
             classMovieId++;
         }
         logger.info("New movie \"{}\" created", this.toString());
-        IO.createContentDirectory(this);
         iAmFromConstructor = false;
         setFieldWithList("cast", allActors.convertStrIdsToObjects(fieldMap.get("cast")));
         setFieldWithList("directors", allActors.convertStrIdsToObjects(fieldMap.get("directors")));
@@ -99,7 +97,6 @@ public final class Movie implements ContentType<Movie> {
             classMovieId++;
         }
         logger.info("New movie \"{}\" created", this.toString());
-        IO.createContentDirectory(this);
         iAmFromConstructor = false;
         saveMe();
     }
@@ -562,14 +559,21 @@ public final class Movie implements ContentType<Movie> {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if(obj == null) return false;
+        if(obj instanceof Movie) {
+            Movie movie = (Movie) obj;
+            return filmweb.equals(movie.getFilmweb());
+        }
+        return false;
+    }
+
+    @Override
     public int compareTo(Movie movie) {
         if(movie == null) {
             throw new IllegalArgumentException("Cannot compare to null!");
         }
-//        if(rate != 0 && movie.getRate() != 0) {
-//            return (int) (this.getRate() - movie.getRate()) * 100;
-//        }
-        return title.concat(premiere.toString()).compareToIgnoreCase(movie.getTitle().concat(movie.premiere.toString()));
+        return filmweb.compareTo(movie.getFilmweb());
     }
 
     @Override

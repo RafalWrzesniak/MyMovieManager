@@ -54,7 +54,7 @@ public final class Connection {
             entry(Movie.IMAGE_URL, "itemprop=\"image\" content")
     );
     private static final Map<String, String> MOVIE_CLASS_LIST_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
-            entry(Movie.GENRES,     "genres"),
+            entry(Movie.GENRES,     "/ranking/film/"), // "genres"
             entry(Movie.PRODUCTION, "countries")
     );
     public static final Map<String, String> MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
@@ -75,14 +75,15 @@ public final class Connection {
     }
 
     public File downloadWebsite() throws IOException {
-        Path tmpFileName = Paths.get(
-                "tmp_",
-                websiteUrl.getHost().replaceAll("(^.{3}\\.)|(\\..+)", ""),
-                "_",
-                LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
-                        .replaceAll("\\..*$", "")
-                        .replaceAll(":", "_"),
-                ".html");
+        String tmpFileName =
+                "tmp_"
+                .concat(websiteUrl.getHost().replaceAll("(^.{3}\\.)|(\\..+)", ""))
+                .concat("_")
+                .concat(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+                    .replaceAll("\\..*$", "")
+                    .replaceAll(":", "_"))
+                .concat(".html");
+
         ReadableByteChannel rbc = Channels.newChannel(websiteUrl.openStream());
         FileOutputStream fos = new FileOutputStream(IO.TMP_FILES.resolve(tmpFileName).toString());
         fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
@@ -190,11 +191,11 @@ public final class Connection {
             logger.warn("Null as input - can't extract list of items \"{}\" from \"{}\"", itemToExtract, websiteUrl);
             throw new IOException("Null as input - can't extract list of items \"" + itemToExtract + "\" from " + websiteUrl);
         }
-        Pattern pattern = Pattern.compile(itemToExtract + "=\\d+\">(.+?)</a>");
+        Pattern pattern = Pattern.compile(itemToExtract + "(=\\d+|\\w+/\\d+)\">(.+?)</a>");
         Matcher matcher = pattern.matcher(line);
         List<String> listOfItems = new ArrayList<>();
         while(matcher.find()) {
-                listOfItems.add(replaceAcutesHTML(matcher.group(1)));
+                listOfItems.add(replaceAcutesHTML(matcher.group(2)));
         }
         if(listOfItems.size() == 0) {
             try {
@@ -295,30 +296,6 @@ public final class Connection {
         return new Actor(actorData);
     }
 
-    private Map<String, List<String>> grabBasicMovieDataFromFilmwebAndCreateMovieMap() throws IOException {
-        Map<String, List<String>> movieData = new HashMap<>();
-        String foundLine = grepLineFromWebsite(MOVIE_LINE_KEY);
-        if(!foundLine.contains(MOVIE_LINE_KEY2)){
-            foundLine = foundLine.concat(grepLineFromWebsite(MOVIE_LINE_KEY2));
-        }
-
-        for (Map.Entry<String, String> pair : MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.entrySet()) {
-            movieData.put(pair.getKey(), Collections.singletonList(extractItemFromFilmwebLine(pair.getValue(), foundLine)));
-        }
-        for(Map.Entry<String, String> pair : MOVIE_CLASS_LIST_FIELDS_MAP_FILMWEB_KEYS.entrySet()) {
-            movieData.put(pair.getKey(), extractListOfItemsFromFilmwebLine(pair.getValue(), foundLine));
-        }
-        if(movieData.get(Movie.TITLE_ORG).get(0) == null) movieData.replace(Movie.TITLE_ORG, movieData.get(Movie.TITLE));
-        if(movieData.get(Movie.PREMIERE).get(0) == null) {
-            movieData.replace(Movie.PREMIERE, Collections.singletonList(extractItemFromFilmwebLine("releaseWorldString", foundLine)));
-        }
-        movieData.put(Movie.FILMWEB, Collections.singletonList(mainMoviePage.toString()));
-        movieData.put(Movie.ID, Collections.singletonList("-1"));
-
-        logger.info("Data properly grabbed from \"{}\"", websiteUrl);
-        return movieData;
-    }
-
     private List<String> grabCastOrCrewFromFilmweb(String castType) throws IOException {
         if(castType == null || !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST)) &&
                 !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.DIRECTORS)) &&
@@ -340,18 +317,22 @@ public final class Connection {
                     try {
                         changeUrlTo(actorUrl);
                         Actor actor = createActorFromFilmwebLink();
-                        File actorDir = IO.createContentDirectory(actor);
-                        assert actor != null;
-                        Path downloadedImagePath = Paths.get(actorDir.toString(), actor.getReprName().concat(".jpg"));
-                        if( Connection.downloadImage(actor.getImageUrl(), downloadedImagePath) ) {
-                            actor.setImagePath(downloadedImagePath);
+                        if(allActors.add(actor)) {
+                            File actorDir = IO.createContentDirectory(actor);
+                            assert actor != null;
+                            Path downloadedImagePath = Paths.get(actorDir.toString(), actor.getReprName().concat(".jpg"));
+                            if( Connection.downloadImage(actor.getImageUrl(), downloadedImagePath) ) {
+                                actor.setImagePath(downloadedImagePath);
+                            } else {
+                                actor.setImagePath(IO.NO_IMAGE);
+                            }
+                        } else if(actor != null){
+                            actor = allActors.get(actor);
                         } else {
-                            actor.setImagePath(IO.NO_IMAGE);
+                            throw new NullPointerException("No data found for " + actorUrl);
                         }
                         actorList.add(actor);
-                        allActors.add(actor);
                     } catch (IOException | NullPointerException e) {
-//                        e.printStackTrace();
                         logger.warn("Can't get data from \"{}\" because of \"{}\" in thread \"{}\"", actorUrl, e.getMessage(), Thread.currentThread());
                     }
                 } else actorList.add(allActors.find(actorUrl).get(0));
@@ -359,11 +340,33 @@ public final class Connection {
         return actorList;
     }
 
-    public Movie createMovieFromFilmwebLink(ContentList<Actor> allActors) throws IOException, NullPointerException {
-        Movie movie = new Movie(grabBasicMovieDataFromFilmwebAndCreateMovieMap());
+    public Movie createMovieFromFilmwebLink() throws IOException, NullPointerException {
+        Map<String, List<String>> movieData = new HashMap<>();
+        String foundLine = grepLineFromWebsite(MOVIE_LINE_KEY);
+        if(!foundLine.contains(MOVIE_LINE_KEY2)){
+            foundLine = foundLine.concat(grepLineFromWebsite(MOVIE_LINE_KEY2));
+        }
+
+        for (Map.Entry<String, String> pair : MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.entrySet()) {
+            movieData.put(pair.getKey(), Collections.singletonList(extractItemFromFilmwebLine(pair.getValue(), foundLine)));
+        }
+        for(Map.Entry<String, String> pair : MOVIE_CLASS_LIST_FIELDS_MAP_FILMWEB_KEYS.entrySet()) {
+            movieData.put(pair.getKey(), extractListOfItemsFromFilmwebLine(pair.getValue(), foundLine));
+        }
+        if(movieData.get(Movie.TITLE_ORG).get(0) == null) movieData.replace(Movie.TITLE_ORG, movieData.get(Movie.TITLE));
+        if(movieData.get(Movie.PREMIERE).get(0) == null) {
+            movieData.replace(Movie.PREMIERE, Collections.singletonList(extractItemFromFilmwebLine("releaseWorldString", foundLine)));
+        }
+        movieData.put(Movie.FILMWEB, Collections.singletonList(mainMoviePage.toString()));
+        movieData.put(Movie.ID, Collections.singletonList("-1"));
+
+        logger.info("Data properly grabbed from \"{}\"", websiteUrl);
+        Movie movie = new Movie(movieData);
         if(movie.getPremiere() == null) throw new NullPointerException("Couldn't find proper data of " + movie.getTitle());
+        return movie;
+    }
 
-
+    public void addCastToMovie(Movie movie, ContentList<Actor> allActors) throws IOException {
         changeMovieUrlToCastActors();
         List<String> castUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST));
         List<Actor> actors = createActorsFromFilmwebLinks(castUrls, allActors);
@@ -378,8 +381,6 @@ public final class Connection {
         List<String> writerUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.WRITERS));
         List<Actor> writers = createActorsFromFilmwebLinks(writerUrls, allActors);
         movie.addWriters(writers);
-
-        return movie;
     }
 
 
