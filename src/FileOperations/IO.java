@@ -295,12 +295,12 @@ public final class IO {
      * all need movie data. It will be saved in pathName\pathName.{@link File#getName()}.png
      * @param movie
      * Movie to create its summary image
-     * @param pathName
+     * @param folderToSaveIn
      * Path of directory that contains movie file
      */
-    public static void createSummaryImage(Movie movie, File pathName) {
-        if(!pathName.isDirectory()) {
-            logger.warn("Failed to save summaryImage of movie \"{}\" - no such directory \"{}\"", movie, pathName);
+    public static void createSummaryImage(Movie movie, File folderToSaveIn) {
+        if(!folderToSaveIn.isDirectory()) {
+            logger.warn("Failed to save summaryImage of movie \"{}\" - no such directory \"{}\"", movie, folderToSaveIn);
             return;
         } else if(movie == null) {
             logger.warn("Failed to save summaryImage - movie is null");
@@ -358,7 +358,7 @@ public final class IO {
         g2d.dispose();
 
         try {
-            File imageFile = new File(pathName.toString().concat("\\").concat(pathName.getName()).concat(".png"));
+            File imageFile = Paths.get(folderToSaveIn.toString(), folderToSaveIn.getName().concat(".png")).toFile();
             ImageIO.write(bufferedImage, "png", imageFile);
             logger.info("SummaryImage for \"{}\" created in \"{}\"", movie, imageFile);
         } catch (IOException e) {

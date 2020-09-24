@@ -37,7 +37,7 @@ public final class Movie implements ContentType<Movie> {
     private String description;
     private Path imagePath;
     private URL imageUrl;
-    private String filmweb;
+    private URL filmweb;
     private static int classMovieId;
     public static String TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", DURATION = "duration",
             RATE = "rate", RATE_COUNT = "rateCount", CAST = "cast", DIRECTORS = "directors", WRITERS = "writers",
@@ -72,6 +72,11 @@ public final class Movie implements ContentType<Movie> {
     public Movie(Map<String, List<String>> fieldMap, ContentList<Actor> allActors) {
         updateClassMovieId();
         iAmFromConstructor = true;
+        try {
+            setFilmweb(new URL(fieldMap.get(Movie.FILMWEB).get(0)));
+        } catch (MalformedURLException ignored) {
+            throw new NullPointerException("Can't create movie when filmweb is incorrect");
+        }
         for(String field : fieldMap.keySet()) {
             setFieldWithList(field, fieldMap.get(field));
         }
@@ -89,6 +94,11 @@ public final class Movie implements ContentType<Movie> {
     public Movie(Map<String, List<String>> fieldMap) {
         updateClassMovieId();
         iAmFromConstructor = true;
+        try {
+            setFilmweb(new URL(fieldMap.get(Movie.FILMWEB).get(0)));
+        } catch (MalformedURLException ignored) {
+            throw new NullPointerException("Can't create movie when filmweb is incorrect");
+        }
         for(String field : fieldMap.keySet()) {
             setFieldWithList(field, fieldMap.get(field));
         }
@@ -222,6 +232,10 @@ public final class Movie implements ContentType<Movie> {
     @Override
     public String getReprName() {
         return title.replaceAll(" ", "_");
+    }
+
+    public void setFilmweb(URL filmweb) {
+        this.filmweb = filmweb;
     }
 
     public void setDuration(int duration) {
@@ -386,7 +400,7 @@ public final class Movie implements ContentType<Movie> {
         return this.id;
     }
 
-    public String getFilmweb() {
+    public URL getFilmweb() {
         return filmweb;
     }
 
@@ -470,7 +484,7 @@ public final class Movie implements ContentType<Movie> {
         map.put(DESCRIPTION, getDescription());
         map.put(IMAGE_PATH, imagePath != null ? imagePath.toString() : null);
         map.put(IMAGE_URL, imageUrl != null ? imageUrl.toString() : null);
-        map.put(FILMWEB, filmweb);
+        map.put(FILMWEB, filmweb.toString());
         return map;
     }
 
@@ -573,7 +587,7 @@ public final class Movie implements ContentType<Movie> {
         if(movie == null) {
             throw new IllegalArgumentException("Cannot compare to null!");
         }
-        return filmweb.compareTo(movie.getFilmweb());
+        return filmweb.toString().compareTo(movie.getFilmweb().toString());
     }
 
     @Override

@@ -47,8 +47,13 @@ public final class DownloadAndProcessMovies extends Thread {
                 while (movieFileList.size() != 0) {
                     File movieFile;
                     synchronized (movieFileList) {
-                        movieFile = movieFileList.get(0);
-                        movieFileList.remove(0);
+                        try {
+                            movieFile = movieFileList.get(0);
+                            movieFileList.remove(0);
+                        } catch (IndexOutOfBoundsException ignored) {
+                            logger.debug("No more data to process for \"{}\"", Thread.currentThread().getName());
+                            break;
+                        }
                     }
                     Movie movie = handleMovieFromFile(movieFile, allMovies, allActors);
                     if(movie != null) {
