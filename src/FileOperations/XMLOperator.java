@@ -200,12 +200,44 @@ public final class XMLOperator {
         makeSimpleSave(doc, savedFile);
     }
 
+    public static <E extends ContentType<E>> void removeFromContentList(ContentList<E> list, int idToRemove) {
+        File savedFile;
+        if(list == null || list.size() == 0) return;
+        String tagName;
+        if(list.get(0) instanceof Actor) {
+            savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
+            tagName = Actor.class.getSimpleName().toLowerCase();
+        }
+        else if(list.get(0) instanceof Movie) {
+            savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
+            tagName = Movie.class.getSimpleName().toLowerCase();
+        }
+        else return;
+
+        Document doc = createDocToRead(savedFile);
+        if(doc == null) return;
+        Element rootElement = doc.getDocumentElement();
+        NodeList nodeList = rootElement.getElementsByTagName(tagName);
+        for(int i = 0; i < nodeList.getLength(); i++) {
+            if(nodeList.item(i).getTextContent().equals(String.valueOf(idToRemove))) {
+                rootElement.removeChild(nodeList.item(i));
+                logger.debug("Id \"{}\" successfully removed from \"{}\"", idToRemove, list.getListName());
+                makeSimpleSave(doc, savedFile);
+                return;
+            }
+        }
+        logger.warn("Failed to remove id \"{}\" from \"{}\"", idToRemove, list.getListName());
+    }
+
+
+
     public static <E extends ContentType<E>> void removeContentList(ContentList<E> list) {
         File savedFile;
         if(list == null || list.size() == 0) return;
         if(list.get(0) instanceof Actor) savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
         else if(list.get(0) instanceof Movie) savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
         else return;
+
         logger.info("Attempt to remove list \"{}\" ends with status: \"{}\"", savedFile.getName(), savedFile.delete());
     }
 
@@ -218,7 +250,6 @@ public final class XMLOperator {
         private List<ContentList<Movie>> allMoviesLists;
         private ContentList<Actor> allActors;
         private ContentList<Movie> allMovies;
-        private ContentList<Movie> moviesToWatch;
 
 
         @Override
@@ -235,16 +266,10 @@ public final class XMLOperator {
             if(allMovies == null) {
                 allMovies = new ContentList<>(ContentList.ALL_MOVIES_DEFAULT);
             }
-            moviesToWatch = ContentList.getContentListFromListByName(allMoviesLists, ContentList.MOVIES_TO_WATCH);
-            if(moviesToWatch == null) {
-                moviesToWatch = new ContentList<>(ContentList.MOVIES_TO_WATCH);
-            }
+
             logger.info("All data read from files");
         }
 
-        public ContentList<Movie> getMoviesToWatch() {
-            return moviesToWatch;
-        }
 
         public ContentList<Actor> getAllActors() {
             return allActors;
@@ -281,7 +306,7 @@ public final class XMLOperator {
             ContentList<Movie> defaultAllMovies = createDefaultMovieContentList(allActorsContentLists);
             allMovieLists.add(defaultAllMovies);
             for(File file : Objects.requireNonNull(IO.listDirectory(SAVE_PATH_MOVIE.toFile()))) {
-                if(file.toString().endsWith(".xml") && !file.getName().matches(ContentList.ALL_MOVIES_DEFAULT.concat(".xml"))) {
+                if(file.toString().endsWith(".xml") && !file.getName().matches(ContentList.ALL_MOVIES_DEFAULT.concat(".xml")) && !file.getName().matches(ContentList.MOVIES_TO_WATCH.concat(".xml"))) {
                     allMovieLists.add(createMovieContentList(file, defaultAllMovies));
                     logger.info("ContentList<Movie> \"{}\" successfully read from file \"{}\"", file.getName().replaceAll("\\.xml$", "") ,file);
                 }
@@ -572,7 +597,7 @@ public final class XMLOperator {
             Thread downloadMovieImages = new Thread(() -> {
                 for(Movie movie : getAllMovies().getList()) {
                     try {
-                        Connection connection = new Connection(new URL(movie.getFilmweb()));
+                        Connection connection = new Connection(movie.getFilmweb());
                         Connection.downloadImage(connection.getImageUrl(true), movie.getImagePath());
                     } catch (IOException ignored) { }
                 }
