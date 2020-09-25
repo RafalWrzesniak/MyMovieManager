@@ -46,6 +46,10 @@ public final class Movie implements ContentType<Movie> {
             RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, IMAGE_PATH, IMAGE_URL, FILMWEB));
     private boolean iAmFromConstructor = false;
 
+    public static final Comparator<Movie> COMP_ID = Comparator.comparingInt(Movie::getId);
+    public static final Comparator<Movie> COMP_DURATION = Comparator.comparingInt(Movie::getDuration);
+    public static final Comparator<Movie> COMP_PREMIERE = Comparator.comparing(Movie::getPremiere);
+    public static final Comparator<Movie> COMP_RATE = Comparator.comparingDouble(Movie::getRate);
 
     static {
         updateClassMovieId();
@@ -530,6 +534,9 @@ public final class Movie implements ContentType<Movie> {
             for(String genre : genres) {
                 if(genre.toLowerCase().contains(searchingStr)) return true;
             }
+            for(String prod : production) {
+                if(prod.toLowerCase().contains(searchingStr)) return true;
+            }
             try {
                 return filmweb.equals(searchingStr);
             } catch (NullPointerException ignore) {}
@@ -587,7 +594,8 @@ public final class Movie implements ContentType<Movie> {
         if(movie == null) {
             throw new IllegalArgumentException("Cannot compare to null!");
         }
-        return filmweb.toString().compareTo(movie.getFilmweb().toString());
+//        return filmweb.toString().compareTo(movie.getFilmweb().toString());
+        return title.toLowerCase().compareTo(movie.getTitle().toLowerCase());
     }
 
     @Override
@@ -598,6 +606,5 @@ public final class Movie implements ContentType<Movie> {
                 logger.debug("Movie \"{}\" added to the list of new objects", this);
             }
         }
-
     }
 }

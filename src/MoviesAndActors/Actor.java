@@ -46,6 +46,9 @@ public final class Actor implements ContentType<Actor> {
     public static final List<String> FIELD_NAMES = new ArrayList<>(List.of(ID, NAME, SURNAME, NATIONALITY, BIRTHDAY,
             DEATH_DAY, IMAGE_PATH, IMAGE_URL, FILMWEB, PLAYED_IN_MOVIES, DIRECTED_MOVIES, WROTE_MOVIES));
 
+    public static final Comparator<Actor> COMP_ID = Comparator.comparingInt(Actor::getId);
+    public static final Comparator<Actor> COMP_AGE = Comparator.comparingInt(Actor::getAge);
+
     static {
         updateClassActorId();
     }
@@ -396,7 +399,7 @@ public final class Actor implements ContentType<Actor> {
         if(actor == null) {
             throw new IllegalArgumentException("Cannot compare to null!");
         }
-        return filmweb.compareTo(actor.getFilmweb());
+        return getReprName().toLowerCase().compareTo(actor.getReprName().toLowerCase());
     }
 
     @Override
