@@ -54,8 +54,8 @@ public final class Connection {
             entry(Movie.IMAGE_URL, "itemprop=\"image\" content")
     );
     private static final Map<String, String> MOVIE_CLASS_LIST_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
-            entry(Movie.GENRES,     "/ranking/film/"), // "genres"
-            entry(Movie.PRODUCTION, "countries")
+            entry(Movie.GENRES,     "gatunek"), // "genres"
+            entry(Movie.PRODUCTION, "produkcja")
     );
     public static final Map<String, String> MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
             entry(Movie.CAST,     "actors"),
@@ -191,6 +191,31 @@ public final class Connection {
             logger.warn("Null as input - can't extract list of items \"{}\" from \"{}\"", itemToExtract, websiteUrl);
             throw new IOException("Null as input - can't extract list of items \"" + itemToExtract + "\" from " + websiteUrl);
         }
+
+        Pattern patternOfItemProp = Pattern.compile("<div class=\"filmInfo__header\">" + itemToExtract + "</div>(.+?)</div>");
+        Matcher matcherOfItemProp = patternOfItemProp.matcher(line);
+        List<String> listOfItems = new ArrayList<>();
+
+        if(matcherOfItemProp.find()) {
+            Pattern pattern = Pattern.compile("\"/ranking/film/\\w+/\\d+\">(.+?)</a>");
+            Matcher matcher = pattern.matcher(matcherOfItemProp.group(1));
+            while(matcher.find()) {
+                listOfItems.add(replaceAcutesHTML(matcher.group(1)));
+            }
+        }
+        if(listOfItems.size() == 0) {
+            logger.warn("Couldn't find any list item \"{}\" on \"{}\"", itemToExtract, websiteUrl);
+        }
+        return listOfItems;
+    }
+
+
+    @Deprecated
+    private List<String> extractListOfItemsFromFilmwebLineOldOne(String itemToExtract, String line) throws IOException {
+        if(itemToExtract == null || line == null) {
+            logger.warn("Null as input - can't extract list of items \"{}\" from \"{}\"", itemToExtract, websiteUrl);
+            throw new IOException("Null as input - can't extract list of items \"" + itemToExtract + "\" from " + websiteUrl);
+        }
         Pattern pattern = Pattern.compile(itemToExtract + "(=\\d+|\\w+/\\d+)\">(.+?)</a>");
         Matcher matcher = pattern.matcher(line);
         List<String> listOfItems = new ArrayList<>();
@@ -201,7 +226,7 @@ public final class Connection {
             try {
                 String newLine = grepLineFromWebsite(itemToExtract);
                 if(newLine != null && !newLine.equals(line)) {
-                    return extractListOfItemsFromFilmwebLine(itemToExtract, newLine);
+                    return extractListOfItemsFromFilmwebLineOldOne(itemToExtract, newLine);
                 } else {
                     logger.warn("Couldn't find any list item \"{}\" on \"{}\"", itemToExtract, websiteUrl);
                 }
