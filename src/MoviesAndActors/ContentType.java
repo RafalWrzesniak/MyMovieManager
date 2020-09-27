@@ -1,5 +1,6 @@
 package MoviesAndActors;
 
+import java.net.URL;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +16,7 @@ public interface ContentType<T> extends Comparable<T> {
     Map<String, String> getAllFieldsAsStrings();
     String getReprName();
     void saveMe();
+    URL getFilmweb();
 
     static String checkForNullOrEmptyOrIllegalChar(String stringToCheck, String argName) {
         if(stringToCheck == null) {

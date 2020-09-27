@@ -57,12 +57,15 @@ public final class Connection {
             entry(Movie.GENRES,     "gatunek"), // "genres"
             entry(Movie.PRODUCTION, "produkcja")
     );
-    public static final Map<String, String> MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
+    private static final Map<String, String> MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
             entry(Movie.CAST,     "actors"),
             entry(Movie.DIRECTORS,"director"),
             entry(Movie.WRITERS,  "screenwriter")
     );
 
+    public URL getMainMoviePage() {
+        return mainMoviePage;
+    }
 
     public Connection(String desiredTitle) throws IOException {
         String desiredTitleEncoded = URLEncoder.encode(desiredTitle, "UTF-8");
@@ -338,29 +341,33 @@ public final class Connection {
             return actorList;
         }
         for(String actorUrl : actorUrls) {
-                if(allActors.find(actorUrl).size() == 0) {
-                    try {
-                        changeUrlTo(actorUrl);
-                        Actor actor = createActorFromFilmwebLink();
-                        if(allActors.add(actor)) {
-                            File actorDir = IO.createContentDirectory(actor);
-                            assert actor != null;
-                            Path downloadedImagePath = Paths.get(actorDir.toString(), actor.getReprName().concat(".jpg"));
-                            if( Connection.downloadImage(actor.getImageUrl(), downloadedImagePath) ) {
-                                actor.setImagePath(downloadedImagePath);
-                            } else {
-                                actor.setImagePath(IO.NO_IMAGE);
-                            }
-                        } else if(actor != null){
-                            actor = allActors.get(actor);
+            try {
+                Actor actor = allActors.getObjByUrlIfExists(new URL(actorUrl));
+                if(actor == null) {
+                    changeUrlTo(actorUrl);
+                    actor = createActorFromFilmwebLink();
+                    if (allActors.add(actor)) {
+                        File actorDir = IO.createContentDirectory(actor);
+                        assert actor != null;
+                        Path downloadedImagePath = Paths.get(actorDir.toString(), actor.getReprName().concat(".jpg"));
+                        if (Connection.downloadImage(actor.getImageUrl(), downloadedImagePath)) {
+                            actor.setImagePath(downloadedImagePath);
                         } else {
-                            throw new NullPointerException("No data found for " + actorUrl);
+                            actor.setImagePath(IO.NO_IMAGE);
                         }
-                        actorList.add(actor);
-                    } catch (IOException | NullPointerException e) {
-                        logger.warn("Can't get data from \"{}\" because of \"{}\" in thread \"{}\"", actorUrl, e.getMessage(), Thread.currentThread());
+                    } else if (actor != null) {
+                        actor = allActors.get(actor);
+                    } else {
+                        throw new NullPointerException("No data found for " + actorUrl);
                     }
-                } else actorList.add(allActors.find(actorUrl).get(0));
+                } else {
+                    logger.debug("Actor \"{}\" already exists on \"{}\", new data won't be downloaded", actor, allActors);
+                }
+                actorList.add(actor);
+
+            } catch (IOException | NullPointerException e) {
+                logger.warn("Can't get data from \"{}\" because of \"{}\" in thread \"{}\"", actorUrl, e.getMessage(), Thread.currentThread());
+            }
         }
         return actorList;
     }

@@ -113,6 +113,11 @@ public final class DownloadAndProcessMovies extends Thread {
         Movie movie = null;
         try {
             connection = new Connection(movieFile.getName());
+            movie = allMovies.getObjByUrlIfExists(connection.getMainMoviePage());
+            if(movie != null) {
+                logger.info("Movie \"{}\" already exists on the list \"{}\", new data won't be downloaded", movie, allMovies);
+                return movie;
+            }
             movie = connection.createMovieFromFilmwebLink();
             if(allMovies.add(movie)) {
                 connection.addCastToMovie(movie, allActors);
