@@ -97,17 +97,19 @@ public final class IO {
         updateRelativePaths();
     }
 
-    public static void changeSavePath(File newDirectory) {
-        System.out.println(newDirectory);
+    public static void changeSavePath(File newDirectory, boolean moveFiles) {
         if(newDirectory != null) {
             newDirectory.mkdir();
-            try {
-                Files.move(SAVE_PATH, newDirectory.toPath(), REPLACE_EXISTING);
-            } catch (IOException e) {
-                e.printStackTrace();
+            if(moveFiles) {
+                try {
+                    Files.move(SAVE_PATH, newDirectory.toPath(), REPLACE_EXISTING);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             updateParamInCfg("SAVE_PATH", newDirectory.toString());
             SAVE_PATH = newDirectory.toPath();
+            logger.debug("SAVE_PATH changed to \"{}\"", newDirectory.toString());
             updateRelativePaths();
         } else {
             logger.warn("Couldn't change SAVE_PATH to \"{}\". SAVE_PATH is still \"{}\"", newDirectory, SAVE_PATH);

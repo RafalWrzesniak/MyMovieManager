@@ -45,6 +45,14 @@ public class MovieMainFolder extends Thread {
             }
         }
 
+        Path path = Paths.get(IO.getSavePathMovie().toString(), moviesToWatch.getListName().concat(".xml"));
+        logger.debug("Attempt to remove \"{}\" ends with status \"{}\"", path.toString(), path.toFile().delete());
+
+        for(Map.Entry<File, Integer> entry : newStateMap.entrySet()) {
+            moviesToWatch.add(allMovies.getById(entry.getValue()));
+        }
+        newStateMap.clear();
+
         logger.debug("Found \"{}\" new movies in main movie folder", newPositionsToHandle.size());
         if(newPositionsToHandle.size() > 0) {
             DownloadAndProcessMovies downloadAndProcessMovies = new DownloadAndProcessMovies(newPositionsToHandle, allMovies, allActors);
@@ -61,8 +69,6 @@ public class MovieMainFolder extends Thread {
         if(!newStateMap.equals(lastRideMap)) {
             IO.writeLastRideFile(newStateMap);
         }
-        Path path = Paths.get(IO.getSavePathMovie().toString(), moviesToWatch.getListName().concat(".xml"));
-        logger.debug("Attempt to remove \"{}\" ends with status \"{}\"", path.toString(), path.toFile().delete());
         for(Map.Entry<File, Integer> entry : newStateMap.entrySet()) {
             moviesToWatch.add(allMovies.getById(entry.getValue()));
         }

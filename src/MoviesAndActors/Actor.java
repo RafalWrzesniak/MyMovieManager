@@ -28,8 +28,8 @@ public final class Actor implements ContentType<Actor> {
     private int age;
     private Path imagePath;
     private URL imageUrl;
-    private String filmweb;
-    private static int classActorId;
+    private URL filmweb;
+    private static int classActorId = -1;
     // actor
     private boolean isActor = false;
     private final List<Movie> playedInMovies = new ArrayList<>();
@@ -49,16 +49,16 @@ public final class Actor implements ContentType<Actor> {
     public static final Comparator<Actor> COMP_ID = Comparator.comparingInt(Actor::getId);
     public static final Comparator<Actor> COMP_AGE = Comparator.comparingInt(Actor::getAge);
 
-    static {
-        updateClassActorId();
-    }
+//    static {
+//        updateClassActorId();
+//    }
 
     public static void updateClassActorId() {
         File actorDir = IO.getSavePathActor().toFile();
         List<String> files = IO.getFileNamesInDirectory(actorDir);
-        if(files.size() == 0) {
+        if(files.size() == 0 && classActorId == -1) {
             classActorId = 0;
-        } else {
+        } else if(files.size() != 0){
             for (String name : files) {
                 Pattern pattern = Pattern.compile("^actor(\\d+)$");
                 Matcher matcher = pattern.matcher(name);
@@ -72,12 +72,15 @@ public final class Actor implements ContentType<Actor> {
 
     public Actor(Map<String, String> actorMap) {
         updateClassActorId();
+        try { setFilmweb(new URL(actorMap.get(FILMWEB)));
+        } catch (MalformedURLException ignored) {
+            throw new NullPointerException("Can't create movie when filmweb is incorrect");
+        }
         this.name = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(NAME), "Name");
         this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(SURNAME), "Surname");
         this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar( actorMap.get(NATIONALITY), "Nationality");
         try { this.imagePath = Paths.get(actorMap.get(IMAGE_PATH)); } catch (NullPointerException ignored) { }
         try { this.imageUrl = new URL(actorMap.get(IMAGE_URL)); } catch (MalformedURLException ignored) { }
-        this.filmweb = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(FILMWEB), "filmweb");
         this.birthday = convertBdStringToLocalDate(actorMap.get(Actor.BIRTHDAY));
         if(actorMap.get(Actor.DEATH_DAY) != null) {
             setDeathDay(LocalDate.parse(actorMap.get(Actor.DEATH_DAY)));
@@ -136,7 +139,7 @@ public final class Actor implements ContentType<Actor> {
         return id;
     }
 
-    public String getFilmweb() {
+    public URL getFilmweb() {
         return filmweb;
     }
 
@@ -170,7 +173,7 @@ public final class Actor implements ContentType<Actor> {
         if(deathDay != null) map.put(DEATH_DAY, deathDay.toString());
         map.put(ContentType.IMAGE_PATH, imagePath != null ? imagePath.toString() : null);
         map.put(ContentType.IMAGE_URL, imageUrl != null ? imageUrl.toString() : null);
-        map.put(ContentType.FILMWEB, filmweb);
+        map.put(ContentType.FILMWEB, filmweb.toString());
         map.put(PLAYED_IN_MOVIES, getMovieId.apply(playedInMovies));
         map.put(DIRECTED_MOVIES, getMovieId.apply(directedMovies));
         map.put(WROTE_MOVIES, getMovieId.apply(wroteMovies));
@@ -199,6 +202,10 @@ public final class Actor implements ContentType<Actor> {
             this.age = deathDay.minusYears(birthday.getYear()).getYear();
         }
 
+    }
+
+    public void setFilmweb(URL filmweb) {
+        this.filmweb = filmweb;
     }
 
     public LocalDate getDeathDay() {
@@ -368,7 +375,7 @@ public final class Actor implements ContentType<Actor> {
 //            }
         }
         try {
-            return filmweb.equals(strToFind);
+            return filmweb.toString().equals(strToFind);
         } catch (NullPointerException ignore) {}
         return false;
     }

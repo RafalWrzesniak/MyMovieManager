@@ -38,7 +38,7 @@ public final class Movie implements ContentType<Movie> {
     private Path imagePath;
     private URL imageUrl;
     private URL filmweb;
-    private static int classMovieId;
+    private static int classMovieId = -1;
     public static String TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", DURATION = "duration",
             RATE = "rate", RATE_COUNT = "rateCount", CAST = "cast", DIRECTORS = "directors", WRITERS = "writers",
             GENRES = "genres", PRODUCTION = "production", DESCRIPTION = "description";
@@ -58,9 +58,9 @@ public final class Movie implements ContentType<Movie> {
     public synchronized static void updateClassMovieId() {
         File movieDir = IO.getSavePathMovie().toFile();
         List<String> files = IO.getFileNamesInDirectory(movieDir);
-        if(files.size() == 0) {
+        if(files.size() == 0 && classMovieId != -1) {
             classMovieId = 0;
-        } else {
+        } else if(files.size() != 0){
             for (String name : files) {
                 Pattern pattern = Pattern.compile("^movie(\\d+)$");
                 Matcher matcher = pattern.matcher(name);

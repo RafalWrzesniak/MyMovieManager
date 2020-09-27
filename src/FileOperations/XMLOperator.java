@@ -606,7 +606,7 @@ public final class XMLOperator {
             Thread downloadActorImages = new Thread(() -> {
                 for(Actor actor : getAllActors().getList()) {
                     try {
-                        Connection connection = new Connection(new URL(actor.getFilmweb()));
+                        Connection connection = new Connection(actor.getFilmweb());
                         Connection.downloadImage(connection.getImageUrl(false), actor.getImagePath());
                     } catch (IOException ignored) { }
                 }
