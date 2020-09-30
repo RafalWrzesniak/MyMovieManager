@@ -168,7 +168,7 @@ public final class Movie implements ContentType<Movie> {
 //                logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
                 saveMe();
             } else {
-                logger.warn("Unsuccessful set of \"{}\" in movie \"{}\" - this field is already set to \"{}\"", field, this.toString(), Movie.class.getDeclaredField(field).get(this));
+                logger.warn("Unsuccessful set of \"{}\" in movie \"{}\" - this field is already set", field, this.toString());
             }
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
@@ -204,7 +204,7 @@ public final class Movie implements ContentType<Movie> {
                             break;
                     }
                 } else {
-                    logger.warn("Unsuccessful set of \"{}\" in \"{}\". \"{}\" is already on the list", field, this, value);
+                    logger.warn("Unsuccessful set of {}. \"{}\" is already on the list", "\"" + field + "\" in " + this, value);
                     return;
                 }
             } else if(value instanceof String) {
@@ -212,7 +212,7 @@ public final class Movie implements ContentType<Movie> {
                 List<String> list = (List<String>) Movie.class.getDeclaredField(field).get(this);
                 String fieldName = Movie.class.getDeclaredField(field).getName();
                 if (list.contains(value)) {
-                    logger.warn("Unsuccessful set of \"{}\" in \"{}\". \"{}\" is already on the list", field, this, value);
+                    logger.warn("Unsuccessful set of {}. \"{}\" is already on the list", "\"" + field + "\" in " + this, value);
                     return;
                 } else if(fieldName.equals("cast") || fieldName.equals("directors") || fieldName.equals("writers")) return;
                 list.add((String) value);

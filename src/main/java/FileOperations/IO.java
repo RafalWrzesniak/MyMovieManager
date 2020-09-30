@@ -40,11 +40,11 @@ public final class IO {
     /**
      * File to be used when there is no available image of something on the web
      */
-    public static final Path NO_IMAGE = Paths.get("resources", "iHaveNoImage.jpg");
+    public static final Path NO_IMAGE = Paths.get("src","main", "resources", "iHaveNoImage.jpg");
     /**
      * File that contains last saw files in {@link MovieMainFolder#getMainMovieFolder()}
      */
-    public static final File LAST_RIDE = Paths.get("resources", "lastRide.xml").toFile();
+    public static final File LAST_RIDE = Paths.get("src","main", "resources", "lastRide.xml").toFile();
 
     private static Path SAVE_PATH;
     private static Path SAVE_PATH_MOVIE;
@@ -64,7 +64,7 @@ public final class IO {
     private IO() {}
 
     private static void initCfg() {
-        File cfg = Paths.get("resources", "config.cfg").toFile();
+        File cfg = Paths.get("src","main", "resources", "config.cfg").toFile();
         if(cfg.exists() && !cfg.isDirectory()) {
             Document doc = XMLOperator.createDocToRead(cfg);
             if(doc != null) {
@@ -125,7 +125,7 @@ public final class IO {
     }
 
     public static void updateParamInCfg(String parameter, String value) {
-        File cfg = Paths.get("resources", "config.cfg").toFile();
+        File cfg = Paths.get("src","main", "resources", "config.cfg").toFile();
         Document doc = XMLOperator.createDocToRead(cfg);
         if(doc == null) return;
         NodeList element = doc.getElementsByTagName(parameter);

@@ -74,7 +74,7 @@ public final class Actor implements ContentType<Actor> {
         updateClassActorId();
         try { setFilmweb(new URL(actorMap.get(FILMWEB)));
         } catch (MalformedURLException ignored) {
-            throw new NullPointerException("Can't create movie when filmweb is incorrect");
+            throw new NullPointerException("Can't create actor when filmweb " + actorMap.get(FILMWEB) + " is incorrect");
         }
         this.name = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(NAME), "Name");
         this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(actorMap.get(SURNAME), "Surname");

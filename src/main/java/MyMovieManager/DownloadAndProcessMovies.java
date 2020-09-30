@@ -1,7 +1,6 @@
 package MyMovieManager;
 
 import FileOperations.IO;
-import FileOperations.XMLOperator;
 import Internet.Connection;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;

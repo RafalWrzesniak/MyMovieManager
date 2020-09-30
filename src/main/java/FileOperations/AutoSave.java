@@ -1,6 +1,8 @@
 package FileOperations;
 
+import MoviesAndActors.Actor;
 import MoviesAndActors.ContentType;
+import MoviesAndActors.Movie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +12,7 @@ import java.util.List;
 public final class AutoSave extends Thread {
 
     private static final Logger logger = LoggerFactory.getLogger(AutoSave.class.getName());
-    public static final List<ContentType> NEW_OBJECTS = new ArrayList<>();
+    public static final List<ContentType<?>> NEW_OBJECTS = new ArrayList<>();
 
 
     @Override
@@ -28,7 +30,12 @@ public final class AutoSave extends Thread {
                 if (NEW_OBJECTS.size() > 0) {
                     logger.info("Saving objects: \"{}\"", NEW_OBJECTS);
                     while(NEW_OBJECTS.size() != 0) {
-                        XMLOperator.saveContentToXML(NEW_OBJECTS.get(0));
+                        Object object = NEW_OBJECTS.get(0);
+                        if(object instanceof Movie) {
+                            XMLOperator.saveContentToXML((Movie) object);
+                        } else if(object instanceof Actor) {
+                            XMLOperator.saveContentToXML((Actor) object);
+                        }
                         NEW_OBJECTS.remove(NEW_OBJECTS.get(0));
                     }
                 }

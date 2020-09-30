@@ -4,7 +4,6 @@ import FileOperations.IO;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -366,7 +365,8 @@ public final class Connection {
                 actorList.add(actor);
 
             } catch (IOException | NullPointerException e) {
-                logger.warn("Can't get data from \"{}\" because of \"{}\" in thread \"{}\"", actorUrl, e.getMessage(), Thread.currentThread());
+                String reason = String.format("\"%s\" in: \"%s\"", e.getMessage(), Thread.currentThread().getName());
+                logger.warn("Can't get data from \"{}\" because of {}", actorUrl, reason);
             }
         }
         return actorList;
@@ -488,16 +488,18 @@ public final class Connection {
             }
 //            System.out.println("Correlation of \"" + foundTitle + "\" : " + Math.round(correlation*100) + "%");
         }
+        String result = String.format("\"%s\" with correlation: %d%%]", chosenTitle, Math.round(highestCorrelation * 100));
         if(Math.round(highestCorrelation*100) > 50) {
-            logger.info("For query \"{}\" there was found \"{}\" with correlation: {}%", desiredTitle, chosenTitle, Math.round(highestCorrelation*100));
+            logger.info("For query \"{}\" there was found {}", desiredTitle, result);
         } else {
-            logger.warn("For query \"{}\" there was found \"{}\" with low correlation: {}%. Possibility of wrong movie assigning", desiredTitle, chosenTitle, Math.round(highestCorrelation*100));
+            logger.warn("For query \"{}\" there was found {}. Low correlation. Possibility of wrong movie assigning", desiredTitle, result);
         }
         return urlToReturn;
     }
 
-    private static int countChar(@NotNull String string, char character) {
+    private static int countChar(String string, char character) {
         int hitNumber = 0;
+        if(string == null || string.equals("")) return hitNumber;
         for(Character chara : string.toCharArray()) {
             if(chara == character) {
                 hitNumber++;

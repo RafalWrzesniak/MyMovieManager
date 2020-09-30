@@ -1,11 +1,13 @@
 .idea/
+encodings.xml
 .lib/
 .out/
-/src/xMain/
+/src/main/java/xMain/
 /savedData/
 /savedImages/
 /tmp
-/resources
+/src/main/resources
+/target
 .gitignore
 MyMovieManager.iml
 MyMovieManager_exported.xml
