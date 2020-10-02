@@ -58,7 +58,7 @@ public final class Movie implements ContentType<Movie> {
     public synchronized static void updateClassMovieId() {
         File movieDir = IO.getSavePathMovie().toFile();
         List<String> files = IO.getFileNamesInDirectory(movieDir);
-        if(files.size() == 0 && classMovieId != -1) {
+        if(files.size() == 0 && classMovieId == -1) {
             classMovieId = 0;
         } else if(files.size() != 0){
             for (String name : files) {
@@ -70,6 +70,7 @@ public final class Movie implements ContentType<Movie> {
                 }
             }
         }
+        if(classMovieId == -1) classMovieId = 0;
     }
 
 

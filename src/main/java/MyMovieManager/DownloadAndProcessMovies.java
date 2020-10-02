@@ -85,6 +85,7 @@ public final class DownloadAndProcessMovies extends Thread {
             connection = new Connection(movieUrl);
             movie = connection.createMovieFromFilmwebLink();
             if(allMovies.add(movie)) {
+                connection.addCastToMovie(movie, allActors);
                 movie.printPretty();
                 File movieDir = IO.createContentDirectory(movie);
                 Path downloadedImagePath = Paths.get(movieDir.toString(), movie.getReprName().replaceAll(":", "").concat(".jpg"));
