@@ -193,6 +193,10 @@ public final class XMLOperator {
         Document doc = createDocToRead(savedFile);
         if(doc == null) return;
         Element rootElement = doc.getDocumentElement();
+        if(rootElement.getTextContent().contains(String.valueOf(content.getId()))) {
+            logger.warn("Content \"{}\" is already saved in file \"{}\"", content, list);
+            return;
+        }
         rootElement.appendChild(doc.createTextNode("\t"));
         Element element = doc.createElement(content.getClass().getSimpleName().toLowerCase());
         element.appendChild(doc.createTextNode(String.valueOf(content.getId())));
