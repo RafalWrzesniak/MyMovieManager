@@ -8,22 +8,25 @@
     <artifactId>MyMovieManager</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+<!--    versions    -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compiler.version>3.8.1</compiler.version>
         <assembly.version>3.3.0</assembly.version>
         <logback.version>1.2.3</logback.version>
         <jupiter.version>5.7.0</jupiter.version>
+        <lombok.version>1.18.14</lombok.version>
         <java.version>9</java.version>
     </properties>
 
     <dependencies>
+<!--    logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
         </dependency>
-
+<!--    junit    -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -36,12 +39,19 @@
             <version>${jupiter.version}</version>
             <scope>test</scope>
         </dependency>
+<!--    lombok    -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
     </dependencies>
 
     <build>
         <plugins>
-
+<!--        main maven compiler       -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -52,7 +62,7 @@
                     <release>${java.version}</release>
                 </configuration>
             </plugin>
-
+<!--        assembly for jar       -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
