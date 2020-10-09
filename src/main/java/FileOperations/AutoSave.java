@@ -3,22 +3,23 @@ package FileOperations;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentType;
 import MoviesAndActors.Movie;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public final class AutoSave extends Thread {
 
-    private static final Logger logger = LoggerFactory.getLogger(AutoSave.class.getName());
+//    == fields ==
     public static final List<ContentType<?>> NEW_OBJECTS = new ArrayList<>();
 
 
+//  == methods ==
     @Override
     public void run() {
         setName("AutoSave");
-        logger.info("AutoSave thread started");
+        log.info("AutoSave thread started");
         boolean run = true;
         while (run) {
             synchronized (NEW_OBJECTS) {
@@ -28,7 +29,7 @@ public final class AutoSave extends Thread {
                     run = false;
                 }
                 if (NEW_OBJECTS.size() > 0) {
-                    logger.info("Saving objects: \"{}\"", NEW_OBJECTS);
+                    log.info("Saving objects: \"{}\"", NEW_OBJECTS);
                     while(NEW_OBJECTS.size() != 0) {
                         Object object = NEW_OBJECTS.get(0);
                         if(object instanceof Movie) {
@@ -41,6 +42,6 @@ public final class AutoSave extends Thread {
                 }
             }
         }
-        logger.info("AutoSave thread interrupted - exiting...");
+        log.info("AutoSave thread interrupted - exiting...");
     }
 }

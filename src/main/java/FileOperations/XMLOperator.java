@@ -5,10 +5,10 @@ import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.ContentType;
 import MoviesAndActors.Movie;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -27,26 +27,23 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 
-
+@Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class XMLOperator {
 
+//    == fields ==
     private static Path SAVE_PATH;
     private static Path SAVE_PATH_MOVIE;
     private static Path SAVE_PATH_ACTOR;
 
-    private static final Logger logger = LoggerFactory.getLogger(XMLOperator.class.getName());
-
-    private XMLOperator() {}
+//    == static initializer ==
 
     static {
         setLocalPaths();
     }
 
-    static void setLocalPaths() {
-        SAVE_PATH = IO.getSavePath();
-        SAVE_PATH_MOVIE = IO.getSavePathMovie();
-        SAVE_PATH_ACTOR = IO.getSavePathActor();
-    }
+
+//    == public static methods ==
 
     public static <E extends ContentType<E>> void saveContentToXML(E content) {
         if(!AutoSave.NEW_OBJECTS.contains(content)) return;
@@ -60,10 +57,107 @@ public final class XMLOperator {
                 .concat(content.getReprName().replaceAll("[]\\[*./:;|,\"]", ""))
                 .concat(".xml"));
         makeSimpleSave(doc, targetFile);
-        logger.debug("Content \"{}\" properly saved in \"{}\"", content.toString(), targetFile);
+        log.debug("Content \"{}\" properly saved in \"{}\"", content.toString(), targetFile);
+    }
+
+    public static <E extends ContentType<E>> void createListFile(ContentList<E> list) {
+        File savedFile;
+        if(list == null || list.size() == 0) throw new IllegalArgumentException("List argument cannot be null or empty!");
+        String type;
+        if(list.get(0) instanceof Actor) {
+            savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
+            type = Actor.class.getSimpleName();
+        }
+        else if(list.get(0) instanceof Movie) {
+            savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
+            type = Movie.class.getSimpleName();
+        }
+        else throw new IllegalArgumentException("Wrong list type!");
+        if(savedFile.exists()) return;
+        Document doc = createDoc();
+        if(doc == null) return;
+        Element rootElement = doc.createElement(ContentList.class.getSimpleName());
+        doc.appendChild(rootElement);
+        rootElement.appendChild(doc.createTextNode("\n\t"));
+        Element listName = doc.createElement("listName");
+        listName.appendChild(doc.createTextNode(list.getListName()));
+        rootElement.appendChild(listName);
+        rootElement.appendChild(doc.createTextNode("\n\t"));
+        Element typeElement = doc.createElement("type");
+        typeElement.appendChild(doc.createTextNode(type));
+        rootElement.appendChild(typeElement);
+        rootElement.appendChild(doc.createTextNode("\n"));
+        makeSimpleSave(doc, savedFile);
+    }
+
+    public static <E extends ContentType<E>> void updateSavedContentListWith(ContentList<E> list, E content) {
+        File savedFile;
+        if(list == null || list.size() == 0) return;
+        if(list.get(0) instanceof Actor) savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
+        else if(list.get(0) instanceof Movie) savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
+        else return;
+
+        Document doc = createDocToRead(savedFile);
+        if(doc == null) return;
+        Element rootElement = doc.getDocumentElement();
+        if(rootElement.getTextContent().contains(String.valueOf(content.getId()))) {
+            log.warn("Content \"{}\" is already saved in file \"{}\"", content, list);
+            return;
+        }
+        rootElement.appendChild(doc.createTextNode("\t"));
+        Element element = doc.createElement(content.getClass().getSimpleName().toLowerCase());
+        element.appendChild(doc.createTextNode(String.valueOf(content.getId())));
+        rootElement.appendChild(element);
+        rootElement.appendChild(doc.createTextNode("\n"));
+        makeSimpleSave(doc, savedFile);
+    }
+
+    public static <E extends ContentType<E>> void removeFromContentList(ContentList<E> list, int idToRemove) {
+        File savedFile;
+        if(list == null || list.size() == 0) return;
+        String tagName;
+        if(list.get(0) instanceof Actor) {
+            savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
+            tagName = Actor.class.getSimpleName().toLowerCase();
+        }
+        else if(list.get(0) instanceof Movie) {
+            savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
+            tagName = Movie.class.getSimpleName().toLowerCase();
+        }
+        else return;
+
+        Document doc = createDocToRead(savedFile);
+        if(doc == null) return;
+        Element rootElement = doc.getDocumentElement();
+        NodeList nodeList = rootElement.getElementsByTagName(tagName);
+        for(int i = 0; i < nodeList.getLength(); i++) {
+            if(nodeList.item(i).getTextContent().equals(String.valueOf(idToRemove))) {
+                rootElement.removeChild(nodeList.item(i));
+                log.debug("Id \"{}\" successfully removed from \"{}\"", idToRemove, list.getListName());
+                makeSimpleSave(doc, savedFile);
+                return;
+            }
+        }
+        log.warn("Failed to remove id \"{}\" from \"{}\"", idToRemove, list.getListName());
     }
 
 
+    public static <E extends ContentType<E>> void removeContentList(ContentList<E> list) {
+        File savedFile;
+        if(list == null || list.size() == 0) return;
+        if(list.get(0) instanceof Actor) savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
+        else if(list.get(0) instanceof Movie) savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
+        else return;
+        log.info("Attempt to remove list \"{}\" ends with status: \"{}\"", savedFile.getName(), savedFile.delete());
+    }
+
+//    == package-private static methods ==
+
+    static void setLocalPaths() {
+        SAVE_PATH = IO.getSAVE_PATH();
+        SAVE_PATH_MOVIE = IO.getSAVE_PATH_MOVIE();
+        SAVE_PATH_ACTOR = IO.getSAVE_PATH_ACTOR();
+    }
 
     static void makeSimpleSave(Document doc, File toFile) {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -97,11 +191,12 @@ public final class XMLOperator {
             doc.getDocumentElement().normalize();
             return doc;
         } catch (Exception e) {
-            logger.warn(e.getMessage());
+            log.warn(e.getMessage());
         }
         return null;
     }
 
+//   == private static methods ==
 
     private static <E extends ContentType<E>> void createXmlStructure(E content, Document doc) {
         String tagName;
@@ -136,14 +231,12 @@ public final class XMLOperator {
         rootElement.appendChild(doc.createTextNode("\n"));
     }
 
-    private static Element createRootElementFromXml(File inputFile) {
+    private static @Nullable Element createRootElementFromXml(File inputFile) {
         if(inputFile == null) {
-            logger.warn("Null as input for XMLOperator passed");
-//            throw new IllegalArgumentException("Input file cannot be null!");
+            log.warn("Null as input for XMLOperator passed");
             return null;
         } else if(!inputFile.toString().endsWith(".xml")) {
-            logger.warn("Wrong input file extension for XMLOperator passed. Should be: .xml, found: \"{}\"", inputFile.toString());
-//            throw new IllegalArgumentException("Wrong input file extension! Should be: .xml, found: " + inputFile.toString());
+            log.warn("Wrong input file extension for XMLOperator passed. Should be: .xml, found: \"{}\"", inputFile.toString());
             return null;
         }
         Document doc = createDocToRead(inputFile);
@@ -152,103 +245,7 @@ public final class XMLOperator {
     }
 
 
-    public static <E extends ContentType<E>> boolean createListFile(ContentList<E> list) {
-        File savedFile;
-        if(list == null || list.size() == 0) throw new IllegalArgumentException("List argument cannot be null or empty!");
-        String type;
-        if(list.get(0) instanceof Actor) {
-            savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
-            type = Actor.class.getSimpleName();
-        }
-        else if(list.get(0) instanceof Movie) {
-            savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
-            type = Movie.class.getSimpleName();
-        }
-        else throw new IllegalArgumentException("Wrong list type!");
-        if(savedFile.exists()) return false;
-        Document doc = createDoc();
-        if(doc == null) return false;
-        Element rootElement = doc.createElement(ContentList.class.getSimpleName());
-        doc.appendChild(rootElement);
-        rootElement.appendChild(doc.createTextNode("\n\t"));
-        Element listName = doc.createElement("listName");
-        listName.appendChild(doc.createTextNode(list.getListName()));
-        rootElement.appendChild(listName);
-        rootElement.appendChild(doc.createTextNode("\n\t"));
-        Element typeElement = doc.createElement("type");
-        typeElement.appendChild(doc.createTextNode(type));
-        rootElement.appendChild(typeElement);
-        rootElement.appendChild(doc.createTextNode("\n"));
-        makeSimpleSave(doc, savedFile);
-        return true;
-    }
-
-    public static <E extends ContentType<E>> void updateSavedContentListWith(ContentList<E> list, E content) {
-        File savedFile;
-        if(list == null || list.size() == 0) return;
-        if(list.get(0) instanceof Actor) savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
-        else if(list.get(0) instanceof Movie) savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
-        else return;
-
-        Document doc = createDocToRead(savedFile);
-        if(doc == null) return;
-        Element rootElement = doc.getDocumentElement();
-        if(rootElement.getTextContent().contains(String.valueOf(content.getId()))) {
-            logger.warn("Content \"{}\" is already saved in file \"{}\"", content, list);
-            return;
-        }
-        rootElement.appendChild(doc.createTextNode("\t"));
-        Element element = doc.createElement(content.getClass().getSimpleName().toLowerCase());
-        element.appendChild(doc.createTextNode(String.valueOf(content.getId())));
-        rootElement.appendChild(element);
-        rootElement.appendChild(doc.createTextNode("\n"));
-        makeSimpleSave(doc, savedFile);
-    }
-
-    public static <E extends ContentType<E>> void removeFromContentList(ContentList<E> list, int idToRemove) {
-        File savedFile;
-        if(list == null || list.size() == 0) return;
-        String tagName;
-        if(list.get(0) instanceof Actor) {
-            savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
-            tagName = Actor.class.getSimpleName().toLowerCase();
-        }
-        else if(list.get(0) instanceof Movie) {
-            savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
-            tagName = Movie.class.getSimpleName().toLowerCase();
-        }
-        else return;
-
-        Document doc = createDocToRead(savedFile);
-        if(doc == null) return;
-        Element rootElement = doc.getDocumentElement();
-        NodeList nodeList = rootElement.getElementsByTagName(tagName);
-        for(int i = 0; i < nodeList.getLength(); i++) {
-            if(nodeList.item(i).getTextContent().equals(String.valueOf(idToRemove))) {
-                rootElement.removeChild(nodeList.item(i));
-                logger.debug("Id \"{}\" successfully removed from \"{}\"", idToRemove, list.getListName());
-                makeSimpleSave(doc, savedFile);
-                return;
-            }
-        }
-        logger.warn("Failed to remove id \"{}\" from \"{}\"", idToRemove, list.getListName());
-    }
-
-
-
-    public static <E extends ContentType<E>> void removeContentList(ContentList<E> list) {
-        File savedFile;
-        if(list == null || list.size() == 0) return;
-        if(list.get(0) instanceof Actor) savedFile = Paths.get(SAVE_PATH_ACTOR.toString(), list.getListName().concat(".xml")).toFile();
-        else if(list.get(0) instanceof Movie) savedFile = Paths.get(SAVE_PATH_MOVIE.toString(), list.getListName().concat(".xml")).toFile();
-        else return;
-
-        logger.info("Attempt to remove list \"{}\" ends with status: \"{}\"", savedFile.getName(), savedFile.delete());
-    }
-
-
-
-
+//    == public static inner classes
 
     public static class ReadAllDataFromFiles extends Thread {
         private List<ContentList<Actor>> allActorsLists;
@@ -272,7 +269,7 @@ public final class XMLOperator {
                 allMovies = new ContentList<>(ContentList.ALL_MOVIES_DEFAULT);
             }
 
-            logger.info("All data read from files");
+            log.info("All data read from files");
         }
 
 
@@ -300,7 +297,7 @@ public final class XMLOperator {
             for(File file : Objects.requireNonNull(IO.listDirectory(SAVE_PATH_ACTOR.toFile()))) {
                 if(file.getName().endsWith(".xml") && !file.getName().matches(ContentList.ALL_ACTORS_DEFAULT.concat(".xml"))) {
                     allActorLists.add(createActorContentList(file, defaultAllActors));
-                    logger.info("ContentList<Actor> \"{}\" successfully read from file \"{}\"", file.getName().replaceAll("\\.xml$", "") ,file);
+                    log.info("ContentList<Actor> \"{}\" successfully read from file \"{}\"", file.getName().replaceAll("\\.xml$", "") ,file);
                 }
             }
             return allActorLists;
@@ -313,7 +310,7 @@ public final class XMLOperator {
             for(File file : Objects.requireNonNull(IO.listDirectory(SAVE_PATH_MOVIE.toFile()))) {
                 if(file.toString().endsWith(".xml") && !file.getName().matches(ContentList.ALL_MOVIES_DEFAULT.concat(".xml")) && !file.getName().matches(ContentList.MOVIES_TO_WATCH.concat(".xml"))) {
                     allMovieLists.add(createMovieContentList(file, defaultAllMovies));
-                    logger.info("ContentList<Movie> \"{}\" successfully read from file \"{}\"", file.getName().replaceAll("\\.xml$", "") ,file);
+                    log.info("ContentList<Movie> \"{}\" successfully read from file \"{}\"", file.getName().replaceAll("\\.xml$", "") ,file);
                 }
             }
             return allMovieLists;
@@ -322,7 +319,7 @@ public final class XMLOperator {
         private static ContentList<Actor> createActorContentList(File inputFile, ContentList<Actor> defaultAllActors) {
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
-                logger.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
+                log.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
                 return null;
             }
 
@@ -340,7 +337,7 @@ public final class XMLOperator {
         private static ContentList<Movie> createMovieContentList(File inputFile, ContentList<Movie> defaultAllMovies) {
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
-                logger.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
+                log.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
                 return null;
             }
 
@@ -360,7 +357,7 @@ public final class XMLOperator {
             File inputFile = Paths.get(SAVE_PATH_ACTOR.toString(), ContentList.ALL_ACTORS_DEFAULT.concat(".xml")).toFile();
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
-                logger.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
+                log.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
                 return null;
             }
             NodeList nodes = root.getElementsByTagName(Actor.class.getSimpleName().toLowerCase());
@@ -406,7 +403,7 @@ public final class XMLOperator {
             File inputFile = Paths.get(SAVE_PATH_MOVIE.toString(), ContentList.ALL_MOVIES_DEFAULT.concat(".xml")).toFile();
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
-                logger.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
+                log.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
                 return null;
             }
 
@@ -418,7 +415,7 @@ public final class XMLOperator {
                 }
             }
             if(defaultActors == null) {
-                logger.warn("Couldn't create ContentList from file \"{}\" - no correct default actor list", inputFile);
+                log.warn("Couldn't create ContentList from file \"{}\" - no correct default actor list", inputFile);
                 return null;
             }
             ContentList<Movie> contentList = new ContentList<>(root.getElementsByTagName("listName").item(0).getTextContent());
@@ -465,10 +462,10 @@ public final class XMLOperator {
             File inputFile = IO.getXmlFileFromDir(inputDir);
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
-                logger.warn("Couldn't create actor from file \"{}\" - internal XML file issue", inputFile);
+                log.warn("Couldn't create actor from file \"{}\" - internal XML file issue", inputFile);
                 return null;
             } else if(!root.getTagName().equals(Actor.class.getSimpleName())) {
-                logger.warn("Couldn't create actor from file \"{}\" - different structure type", inputFile);
+                log.warn("Couldn't create actor from file \"{}\" - different structure type", inputFile);
                 return null;
             }
 
@@ -480,7 +477,7 @@ public final class XMLOperator {
                     if(value != null) map.put(fieldName, value);
                 }
             }
-            logger.info("New actor created successfully from file \"{}\"", inputFile);
+            log.info("New actor created successfully from file \"{}\"", inputFile);
             Actor actor = new Actor(map);
             AutoSave.NEW_OBJECTS.remove(actor);
             return actor;
@@ -490,10 +487,10 @@ public final class XMLOperator {
             File inputFile = IO.getXmlFileFromDir(inputDir);
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
-                logger.warn("Couldn't create actor from file \"{}\" - internal XML file issue", inputFile);
+                log.warn("Couldn't create actor from file \"{}\" - internal XML file issue", inputFile);
                 return null;
             } else if(!root.getTagName().equals(Movie.class.getSimpleName())) {
-                logger.warn("Couldn't create actor from file \"{}\" - different structure type", inputFile);
+                log.warn("Couldn't create actor from file \"{}\" - different structure type", inputFile);
                 return null;
             }
 
@@ -507,7 +504,7 @@ public final class XMLOperator {
                 }
                 map.put(fieldName, param);
             }
-            logger.info("New movie created successfully from file \"{}\"", inputFile);
+            log.info("New movie created successfully from file \"{}\"", inputFile);
             Movie movie = new Movie(map, allActors);
             AutoSave.NEW_OBJECTS.remove(movie);
             Function<List<Actor>, Boolean> removeActorsFromListToSave = list -> {
@@ -579,10 +576,11 @@ public final class XMLOperator {
             copyNodesFromPath.apply(SAVE_PATH_MOVIE);
             rootElement.appendChild(doc.createTextNode("\n"));
             makeSimpleSave(doc, exportFile);
-            logger.info("All data successfully exported to file \"{}\"", exportFile);
+            log.info("All data successfully exported to file \"{}\"", exportFile);
         }
 
     }
+
 
     public static class ImportDataFromXml extends ReadAllDataFromFiles {
 
@@ -595,7 +593,7 @@ public final class XMLOperator {
         @Override
         public void run() {
             setName("ImportData");
-            logger.info("Import data started from file \"{}\"", importFile.toString());
+            log.info("Import data started from file \"{}\"", importFile.toString());
             convertImportFileToDirs(importFile);
             super.run();
             setName("ImportData");
@@ -627,13 +625,13 @@ public final class XMLOperator {
                 e.printStackTrace();
             }
 
-            logger.info("Import data finished from file \"{}\"", importFile.toString());
+            log.info("Import data finished from file \"{}\"", importFile.toString());
         }
 
         public static void convertImportFileToDirs(File importFile) {
             Element rootElement = createRootElementFromXml(importFile);
             if(rootElement == null || !rootElement.getTagName().equals("exported")) {
-                logger.warn("Failed to import file \"{}\" - wrong XML", importFile);
+                log.warn("Failed to import file \"{}\" - wrong XML", importFile);
                 return;
             }
             Function<String, Boolean> saveAllContentsToFiles = content -> {
@@ -677,21 +675,13 @@ public final class XMLOperator {
                         saveAllContentsToFiles.apply(Actor.class.getSimpleName()) &&
                         saveAllContentsToFiles.apply(ContentList.class.getSimpleName())
                 ) {
-                    logger.info("Successfully imported data from file \"{}\"", importFile);
+                    log.info("Successfully imported data from file \"{}\"", importFile);
                 } else {
-                    logger.warn("Some data could not be read while import from \"{}\"", importFile);
+                    log.warn("Some data could not be read while import from \"{}\"", importFile);
                 }
             }
         }
 
     }
 
-
-
 }
-
-
-
-
-
-

@@ -4,8 +4,10 @@ import MoviesAndActors.Actor;
 import MoviesAndActors.ContentType;
 import MoviesAndActors.Movie;
 import MyMovieManager.MovieMainFolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -24,15 +26,24 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
  * Fully static and final class with private constructor to manage some I/O operations
  */
+@Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class IO {
 
-    private static final Logger logger = LoggerFactory.getLogger(IO.class.getName());
+//    == fields ==
+    @Getter
+    private static Path SAVE_PATH;
+    @Getter
+    private static Path SAVE_PATH_MOVIE;
+    @Getter
+    private static Path SAVE_PATH_ACTOR;
+
+//    == constants ==
     /**
      * Path for files that are needed only for some time
      */
@@ -42,14 +53,11 @@ public final class IO {
      */
     public static final Path NO_IMAGE = Paths.get("src","main", "resources", "iHaveNoImage.jpg");
     /**
-     * File that contains last saw files in {@link MovieMainFolder#getMainMovieFolder()}
+     * File that contains last saw files in {@link MovieMainFolder#getMAIN_MOVIE_FOLDER()}
      */
     public static final File LAST_RIDE = Paths.get("src","main", "resources", "lastRide.xml").toFile();
 
-    private static Path SAVE_PATH;
-    private static Path SAVE_PATH_MOVIE;
-    private static Path SAVE_PATH_ACTOR;
-
+//  == static initializer ==
     static {
         initCfg();
         XMLOperator.setLocalPaths();
@@ -61,7 +69,7 @@ public final class IO {
         }
     }
 
-    private IO() {}
+//    == private static methods ==
 
     private static void initCfg() {
         File cfg = Paths.get("src","main", "resources", "config.cfg").toFile();
@@ -97,6 +105,20 @@ public final class IO {
         updateRelativePaths();
     }
 
+
+//    == package-private static methods ==
+
+    static void updateRelativePaths() {
+        SAVE_PATH_MOVIE = Paths.get(SAVE_PATH.toString(), Movie.class.getSimpleName());
+        SAVE_PATH_ACTOR = Paths.get(SAVE_PATH.toString(), Actor.class.getSimpleName());
+        boolean made1 = SAVE_PATH_MOVIE.toFile().mkdir();
+        boolean made2 = SAVE_PATH_ACTOR.toFile().mkdir();
+        XMLOperator.setLocalPaths();
+    }
+
+
+//    == public static methods ==
+
     public static void changeSavePath(File newDirectory, boolean moveFiles) {
         if(newDirectory != null) {
             newDirectory.mkdir();
@@ -109,19 +131,11 @@ public final class IO {
             }
             updateParamInCfg("SAVE_PATH", newDirectory.toString());
             SAVE_PATH = newDirectory.toPath();
-            logger.debug("SAVE_PATH changed to \"{}\"", newDirectory.toString());
+            log.debug("SAVE_PATH changed to \"{}\"", newDirectory.toString());
             updateRelativePaths();
         } else {
-            logger.warn("Couldn't change SAVE_PATH to \"{}\". SAVE_PATH is still \"{}\"", newDirectory, SAVE_PATH);
+            log.warn("Couldn't change SAVE_PATH to \"{}\". SAVE_PATH is still \"{}\"", newDirectory, SAVE_PATH);
         }
-    }
-
-    static void updateRelativePaths() {
-        SAVE_PATH_MOVIE = Paths.get(SAVE_PATH.toString(), Movie.class.getSimpleName());
-        SAVE_PATH_ACTOR = Paths.get(SAVE_PATH.toString(), Actor.class.getSimpleName());
-        boolean made1 = SAVE_PATH_MOVIE.toFile().mkdir();
-        boolean made2 = SAVE_PATH_ACTOR.toFile().mkdir();
-
     }
 
     public static void updateParamInCfg(String parameter, String value) {
@@ -132,19 +146,10 @@ public final class IO {
         if(!element.item(0).getTextContent().equals(value)) {
             element.item(0).setTextContent(value);
             XMLOperator.makeSimpleSave(doc, cfg);
-            logger.info("Parameter \"{}\" changed to \"{}\" in config.cfg", parameter, value);
+            log.info("Parameter \"{}\" changed to \"{}\" in config.cfg", parameter, value);
         }
     }
 
-    public static Path getSavePath() {
-        return SAVE_PATH;
-    }
-    public static Path getSavePathActor() {
-        return SAVE_PATH_ACTOR;
-    }
-    public static Path getSavePathMovie() {
-        return SAVE_PATH_MOVIE;
-    }
     /** Lists directory to ArrayList
      * @param directory
      * File to list
@@ -159,7 +164,7 @@ public final class IO {
             files.removeIf(file -> file.getName().matches("^.+\\.ini$"));
             return files;
         } catch (NullPointerException ignore) {
-            logger.warn("Directory \"{}\" does not exist", directory);
+            log.warn("Directory \"{}\" does not exist", directory);
             return new ArrayList<>();
         }
     }
@@ -228,18 +233,18 @@ public final class IO {
      *     Object implementing {@link ContentType} interface - {@link Actor} or {@link Movie}
      *
      * @return
-     * Empty {@link File} (directory). {@link #getSavePathActor()} or {@link #getSavePathMovie()} ()}
+     * Empty {@link File} (directory). {@link #getSAVE_PATH_ACTOR()} ()} or {@link #getSAVE_PATH_MOVIE()} ()}
      * and then \\actor or \\movie and in the end content id. For example: C:\ProjectPath\savedData\actor42
      */
     public static <E extends ContentType<E>> File createContentDirectory(E content) {
         File outDir = null;
         if (content instanceof Actor) {
-            outDir = new File(getSavePathActor() + "\\actor" + content.getId());
+            outDir = new File(getSAVE_PATH_ACTOR() + "\\actor" + content.getId());
         } else if(content instanceof Movie) {
-            outDir = new File(getSavePathMovie() + "\\movie" + content.getId());
+            outDir = new File(getSAVE_PATH_MOVIE() + "\\movie" + content.getId());
         } else return null;
         if (outDir.mkdir()) {
-            logger.info("New directory \"{}\" created", outDir);
+            log.info("New directory \"{}\" created", outDir);
         }
         return outDir;
     }
@@ -253,12 +258,12 @@ public final class IO {
      */
     public static File getXmlFileFromDir(File inputDir) {
         if(inputDir == null || !inputDir.isDirectory()) {
-            logger.warn("Couldn't create content from directory \"{}\" - no such directory or is not a directory", inputDir);
+            log.warn("Couldn't create content from directory \"{}\" - no such directory or is not a directory", inputDir);
             return null;
         }
         List<File> fileList = IO.listDirectory(inputDir);
         if(fileList.size() == 0) {
-            logger.warn("Couldn't create content from directory \"{}\" - directory is empty or does not exist", inputDir);
+            log.warn("Couldn't create content from directory \"{}\" - directory is empty or does not exist", inputDir);
             return null;
         }
         for(File file : fileList) {
@@ -266,7 +271,7 @@ public final class IO {
                 return file;
             }
         }
-        logger.warn("There is no .xml file in directory \"{}\".", inputDir);
+        log.warn("There is no .xml file in directory \"{}\".", inputDir);
         return null;
     }
 
@@ -302,10 +307,10 @@ public final class IO {
      */
     public static void createSummaryImage(Movie movie, File folderToSaveIn) {
         if(!folderToSaveIn.isDirectory()) {
-            logger.warn("Failed to save summaryImage of movie \"{}\" - no such directory \"{}\"", movie, folderToSaveIn);
+            log.warn("Failed to save summaryImage of movie \"{}\" - no such directory \"{}\"", movie, folderToSaveIn);
             return;
         } else if(movie == null) {
-            logger.warn("Failed to save summaryImage - movie is null");
+            log.warn("Failed to save summaryImage - movie is null");
             return;
         }
 
@@ -362,11 +367,71 @@ public final class IO {
         try {
             File imageFile = Paths.get(folderToSaveIn.toString(), folderToSaveIn.getName().concat(".png")).toFile();
             ImageIO.write(bufferedImage, "png", imageFile);
-            logger.info("SummaryImage for \"{}\" created in \"{}\"", movie, imageFile);
+            log.info("SummaryImage for \"{}\" created in \"{}\"", movie, imageFile);
         } catch (IOException e) {
-            logger.warn("Failed to save summaryImage of movie \"{}\"", movie);
+            log.warn("Failed to save summaryImage of movie \"{}\"", movie);
         }
     }
+
+    public static void writeLastRideFile(Map<File, Integer> map) {
+        Document doc = XMLOperator.createDoc();
+        if(doc != null) {
+            Element rootElement = doc.createElement("LastRide");
+            doc.appendChild(rootElement);
+
+            for(Map.Entry<File, Integer> entry : map.entrySet()) {
+                rootElement.appendChild(doc.createTextNode("\n\t"));
+                Element element = doc.createElement("folder");
+                element.appendChild(doc.createTextNode("\n\t\t"));
+                Element name = doc.createElement("name");
+                name.setTextContent(entry.getKey().toString());
+                element.appendChild(name);
+
+                element.appendChild(doc.createTextNode("\n\t\t"));
+                Element id = doc.createElement("id");
+                id.setTextContent(String.valueOf(entry.getValue()));
+                element.appendChild(id);
+                element.appendChild(doc.createTextNode("\n\t"));
+                rootElement.appendChild(element);
+            }
+            rootElement.appendChild(doc.createTextNode("\n"));
+            XMLOperator.makeSimpleSave(doc, LAST_RIDE);
+            log.info("Saved \"{}\" files from MainMovieFolder to lastly saw file", map.size());
+        } else {
+            log.warn("Couldn't save state of MainMovieFolder");
+        }
+
+    }
+
+    public static Map<File, Integer> readLastStateOfMainMovieFolder() {
+        Map<File, Integer> lastState = new HashMap<>();
+        Document doc = XMLOperator.createDocToRead(LAST_RIDE);
+        if(doc != null) {
+            Element root = doc.getDocumentElement();
+            NodeList elements = root.getElementsByTagName("folder");
+            for(int i = 0; i < elements.getLength(); i++) {
+                NodeList child = elements.item(i).getChildNodes();
+                File file = null;
+                int id = -1;
+                for(int k = 0; k < child.getLength(); k++) {
+                    if(child.item(k).getNodeName().equals("name")) {
+                        file = new File(child.item(k).getTextContent());
+                    }
+                    if(child.item(k).getNodeName().equals("id")) {
+                        id = Integer.parseInt(child.item(k).getTextContent());
+                    }
+                }
+                if(file != null && id != -1) {
+                    lastState.putIfAbsent(file, id);
+                }
+            }
+        } else {
+            log.warn("Couldn't read data from \"{}\"", MovieMainFolder.getMAIN_MOVIE_FOLDER());
+        }
+        return lastState;
+    }
+
+//    == public static inner classes ==
 
     public static class ExportAll extends Thread {
 
@@ -397,10 +462,10 @@ public final class IO {
                         .concat(".zip")));
             }
             try {
-                zipFile(getSavePath().toFile(), outPutFile);
-                logger.info("All data was successfully zipped end exported to \"{}\"", outPutFile);
+                zipFile(getSAVE_PATH().toFile(), outPutFile);
+                log.info("All data was successfully zipped end exported to \"{}\"", outPutFile);
             } catch (IOException e) {
-                logger.warn("Failed to ExportAll and ZIP file");
+                log.warn("Failed to ExportAll and ZIP file");
             }
 
         }
@@ -449,17 +514,17 @@ public final class IO {
         public void run() {
             setName("ImportAll");
             try {
-                deleteDirectoryRecursively(getSavePath().toFile());
+                deleteDirectoryRecursively(getSAVE_PATH().toFile());
                 unZipFile();
-                logger.info("Successfully imported data from \"{}\"", inputFile);
+                log.info("Successfully imported data from \"{}\"", inputFile);
             } catch (IOException e) {
                 e.printStackTrace();
-                logger.warn("Failed to import file \"{}\"", inputFile);
+                log.warn("Failed to import file \"{}\"", inputFile);
             }
         }
 
         private void unZipFile() throws IOException{
-            File destDir = getSavePath().toFile();
+            File destDir = getSAVE_PATH().toFile();
             byte[] buffer = new byte[1024];
             ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile));
             ZipEntry zipEntry = zis.getNextEntry();
@@ -484,66 +549,6 @@ public final class IO {
         }
 
     }
-
-
-    public static void writeLastRideFile(Map<File, Integer> map) {
-        Document doc = XMLOperator.createDoc();
-        if(doc != null) {
-            Element rootElement = doc.createElement("LastRide");
-            doc.appendChild(rootElement);
-
-            for(Map.Entry<File, Integer> entry : map.entrySet()) {
-                rootElement.appendChild(doc.createTextNode("\n\t"));
-                Element element = doc.createElement("folder");
-                element.appendChild(doc.createTextNode("\n\t\t"));
-                Element name = doc.createElement("name");
-                name.setTextContent(entry.getKey().toString());
-                element.appendChild(name);
-
-                element.appendChild(doc.createTextNode("\n\t\t"));
-                Element id = doc.createElement("id");
-                id.setTextContent(String.valueOf(entry.getValue()));
-                element.appendChild(id);
-                element.appendChild(doc.createTextNode("\n\t"));
-                rootElement.appendChild(element);
-            }
-            rootElement.appendChild(doc.createTextNode("\n"));
-            XMLOperator.makeSimpleSave(doc, LAST_RIDE);
-            logger.info("Saved \"{}\" files from MainMovieFolder to lastly saw file", map.size());
-        } else {
-            logger.warn("Couldn't save state of MainMovieFolder");
-        }
-
-    }
-
-    public static Map<File, Integer> readLastStateOfMainMovieFolder() {
-        Map<File, Integer> lastState = new HashMap<>();
-        Document doc = XMLOperator.createDocToRead(LAST_RIDE);
-        if(doc != null) {
-            Element root = doc.getDocumentElement();
-            NodeList elements = root.getElementsByTagName("folder");
-            for(int i = 0; i < elements.getLength(); i++) {
-                NodeList child = elements.item(i).getChildNodes();
-                File file = null;
-                int id = -1;
-                for(int k = 0; k < child.getLength(); k++) {
-                    if(child.item(k).getNodeName().equals("name")) {
-                        file = new File(child.item(k).getTextContent());
-                    }
-                    if(child.item(k).getNodeName().equals("id")) {
-                        id = Integer.parseInt(child.item(k).getTextContent());
-                    }
-                }
-                if(file != null && id != -1) {
-                    lastState.putIfAbsent(file, id);
-                }
-            }
-        } else {
-            logger.warn("Couldn't read data from \"{}\"", MovieMainFolder.getMainMovieFolder());
-        }
-        return lastState;
-    }
-
 
 
 }

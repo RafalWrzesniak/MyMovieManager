@@ -5,8 +5,9 @@ import Internet.Connection;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,27 +19,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
+@RequiredArgsConstructor
 public final class DownloadAndProcessMovies extends Thread {
 
-    private static final Logger logger = LoggerFactory.getLogger(DownloadAndProcessMovies.class.getName());
+//    == fields ==
+    @Getter private List<Movie> downloadedMovies;
+    @Getter private Map<File, Integer> movieFileMap;
+
+//    == required fields ==
     private final List<File> movieFileList;
-    private final ContentList<Actor> allActors;
     private final ContentList<Movie> allMovies;
-    private final Map<File, Integer> movieFileMap;
+    private final ContentList<Actor> allActors;
 
-    private final List<Movie> downloadedMovies = new ArrayList<>();
-
-    public DownloadAndProcessMovies(List<File> movieFileList, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
-        this.movieFileList = movieFileList;
-        this.allMovies = allMovies;
-        this.allActors = allActors;
-        this.movieFileMap = new HashMap<>();
-        setName("DownloadAndProcess");
-    }
-
+//    == methods ==
     @Override
     public void run() {
-        logger.info("Thread \"{}\" started", getName());
+        setName("DownloadAndProcess");
+        log.info("Thread \"{}\" started", getName());
+        movieFileMap = new HashMap<>();
+        downloadedMovies = new ArrayList<>();
         List<Thread> threads = new ArrayList<>();
         int numberOfThreads = movieFileList.size() > 20 ? 5 : 3;
         for(int i = 0; i < numberOfThreads; i++) {
@@ -50,7 +50,7 @@ public final class DownloadAndProcessMovies extends Thread {
                             movieFile = movieFileList.get(0);
                             movieFileList.remove(0);
                         } catch (IndexOutOfBoundsException ignored) {
-                            logger.debug("No more data to process for \"{}\"", Thread.currentThread().getName());
+                            log.debug("No more data to process for \"{}\"", Thread.currentThread().getName());
                             break;
                         }
                     }
@@ -70,10 +70,10 @@ public final class DownloadAndProcessMovies extends Thread {
             try {
                 thread.join();
             } catch (InterruptedException e) {
-                logger.warn("Thread \"{}\" crashed", thread.getName());
+                log.warn("Thread \"{}\" crashed", thread.getName());
             }
         }
-        logger.info("Thread \"" + getName() + "\" finished");
+        log.info("Thread \"" + getName() + "\" finished");
     }
 
 
@@ -95,14 +95,14 @@ public final class DownloadAndProcessMovies extends Thread {
                     movie.setImagePath(IO.NO_IMAGE);
                 }
                 long estimatedTime = System.nanoTime() - startTime;
-                logger.debug("Movie \"{}\" downloaded and saved in \"{}\" [s]", movie, ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
+                log.debug("Movie \"{}\" downloaded and saved in \"{}\" [s]", movie, ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
             } else {
                 movie = allMovies.get(movie);
-                logger.debug("Movie \"{}\" already exists in system", movie);
+                log.debug("Movie \"{}\" already exists in system", movie);
             }
 
         } catch (IOException | NullPointerException e) {
-            logger.warn("Unexpected error while downloading from \"{}\" - \"{}\"", movieUrl, e.getMessage());
+            log.warn("Unexpected error while downloading from \"{}\" - \"{}\"", movieUrl, e.getMessage());
         }
         return movie;
     }
@@ -115,7 +115,7 @@ public final class DownloadAndProcessMovies extends Thread {
             connection = new Connection(movieFile.getName());
             movie = allMovies.getObjByUrlIfExists(connection.getMainMoviePage());
             if(movie != null) {
-                logger.info("Movie \"{}\" already exists on the list \"{}\", new data won't be downloaded", movie, allMovies);
+                log.info("Movie \"{}\" already exists on the list \"{}\", new data won't be downloaded", movie, allMovies);
                 return movie;
             }
             movie = connection.createMovieFromFilmwebLink();
@@ -132,23 +132,16 @@ public final class DownloadAndProcessMovies extends Thread {
                     movie.setImagePath(IO.NO_IMAGE);
                 }
                 long estimatedTime = System.nanoTime() - startTime;
-                logger.debug("Movie \"{}\" downloaded and saved in \"{}\" [s]", movie, ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
+                log.debug("Movie \"{}\" downloaded and saved in \"{}\" [s]", movie, ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
             } else {
                 movie = allMovies.get(movie);
-                logger.debug("Movie \"{}\" already exists in system", movie);
+                log.debug("Movie \"{}\" already exists in system", movie);
             }
             movie.printPretty();
         } catch (IOException | NullPointerException e) {
-            logger.warn("Unexpected error while downloading \"{}\" - \"{}\"", movieFile.getName(), e.getMessage());
+            log.warn("Unexpected error while downloading \"{}\" - \"{}\"", movieFile.getName(), e.getMessage());
         }
         return movie;
     }
 
-    public List<Movie> getDownloadedMovies() {
-        return downloadedMovies;
-    }
-
-    public Map<File, Integer> getMovieFileMap() {
-        return movieFileMap;
-    }
 }

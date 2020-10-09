@@ -4,8 +4,8 @@ import FileOperations.IO;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
 import java.io.*;
@@ -23,15 +23,18 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static java.util.Map.entry;
 
+@Slf4j
 public final class Connection {
 
+//    == fields ==
     private URL websiteUrl;
+    @Getter
     private URL mainMoviePage;
+
+//    == constants ==
     private static final String FILMWEB = "https://www.filmweb.pl";
-    private static final Logger logger = LoggerFactory.getLogger(Connection.class.getName());
     private static final String MOVIE_LINE_KEY  = "data-linkable=\"filmMain\"";
     private static final String MOVIE_LINE_KEY2 = "data-source=\"linksData\"";
     private static final String ACTOR_LINE_KEY  = "personMainHeader";
@@ -62,9 +65,7 @@ public final class Connection {
             entry(Movie.WRITERS,  "screenwriter")
     );
 
-    public URL getMainMoviePage() {
-        return mainMoviePage;
-    }
+//    == constructors ==
 
     public Connection(String desiredTitle) throws IOException {
         String desiredTitleEncoded = URLEncoder.encode(desiredTitle, "UTF-8");
@@ -74,6 +75,16 @@ public final class Connection {
 
     public Connection(URL websiteUrl) throws IOException {
         changeUrlTo(websiteUrl.toString());
+    }
+
+
+//    == public methods ==
+
+    public void changeMovieUrlToCastActors() throws MalformedURLException {
+        this.websiteUrl = new URL(mainMoviePage.toString().concat("/cast/actors"));
+    }
+    public void changeMovieUrlToCastCrew() throws MalformedURLException {
+        this.websiteUrl = new URL(mainMoviePage.toString().concat("/cast/crew"));
     }
 
     public File downloadWebsite() throws IOException {
@@ -92,16 +103,15 @@ public final class Connection {
         return IO.TMP_FILES.resolve(tmpFileName).toFile();
     }
 
-
     public static boolean downloadImage(URL fromImageUrl, Path toFileName) {
         if(fromImageUrl == null || toFileName == null) return false;
         try (InputStream inputStream = fromImageUrl.openStream()) {
             Files.copy(inputStream, toFileName, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            logger.warn("Failed to download image from \"{}\"", fromImageUrl);
+            log.warn("Failed to download image from \"{}\"", fromImageUrl);
             return false;
         }
-        logger.debug("Image downloaded from \"{}\"", fromImageUrl);
+        log.debug("Image downloaded from \"{}\"", fromImageUrl);
         return true;
     }
 
@@ -121,7 +131,7 @@ public final class Connection {
 
     public void changeUrlTo(String newUrl) throws IOException {
         if(newUrl == null) {
-            logger.warn("Null as input - cannot change URL to null");
+            log.warn("Null as input - cannot change URL to null");
             throw new IOException("Null as input - cannot change URL to null");
         }
         if (newUrl.matches("^" + FILMWEB + "/film/[^/]+?$")) {
@@ -129,164 +139,10 @@ public final class Connection {
         }
         this.websiteUrl = new URL(newUrl);
         if (websiteUrl.getQuery() == null) {
-            logger.debug("Changed Connection URL to \"{}\"", websiteUrl);
+            log.debug("Changed Connection URL to \"{}\"", websiteUrl);
         } else {
-            logger.debug("Making a query to website \"{}\"", websiteUrl);
+            log.debug("Making a query to website \"{}\"", websiteUrl);
         }
-    }
-
-    public void changeMovieUrlToCastActors() throws MalformedURLException {
-        this.websiteUrl = new URL(mainMoviePage.toString().concat("/cast/actors"));
-    }
-    public void changeMovieUrlToCastCrew() throws MalformedURLException {
-        this.websiteUrl = new URL(mainMoviePage.toString().concat("/cast/crew"));
-    }
-
-    private String grepLineFromWebsite(String find) throws IOException {
-        if(find == null) return null;
-        URLConnection con;
-        BufferedReader bufferedReader;
-        con = websiteUrl.openConnection();
-        InputStream inputStream;
-        try {
-            inputStream = con.getInputStream();
-        } catch (SSLException e) {
-            return null;
-        }
-        bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            if(line.contains(find)) {
-                return line;
-            }
-        }
-        logger.warn("Couldn't find proper line containing \"{}\" on \"{}\"", find, websiteUrl);
-        return null;
-    }
-
-    private String extractItemFromFilmwebLine(String itemToExtract, String line) {
-        if(itemToExtract == null || line == null) {
-            logger.warn("Null as input - can't extract item \"{}\" from \"{}\"", itemToExtract, websiteUrl);
-            return null;
-        }
-        Pattern pattern = Pattern.compile(itemToExtract + "(=|\":)?+[\">]+(.+?)[\"<]");
-        Matcher matcher = pattern.matcher(line);
-        if(matcher.find()) {
-            return replaceAcutesHTML(matcher.group(2));
-        } else {
-            try {
-                String newLine = grepLineFromWebsite(itemToExtract);
-                if(newLine != null && !newLine.equals(line)) {
-                    return extractItemFromFilmwebLine(itemToExtract, newLine);
-                } else {
-                    logger.warn("Couldn't extract \"{}\" from \"{}\"", itemToExtract, websiteUrl);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
-    }
-
-    private List<String> extractListOfItemsFromFilmwebLine(String itemToExtract, String line) throws IOException {
-        if(itemToExtract == null || line == null) {
-            logger.warn("Null as input - can't extract list of items \"{}\" from \"{}\"", itemToExtract, websiteUrl);
-            throw new IOException("Null as input - can't extract list of items \"" + itemToExtract + "\" from " + websiteUrl);
-        }
-
-        Pattern patternOfItemProp = Pattern.compile("<div class=\"filmInfo__header\">" + itemToExtract + "</div>(.+?)</div>");
-        Matcher matcherOfItemProp = patternOfItemProp.matcher(line);
-        List<String> listOfItems = new ArrayList<>();
-
-        if(matcherOfItemProp.find()) {
-            Pattern pattern = Pattern.compile("\"/ranking/film/\\w+/\\d+\">(.+?)</a>");
-            Matcher matcher = pattern.matcher(matcherOfItemProp.group(1));
-            while(matcher.find()) {
-                listOfItems.add(replaceAcutesHTML(matcher.group(1)));
-            }
-        }
-        if(listOfItems.size() == 0) {
-            logger.warn("Couldn't find any list item \"{}\" on \"{}\"", itemToExtract, websiteUrl);
-        }
-        return listOfItems;
-    }
-
-
-    @Deprecated
-    private List<String> extractListOfItemsFromFilmwebLineOldOne(String itemToExtract, String line) throws IOException {
-        if(itemToExtract == null || line == null) {
-            logger.warn("Null as input - can't extract list of items \"{}\" from \"{}\"", itemToExtract, websiteUrl);
-            throw new IOException("Null as input - can't extract list of items \"" + itemToExtract + "\" from " + websiteUrl);
-        }
-        Pattern pattern = Pattern.compile(itemToExtract + "(=\\d+|\\w+/\\d+)\">(.+?)</a>");
-        Matcher matcher = pattern.matcher(line);
-        List<String> listOfItems = new ArrayList<>();
-        while(matcher.find()) {
-                listOfItems.add(replaceAcutesHTML(matcher.group(2)));
-        }
-        if(listOfItems.size() == 0) {
-            try {
-                String newLine = grepLineFromWebsite(itemToExtract);
-                if(newLine != null && !newLine.equals(line)) {
-                    return extractListOfItemsFromFilmwebLineOldOne(itemToExtract, newLine);
-                } else {
-                    logger.warn("Couldn't find any list item \"{}\" on \"{}\"", itemToExtract, websiteUrl);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return listOfItems;
-    }
-
-    private List<String> extractCastLinksFromFilmwebLink(String itemToExtract, String line) {
-        if(itemToExtract == null || line == null) {
-            logger.warn("Null as input - can't extract cast links \"{}\" from \"{}\"", itemToExtract, websiteUrl);
-            return null;
-        }
-        List<String> listOfItems = new ArrayList<>();
-        Pattern pattern = Pattern.compile("data-profession=\"" + itemToExtract + "\".+?<a href=\"(.+?)\">");
-        Matcher matcher = pattern.matcher(line);
-        int numberOfMatcher = 0;
-        while(matcher.find() && numberOfMatcher < 10) {
-            listOfItems.add(FILMWEB.concat(matcher.group(1)));
-            numberOfMatcher++;
-        }
-        if(listOfItems.size() == 0) {
-            logger.warn("Couldn't find any cast link \"{}\" on \"{}\"", itemToExtract, websiteUrl);
-        }
-        return listOfItems;
-    }
-
-    private String extractDeathDateFromFilmwebLine(String line) {
-        if(line == null) {
-            logger.warn("Null as input - can't extract death date from \"{}\"", websiteUrl);
-            return null;
-        }
-        Pattern pattern = Pattern.compile("dateToCalc=new Date\\((.+?)\\)");
-        Matcher matcher = pattern.matcher(line);
-        if (matcher.find()) {
-            String[] split = matcher.group(1).replaceAll("2E3", "2000").split(",");
-            return LocalDate.of(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])).toString();
-        }
-        return null;
-    }
-
-    private Map<String, String> extractQueryTitleAndItsLinks(String line) {
-        if(line == null) {
-            logger.warn("Null as input - can't extract query data from null");
-            return null;
-        }
-        Map<String, String> map = new HashMap<>();
-        Pattern pattern = Pattern.compile("<data class.+?data-title=\"(.+?)\".+?href=\"(.+?)\"");
-        Matcher matcher = pattern.matcher(line);
-        while(matcher.find()) {
-            map.putIfAbsent(replaceAcutesHTML(matcher.group(1)), matcher.group(2));
-        }
-        if(map.size() == 0) {
-            logger.warn("Couldn't find any results of query");
-        }
-        return map;
     }
 
 
@@ -319,24 +175,15 @@ public final class Connection {
         actorData.put(Actor.DEATH_DAY, deathDay);
         actorData.put(Actor.IMAGE_URL, imageUrl);
 
-        logger.info("Data properly grabbed from \"{}\"", websiteUrl);
+        log.info("Data properly grabbed from \"{}\"", websiteUrl);
         return new Actor(actorData);
     }
 
-    private List<String> grabCastOrCrewFromFilmweb(String castType) throws IOException {
-        if(castType == null || !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST)) &&
-                !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.DIRECTORS)) &&
-                !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.WRITERS))) {
-            logger.warn("Wrong castType parameter, can't download cast data of \"{}\" from \"{}\"", castType, websiteUrl);
-            throw new IllegalArgumentException("Wrong castType parameter");
-        }
-        return extractCastLinksFromFilmwebLink(castType, grepLineFromWebsite(CAST_LINE_KEY));
-    }
 
     public List<Actor> createActorsFromFilmwebLinks(List<String> actorUrls, ContentList<Actor> allActors) {
         List<Actor> actorList = new ArrayList<>();
         if(actorUrls == null || actorUrls.size() == 0 || allActors == null) {
-             logger.warn("Null or empty argument passed to createActorsFromFilmwebLinks");
+             log.warn("Null or empty argument passed to createActorsFromFilmwebLinks");
             return actorList;
         }
         for(String actorUrl : actorUrls) {
@@ -360,13 +207,13 @@ public final class Connection {
                         throw new NullPointerException("No data found for " + actorUrl);
                     }
                 } else {
-                    logger.debug("Actor \"{}\" already exists on \"{}\", new data won't be downloaded", actor, allActors);
+                    log.debug("Actor \"{}\" already exists on \"{}\", new data won't be downloaded", actor, allActors);
                 }
                 actorList.add(actor);
 
             } catch (IOException | NullPointerException e) {
                 String reason = String.format("\"%s\" in: \"%s\"", e.getMessage(), Thread.currentThread().getName());
-                logger.warn("Can't get data from \"{}\" because of {}", actorUrl, reason);
+                log.warn("Can't get data from \"{}\" because of {}", actorUrl, reason);
             }
         }
         return actorList;
@@ -390,9 +237,8 @@ public final class Connection {
             movieData.replace(Movie.PREMIERE, Collections.singletonList(extractItemFromFilmwebLine("releaseWorldString", foundLine)));
         }
         movieData.put(Movie.FILMWEB, Collections.singletonList(mainMoviePage.toString()));
-        movieData.put(Movie.ID, Collections.singletonList("-1"));
 
-        logger.info("Data properly grabbed from \"{}\"", websiteUrl);
+        log.info("Data properly grabbed from \"{}\"", websiteUrl);
         Movie movie = new Movie(movieData);
         if(movie.getPremiere() == null) throw new NullPointerException("Couldn't find proper data of " + movie.getTitle());
         return movie;
@@ -434,7 +280,7 @@ public final class Connection {
                 if(premiereOfCurrentTitle == null) return 0;
                 return LocalDate.parse(premiereOfCurrentTitle, DateTimeFormatter.ISO_DATE).getYear();
             } catch (IOException e) {
-                logger.warn("Couldn't extract year from url \"{}\"", url);
+                log.warn("Couldn't extract year from url \"{}\"", url);
             }
             return 0;
         };
@@ -490,11 +336,170 @@ public final class Connection {
         }
         String result = String.format("\"%s\" with correlation: %d%%]", chosenTitle, Math.round(highestCorrelation * 100));
         if(Math.round(highestCorrelation*100) > 50) {
-            logger.info("For query \"{}\" there was found {}", desiredTitle, result);
+            log.info("For query \"{}\" there was found {}", desiredTitle, result);
         } else {
-            logger.warn("For query \"{}\" there was found {}. Low correlation. Possibility of wrong movie assigning", desiredTitle, result);
+            log.warn("For query \"{}\" there was found {}. Low correlation. Possibility of wrong movie assigning", desiredTitle, result);
         }
         return urlToReturn;
+    }
+
+
+
+    //    == private methods ==
+
+    private String grepLineFromWebsite(String find) throws IOException {
+        if(find == null) return null;
+        URLConnection con;
+        BufferedReader bufferedReader;
+        con = websiteUrl.openConnection();
+        InputStream inputStream;
+        try {
+            inputStream = con.getInputStream();
+        } catch (SSLException e) {
+            return null;
+        }
+        bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            if(line.contains(find)) {
+                return line;
+            }
+        }
+        log.warn("Couldn't find proper line containing \"{}\" on \"{}\"", find, websiteUrl);
+        return null;
+    }
+
+    private String extractItemFromFilmwebLine(String itemToExtract, String line) {
+        if(itemToExtract == null || line == null) {
+            log.warn("Null as input - can't extract item \"{}\" from \"{}\"", itemToExtract, websiteUrl);
+            return null;
+        }
+        Pattern pattern = Pattern.compile(itemToExtract + "(=|\":)?+[\">]+(.+?)[\"<]");
+        Matcher matcher = pattern.matcher(line);
+        if(matcher.find()) {
+            return replaceAcutesHTML(matcher.group(2));
+        } else {
+            try {
+                String newLine = grepLineFromWebsite(itemToExtract);
+                if(newLine != null && !newLine.equals(line)) {
+                    return extractItemFromFilmwebLine(itemToExtract, newLine);
+                } else {
+                    log.warn("Couldn't extract \"{}\" from \"{}\"", itemToExtract, websiteUrl);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    private List<String> extractListOfItemsFromFilmwebLine(String itemToExtract, String line) throws IOException {
+        if(itemToExtract == null || line == null) {
+            log.warn("Null as input - can't extract list of items \"{}\" from \"{}\"", itemToExtract, websiteUrl);
+            throw new IOException("Null as input - can't extract list of items \"" + itemToExtract + "\" from " + websiteUrl);
+        }
+        Pattern patternOfItemProp = Pattern.compile("<div class=\"filmInfo__header\">" + itemToExtract + "</div>(.+?)</div>");
+        Matcher matcherOfItemProp = patternOfItemProp.matcher(line);
+        List<String> listOfItems = new ArrayList<>();
+
+        if(matcherOfItemProp.find()) {
+            Pattern pattern = Pattern.compile("\"/ranking/film/\\w+/\\d+\">(.+?)</a>");
+            Matcher matcher = pattern.matcher(matcherOfItemProp.group(1));
+            while(matcher.find()) {
+                listOfItems.add(replaceAcutesHTML(matcher.group(1)));
+            }
+        }
+        if(listOfItems.size() == 0) {
+            log.warn("Couldn't find any list item \"{}\" on \"{}\"", itemToExtract, websiteUrl);
+        }
+        return listOfItems;
+    }
+
+    @Deprecated
+    private List<String> extractListOfItemsFromFilmwebLineOldOne(String itemToExtract, String line) throws IOException {
+        if(itemToExtract == null || line == null) {
+            log.warn("Null as input - can't extract list of items \"{}\" from \"{}\"", itemToExtract, websiteUrl);
+            throw new IOException("Null as input - can't extract list of items \"" + itemToExtract + "\" from " + websiteUrl);
+        }
+        Pattern pattern = Pattern.compile(itemToExtract + "(=\\d+|\\w+/\\d+)\">(.+?)</a>");
+        Matcher matcher = pattern.matcher(line);
+        List<String> listOfItems = new ArrayList<>();
+        while(matcher.find()) {
+            listOfItems.add(replaceAcutesHTML(matcher.group(2)));
+        }
+        if(listOfItems.size() == 0) {
+            try {
+                String newLine = grepLineFromWebsite(itemToExtract);
+                if(newLine != null && !newLine.equals(line)) {
+                    return extractListOfItemsFromFilmwebLineOldOne(itemToExtract, newLine);
+                } else {
+                    log.warn("Couldn't find any list item \"{}\" on \"{}\"", itemToExtract, websiteUrl);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return listOfItems;
+    }
+
+    private List<String> extractCastLinksFromFilmwebLink(String itemToExtract, String line) {
+        if(itemToExtract == null || line == null) {
+            log.warn("Null as input - can't extract cast links \"{}\" from \"{}\"", itemToExtract, websiteUrl);
+            return null;
+        }
+        List<String> listOfItems = new ArrayList<>();
+        Pattern pattern = Pattern.compile("data-profession=\"" + itemToExtract + "\".+?<a href=\"(.+?)\">");
+        Matcher matcher = pattern.matcher(line);
+        int numberOfMatcher = 0;
+        while(matcher.find() && numberOfMatcher < 10) {
+            listOfItems.add(FILMWEB.concat(matcher.group(1)));
+            numberOfMatcher++;
+        }
+        if(listOfItems.size() == 0) {
+            log.warn("Couldn't find any cast link \"{}\" on \"{}\"", itemToExtract, websiteUrl);
+        }
+        return listOfItems;
+    }
+
+    private String extractDeathDateFromFilmwebLine(String line) {
+        if(line == null) {
+            log.warn("Null as input - can't extract death date from \"{}\"", websiteUrl);
+            return null;
+        }
+        Pattern pattern = Pattern.compile("dateToCalc=new Date\\((.+?)\\)");
+        Matcher matcher = pattern.matcher(line);
+        if (matcher.find()) {
+            String[] split = matcher.group(1).replaceAll("2E3", "2000").split(",");
+            return LocalDate.of(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])).toString();
+        }
+        return null;
+    }
+
+    private Map<String, String> extractQueryTitleAndItsLinks(String line) {
+        if(line == null) {
+            log.warn("Null as input - can't extract query data from null");
+            return null;
+        }
+        Map<String, String> map = new HashMap<>();
+        Pattern pattern = Pattern.compile("<data class.+?data-title=\"(.+?)\".+?href=\"(.+?)\"");
+        Matcher matcher = pattern.matcher(line);
+        while(matcher.find()) {
+            map.putIfAbsent(replaceAcutesHTML(matcher.group(1)), matcher.group(2));
+        }
+        if(map.size() == 0) {
+            log.warn("Couldn't find any results of query");
+        }
+        return map;
+    }
+
+    private List<String> grabCastOrCrewFromFilmweb(String castType) throws IOException {
+        if(castType == null || !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST)) &&
+                !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.DIRECTORS)) &&
+                !castType.equals(MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.WRITERS))) {
+            log.warn("Wrong castType parameter, can't download cast data of \"{}\" from \"{}\"", castType, websiteUrl);
+            throw new IllegalArgumentException("Wrong castType parameter");
+        }
+        return extractCastLinksFromFilmwebLink(castType, grepLineFromWebsite(CAST_LINE_KEY));
     }
 
     private static int countChar(String string, char character) {
@@ -507,12 +512,6 @@ public final class Connection {
         }
         return hitNumber;
     }
-
-
-
-
-
-
 
     private static String replaceNullWithDash(String object) {
         return object == null ? "-" : object;

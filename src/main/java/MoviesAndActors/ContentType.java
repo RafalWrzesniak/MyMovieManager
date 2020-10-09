@@ -6,18 +6,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public interface ContentType<T> extends Comparable<T> {
+
+//    == constants ==
     String ID = "id";
     String IMAGE_PATH = "imagePath";
     String FILMWEB = "filmweb";
     String IMAGE_URL = "imageUrl";
 
-    boolean searchFor(String strToFind);
-    int getId();
+//    == methods ==
     Map<String, String> getAllFieldsAsStrings();
+    boolean searchFor(String strToFind);
     String getReprName();
-    void saveMe();
     URL getFilmweb();
+    void saveMe();
+    int getId();
 
+//    == default methods ==
     static String checkForNullOrEmptyOrIllegalChar(String stringToCheck, String argName) {
         if(stringToCheck == null) {
             throw new IllegalArgumentException(String.format("%s argument cannot be null!", argName));
@@ -38,7 +42,7 @@ public interface ContentType<T> extends Comparable<T> {
             StringBuilder getAllIncorrectChars = new StringBuilder();
             while(matcher.find()) {
                 if(!getAllIncorrectChars.toString().contains(stringToCheck.substring(matcher.start(), matcher.end()))) {
-                    getAllIncorrectChars.append("\'").append(stringToCheck, matcher.start(), matcher.end()).append("\', ");
+                    getAllIncorrectChars.append("'").append(stringToCheck, matcher.start(), matcher.end()).append("', ");
                 }
             }
             getAllIncorrectChars.replace(getAllIncorrectChars.length()-2, getAllIncorrectChars.length(), "");

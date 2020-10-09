@@ -4,8 +4,9 @@ import FileOperations.IO;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -15,21 +16,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
+@RequiredArgsConstructor
 public class MovieMainFolder extends Thread {
 
-    private static final Logger logger = LoggerFactory.getLogger(MovieMainFolder.class.getName());
-    private static File MAIN_MOVIE_FOLDER;
+//    == constants ==
+    @Getter private static File MAIN_MOVIE_FOLDER;
+
+//    == fields ==
+    @Getter private ContentList<Movie> moviesToWatch;
+
+//    == required fields ==
     private final ContentList<Movie> allMovies;
     private final ContentList<Actor> allActors;
-    private final ContentList<Movie> moviesToWatch;
 
-
-    public MovieMainFolder(ContentList<Movie> allMovies, ContentList<Actor> allActors) {
-        this.allMovies = allMovies;
-        this.allActors = allActors;
-        this.moviesToWatch = new ContentList<>(ContentList.MOVIES_TO_WATCH);
-    }
-
+//    == methods ==
     @Override
     public void run() {
         setName("MovieMainFolder");
@@ -45,18 +46,19 @@ public class MovieMainFolder extends Thread {
             }
         }
 
-        Path path = Paths.get(IO.getSavePathMovie().toString(), moviesToWatch.getListName().concat(".xml"));
-        logger.debug("Attempt to remove \"{}\" ends with status \"{}\"", path.toString(), path.toFile().delete());
+        moviesToWatch = new ContentList<>(ContentList.MOVIES_TO_WATCH);
+        Path path = Paths.get(IO.getSAVE_PATH_MOVIE().toString(), moviesToWatch.getListName().concat(".xml"));
+        log.debug("Attempt to remove \"{}\" ends with status \"{}\"", path.toString(), path.toFile().delete());
 
 
-        logger.debug("Found \"{}\" new movies in main movie folder", newPositionsToHandle.size());
+        log.debug("Found \"{}\" new movies in main movie folder", newPositionsToHandle.size());
         if(newPositionsToHandle.size() > 0) {
             DownloadAndProcessMovies downloadAndProcessMovies = new DownloadAndProcessMovies(newPositionsToHandle, allMovies, allActors);
             downloadAndProcessMovies.start();
             try {
                 downloadAndProcessMovies.join();
             } catch (InterruptedException e) {
-                logger.warn("Unexpected error while downloading new movies to main folder");
+                log.warn("Unexpected error while downloading new movies to main folder");
             }
             if(downloadAndProcessMovies.getDownloadedMovies().size() > 0) {
                 newStateMap.putAll(downloadAndProcessMovies.getMovieFileMap());
@@ -71,26 +73,13 @@ public class MovieMainFolder extends Thread {
             moviesToWatch.add(allMovies.getById(entry.getValue()));
         }
         newStateMap.clear();
-        logger.info("\"{}\" has now \"{}\" movies", ContentList.MOVIES_TO_WATCH, moviesToWatch.size());
+        log.info("\"{}\" has now \"{}\" movies", ContentList.MOVIES_TO_WATCH, moviesToWatch.size());
     }
 
-    public ContentList<Movie> getMoviesToWatch() {
-        return moviesToWatch;
-    }
-
-    public static File getMainMovieFolder() {
-        return MAIN_MOVIE_FOLDER;
-    }
 
     public static void setMainMovieFolder(File mainMovieFolder) {
         MAIN_MOVIE_FOLDER = mainMovieFolder;
         IO.updateParamInCfg("MAIN_MOVIE_FOLDER", mainMovieFolder.toString());
     }
-
-
-
-
-
-
 
 }
