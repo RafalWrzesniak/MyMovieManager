@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
@@ -16,23 +17,28 @@ class MovieTest {
         return Arrays.asList(new Object[][]{
                 {Map.ofEntries(
                         Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
-                        Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16"))
+                        Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16")),
+                        Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Most+szpieg%C3%B3w-2015-728144"))
                 )},
                 {Map.ofEntries(
                         Map.entry(Movie.TITLE, Collections.singletonList("Birdman")),
-                        Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13"))
+                        Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13")),
+                        Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Birdman-2014-680709"))
                 )},
                 {Map.ofEntries(
                         Map.entry(Movie.TITLE, Collections.singletonList("Władca pierścieni: Drużyna Pierścienia")),
-                        Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13"))
+                        Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13")),
+                        Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/W%C5%82adca+Pier%C5%9Bcieni%3A+Dru%C5%BCyna+Pier%C5%9Bcienia-2001-1065"))
                 )},
                 {Map.ofEntries(
                         Map.entry(Movie.TITLE, Collections.singletonList("Deadpool")),
-                        Map.entry(Movie.PREMIERE, Collections.singletonList("2016-01-21"))
+                        Map.entry(Movie.PREMIERE, Collections.singletonList("2016-01-21")),
+                        Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Deadpool-2016-514675"))
                 )},
                 {Map.ofEntries(
                         Map.entry(Movie.TITLE, Collections.singletonList("Kiler")),
-                        Map.entry(Movie.PREMIERE, Collections.singletonList("1997-11-17"))
+                        Map.entry(Movie.PREMIERE, Collections.singletonList("1997-11-17")),
+                        Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Kiler-1997-529"))
                 )},
         });
     }
@@ -46,7 +52,7 @@ class MovieTest {
                 Map.entry(Actor.SURNAME, "Pazura"),
                 Map.entry(Actor.NATIONALITY, "Poland"),
                 Map.entry(Actor.BIRTHDAY, "1962-06-13"),
-                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone1"),
                 Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\cp.jpg")
         ));
         actor2 = new Actor(Map.ofEntries(
@@ -54,7 +60,7 @@ class MovieTest {
                 Map.entry(Actor.SURNAME, "Sparrow"),
                 Map.entry(Actor.NATIONALITY, "Karaibian"),
                 Map.entry(Actor.BIRTHDAY, "1957-06-02"),
-                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone2"),
                 Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\js.jpg")
         ));
        actor3 = new Actor(Map.ofEntries(
@@ -62,7 +68,7 @@ class MovieTest {
                 Map.entry(Actor.SURNAME, "Wick"),
                 Map.entry(Actor.NATIONALITY, "USA"),
                 Map.entry(Actor.BIRTHDAY, "1983-07-21"),
-                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone3"),
                 Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\jw.jpg")
         ));
     }
@@ -71,7 +77,8 @@ class MovieTest {
     void setUp() {
         movie = new Movie(Map.ofEntries(
                 Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
-                Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16"))
+                Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16")),
+                Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Most+szpieg%C3%B3w-2015-728144"))
         ));
     }
 
@@ -153,7 +160,7 @@ class MovieTest {
     void setCoverPath() {
         setUp();
         movie.setImagePath(Paths.get("E:\\xInne\\dk.jpg"));
-        assertEquals("E:\\xInne\\dk.jpg", movie.getImagePath());
+        assertEquals(Paths.get("E:","xInne","dk.jpg"), movie.getImagePath());
     }
 
     @Test
@@ -292,11 +299,13 @@ class MovieTest {
         setUp();
         Movie movie2 = new Movie(Map.ofEntries(
                 Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
-                Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16"))
+                Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16")),
+                Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Most+szpieg%C3%B3w-2015-728144"))
         ));
         Movie movie3 = new Movie(Map.ofEntries(
                 Map.entry(Movie.TITLE, Collections.singletonList("Deadpool")),
-                Map.entry(Movie.PREMIERE, Collections.singletonList("2016-01-21"))
+                Map.entry(Movie.PREMIERE, Collections.singletonList("2016-01-21")),
+                Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Deadpool-2016-514675"))
         ));
         assertEquals(0, movie.compareTo(movie2));
         assertEquals(9, movie.compareTo(movie3));

@@ -53,8 +53,6 @@ class IOTest {
         assertEquals("name", IO.removeFileExtension("name"));
         assertEquals("na.me", IO.removeFileExtension("na.me.txt"));
         assertEquals("..na.me", IO.removeFileExtension("..na.me.txt"));
-        assertNull(IO.removeFileExtension("name.ini"));
-        assertNull(IO.removeFileExtension("Thumbs.db"));
     }
 
     @Test
@@ -80,7 +78,8 @@ class IOTest {
     void createSummaryImage() {
         Movie movie = new Movie(Map.ofEntries(
                 Map.entry(Movie.TITLE, Collections.singletonList("Some Title")),
-                Map.entry(Movie.PREMIERE, Collections.singletonList("2020-08-31"))
+                Map.entry(Movie.PREMIERE, Collections.singletonList("2020-08-31")),
+                Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/movie"))
         ));
         IO.createSummaryImage(movie, tmp);
         assertTrue(IO.listDirectory(tmp).contains(new File(tmpPath.concat("\\tmpTest.png"))));

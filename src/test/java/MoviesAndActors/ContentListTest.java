@@ -1,7 +1,12 @@
 package MoviesAndActors;
 
+import FileOperations.IO;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,22 +16,25 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ContentListTest {
 
-    private final ContentList<Actor> contentListActor = new ContentList<>("myActorList");
-    private final ContentList<Movie> contentListMovie = new ContentList<>("myMovieList");
+    static ContentList<Actor> contentListActor;
+    static ContentList<Movie> contentListMovie;
+
     Movie movie = new Movie(Map.ofEntries(
             Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
-            Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16"))
+            Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16")),
+            Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Most+szpieg%C3%B3w-2015-728144"))
     ));
     Movie movie2 = new Movie(Map.ofEntries(
             Map.entry(Movie.TITLE, Collections.singletonList("Birdman")),
-            Map.entry(Movie.PREMIERE, Collections.singletonList("2014-08-27"))
+            Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13")),
+            Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Birdman-2014-680709"))
     ));
     private final Actor actor = new Actor(Map.ofEntries(
             Map.entry(Actor.NAME, "Cezary"),
             Map.entry(Actor.SURNAME, "Pazura"),
             Map.entry(Actor.NATIONALITY, "Poland"),
             Map.entry(Actor.BIRTHDAY, "1962-06-13"),
-            Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+            Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone9"),
             Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\cp.jpg")
     ));
     private final Actor actor2 = new Actor(Map.ofEntries(
@@ -34,13 +42,33 @@ class ContentListTest {
             Map.entry(Actor.SURNAME, "Pazura2"),
             Map.entry(Actor.NATIONALITY, "Poland"),
             Map.entry(Actor.BIRTHDAY, "1962-06-13"),
-            Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+            Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone99"),
             Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\cp.jpg")
     ));
 
+    @BeforeEach
+    void clearTmp() {
+        IO.deleteDirectoryRecursively(IO.TMP_FILES.toFile());
+        System.out.println(IO.TMP_FILES.toFile().mkdirs());
+        IO.changeSavePath(IO.TMP_FILES.toFile(), false);
+    }
+
+    @BeforeAll
+    static void beforeAll() {
+        contentListActor = new ContentList<>("myActorListTest");
+        contentListMovie = new ContentList<>("myMovieListTest");
+        IO.changeSavePath(IO.TMP_FILES.toFile(), false);
+    }
+
+    @AfterAll
+    static void afterAll() {
+        IO.changeSavePath(new File(System.getProperty("user.dir").concat("\\savedData")), false);
+    }
+
+
     @Test
     void getListName() {
-        assertEquals("myActorList", contentListActor.getListName());
+        assertEquals("myActorListTest", contentListActor.getListName());
         assertEquals("someOtherList", new ContentList<Actor>("someOtherList").getListName());
     }
 
@@ -141,19 +169,20 @@ class ContentListTest {
 
     @Test
     void isEmpty() {
+        contentListMovie.clear();
         assertTrue(contentListMovie.isEmpty());
     }
 
     @Test
     void getContentListFromListByName() {
         List<ContentList<Movie>> listOfContentLists = List.of(contentListMovie, new ContentList<>("otherList"));
-        assertEquals(contentListMovie, ContentList.getContentListFromListByName(listOfContentLists, "myMovieList"));
+        assertEquals(contentListMovie, ContentList.getContentListFromListByName(listOfContentLists, "myMovieListTest"));
     }
 
     @Test
     void testToString() {
         contentListActor.add(actor);
         contentListActor.add(actor2);
-        assertEquals(List.of(actor, actor2).toString(), contentListActor.toString());
+        assertEquals("ContentList{name='\u001B[1mmyActorListTest\u001B[0m', size='\u001B[1m2\u001B[0m'}", contentListActor.toString());
     }
 }

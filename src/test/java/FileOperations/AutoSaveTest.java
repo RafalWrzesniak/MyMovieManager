@@ -59,13 +59,13 @@ class AutoSaveTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        List<File> files = IO.listDirectory(IO.getSavePathActor().toFile());
+        List<File> files = IO.listDirectory(IO.getSAVE_PATH_ACTOR().toFile());
 
-        assertTrue(files.contains(IO.getSavePathActor().resolve("actor0").toFile()));
-        assertTrue(files.contains(IO.getSavePathActor().resolve("actor1").toFile()));
+        assertTrue(files.contains(IO.getSAVE_PATH_ACTOR().resolve("actor0").toFile()));
+        assertTrue(files.contains(IO.getSAVE_PATH_ACTOR().resolve("actor1").toFile()));
 
-        assertNotNull(IO.getXmlFileFromDir(IO.getSavePathActor().resolve("actor0").toFile()));
-        assertNotNull(IO.getXmlFileFromDir(IO.getSavePathActor().resolve("actor1").toFile()));
+        assertNotNull(IO.getXmlFileFromDir(IO.getSAVE_PATH_ACTOR().resolve("actor0").toFile()));
+        assertNotNull(IO.getXmlFileFromDir(IO.getSAVE_PATH_ACTOR().resolve("actor1").toFile()));
     }
 
     @Test
@@ -94,12 +94,12 @@ class AutoSaveTest {
         autoSave.interrupt();
 
         Thread.sleep(3000);
-        List<File> files = IO.listDirectory(IO.getSavePathActor().toFile());
-        assertTrue(files.contains(IO.getSavePathActor().resolve("actor2").toFile()));
-        assertTrue(files.contains(IO.getSavePathActor().resolve("actor3").toFile()));
+        List<File> files = IO.listDirectory(IO.getSAVE_PATH_ACTOR().toFile());
+        assertTrue(files.contains(IO.getSAVE_PATH_ACTOR().resolve("actor2").toFile()));
+        assertTrue(files.contains(IO.getSAVE_PATH_ACTOR().resolve("actor3").toFile()));
 
-        assertNotNull(IO.getXmlFileFromDir(IO.getSavePathActor().resolve("actor2").toFile()));
-        assertNotNull(IO.getXmlFileFromDir(IO.getSavePathActor().resolve("actor3").toFile()));
+        assertNotNull(IO.getXmlFileFromDir(IO.getSAVE_PATH_ACTOR().resolve("actor2").toFile()));
+        assertNotNull(IO.getXmlFileFromDir(IO.getSAVE_PATH_ACTOR().resolve("actor3").toFile()));
 
 
 

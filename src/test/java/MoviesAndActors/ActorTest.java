@@ -17,7 +17,7 @@ class ActorTest {
                         Map.entry(Actor.SURNAME, "Wrześniak"),
                         Map.entry(Actor.NATIONALITY, "Poland"),
                         Map.entry(Actor.BIRTHDAY, "1994-08-11"),
-                        Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                        Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone0"),
                         Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\me.jpg")
                 ), 26},
                 {Map.ofEntries(
@@ -25,7 +25,7 @@ class ActorTest {
                         Map.entry(Actor.SURNAME, "Spielberg"),
                         Map.entry(Actor.NATIONALITY, "USA"),
                         Map.entry(Actor.BIRTHDAY, "1946-12-18"),
-                        Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                        Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone1"),
                         Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\ss.jpg")
                 ), 74},
                 {Map.ofEntries(
@@ -33,7 +33,7 @@ class ActorTest {
                         Map.entry(Actor.SURNAME, "Pazura"),
                         Map.entry(Actor.NATIONALITY, "Poland"),
                         Map.entry(Actor.BIRTHDAY, "1962-06-13"),
-                        Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                        Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone2"),
                         Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\cp.jpg")
                 ), 58},
                 {Map.ofEntries(
@@ -41,7 +41,7 @@ class ActorTest {
                         Map.entry(Actor.SURNAME, "Aniston"),
                         Map.entry(Actor.NATIONALITY, "USA"),
                         Map.entry(Actor.BIRTHDAY, "1969-02-11"),
-                        Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                        Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone3"),
                         Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\ja.jpg")
                 ), 51},
                 {Map.ofEntries(
@@ -49,7 +49,7 @@ class ActorTest {
                         Map.entry(Actor.SURNAME, "Hanks"),
                         Map.entry(Actor.NATIONALITY, "USA"),
                         Map.entry(Actor.BIRTHDAY, "1956-07-07"),
-                        Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                        Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone4"),
                         Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\th.jpg")
                 ), 64},
         });
@@ -58,20 +58,25 @@ class ActorTest {
     Actor actor;
     Movie most = new Movie(Map.ofEntries(
             Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
-            Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16"))
-    ));
+            Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16")),
+            Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Most+szpieg%C3%B3w-2015-728144"))
+            ));
     Movie birdman = new Movie(Map.ofEntries(
-            Map.entry(Movie.TITLE, Collections.singletonList("Birdman")),
-            Map.entry(Movie.PREMIERE, Collections.singletonList("2014-08-27"))
-    ));
+        Map.entry(Movie.TITLE, Collections.singletonList("Birdman")),
+        Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13")),
+        Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Birdman-2014-680709"))
+        ));
+
     Movie lotr = new Movie(Map.ofEntries(
-            Map.entry(Movie.TITLE, Collections.singletonList("Władca pierścieni: Drużyna Pierścienia")),
-            Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13"))
-    ));
+        Map.entry(Movie.TITLE, Collections.singletonList("Władca pierścieni: Drużyna Pierścienia")),
+        Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13")),
+        Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/W%C5%82adca+Pier%C5%9Bcieni%3A+Dru%C5%BCyna+Pier%C5%9Bcienia-2001-1065"))
+        ));
     Movie deadpool = new Movie(Map.ofEntries(
-            Map.entry(Movie.TITLE, Collections.singletonList("Deadpool")),
-            Map.entry(Movie.PREMIERE, Collections.singletonList("2016-01-21"))
-    ));
+        Map.entry(Movie.TITLE, Collections.singletonList("Deadpool")),
+        Map.entry(Movie.PREMIERE, Collections.singletonList("2016-01-21")),
+        Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Deadpool-2016-514675"))
+        ));
         
     void setUp() {
         actor = new Actor(Map.ofEntries(
@@ -79,7 +84,7 @@ class ActorTest {
                 Map.entry(Actor.SURNAME, "Sparrow"),
                 Map.entry(Actor.NATIONALITY, "Karaibian"),
                 Map.entry(Actor.BIRTHDAY, "1957-06-02"),
-                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone999"),
                 Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\dk.jpg")
         ));
     }
@@ -122,18 +127,12 @@ class ActorTest {
         assertEquals(age, person.getAge());
     }
 
-//    @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
-//    @MethodSource("stringParams")
-//    void getPersonId(HashMap<String, String> map, int age, int id) {
-//        Actor person = new Actor(name, surname, nationality, birthday, imagePath);
-//        assertEquals(id, person.getPersonId());
-//    }
 
     @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
     @MethodSource("stringParams")
     void getImagePath(Map<String, String> map) {
         Actor person = new Actor(map);
-        assertEquals(map.get(Actor.IMAGE_PATH), person.getImagePath());
+        assertEquals(map.get(Actor.IMAGE_PATH), person.getImagePath().toString());
     }
 
     @org.junit.jupiter.api.Test
@@ -146,9 +145,6 @@ class ActorTest {
                 () -> ContentType.checkForNullOrEmptyOrIllegalChar("", "Surname"));
         assertEquals("Surname argument cannot be empty!", exception2.getMessage());
 
-        IllegalArgumentException exception3 = assertThrows(IllegalArgumentException.class,
-                () -> ContentType.checkForNullOrEmptyOrIllegalChar("as[d", "Nationality"));
-        assertEquals("Nationality argument \"as[d\" contains illegal chars: '['", exception3.getMessage());
     }
 
     @org.junit.jupiter.api.Test
@@ -158,7 +154,7 @@ class ActorTest {
                 Map.entry(Actor.SURNAME, "Sparrow"),
                 Map.entry(Actor.NATIONALITY, "Karaibian"),
                 Map.entry(Actor.BIRTHDAY, "1957-06-02"),
-                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone1"),
                 Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\dk.jpg")
         ));
         Actor person2 = new Actor(Map.ofEntries(
@@ -166,7 +162,7 @@ class ActorTest {
                 Map.entry(Actor.SURNAME, "Arrow"),
                 Map.entry(Actor.NATIONALITY, "Karaibian"),
                 Map.entry(Actor.BIRTHDAY, "1957-06-02"),
-                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone2"),
                 Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\dk.jpg")
         ));
         assertFalse(person.equals(person2));
@@ -283,7 +279,7 @@ class ActorTest {
                 Map.entry(Actor.SURNAME, "Sparrow"),
                 Map.entry(Actor.NATIONALITY, "Karaibian"),
                 Map.entry(Actor.BIRTHDAY, "1957-06-02"),
-                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone999"),
                 Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\dk.jpg")
         ));
         Actor actor3 = new Actor(Map.ofEntries(
@@ -291,7 +287,7 @@ class ActorTest {
                 Map.entry(Actor.SURNAME, "Arrow"),
                 Map.entry(Actor.NATIONALITY, "Karaibian"),
                 Map.entry(Actor.BIRTHDAY, "1957-06-02"),
-                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone9"),
                 Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\dk.jpg")
         ));
         assertEquals(actor2, actor);
@@ -306,7 +302,7 @@ class ActorTest {
                 Map.entry(Actor.SURNAME, "Sparrow"),
                 Map.entry(Actor.NATIONALITY, "Karaibian"),
                 Map.entry(Actor.BIRTHDAY, "1957-06-02"),
-                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone999"),
                 Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\dk.jpg")
         ));        
         Actor actor3 = new Actor(Map.ofEntries(
@@ -314,7 +310,7 @@ class ActorTest {
                 Map.entry(Actor.SURNAME, "Arrow"),
                 Map.entry(Actor.NATIONALITY, "Karaibian"),
                 Map.entry(Actor.BIRTHDAY, "1957-06-02"),
-                Map.entry(Actor.FILMWEB, "www.filmweb.pl"),
+                Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone123"),
                 Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\dk.jpg")
         ));
         assertEquals(0, actor.compareTo(actor2));
