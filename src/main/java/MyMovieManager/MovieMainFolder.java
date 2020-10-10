@@ -1,5 +1,6 @@
 package MyMovieManager;
 
+import Configuration.Config;
 import FileOperations.IO;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
@@ -20,9 +21,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MovieMainFolder extends Thread {
 
-//    == constants ==
-    @Getter private static File MAIN_MOVIE_FOLDER;
-
 //    == fields ==
     @Getter private ContentList<Movie> moviesToWatch;
 
@@ -35,7 +33,7 @@ public class MovieMainFolder extends Thread {
     public void run() {
         setName("MovieMainFolder");
         Map<File, Integer> lastRideMap = IO.readLastStateOfMainMovieFolder();
-        List<File> currentState = IO.listDirectory(MAIN_MOVIE_FOLDER);
+        List<File> currentState = IO.listDirectory(Configuration.Config.getMAIN_MOVIE_FOLDER());
         List<File> newPositionsToHandle = new ArrayList<>();
         Map<File, Integer> newStateMap = new HashMap<>();
         for(File file : currentState) {
@@ -47,7 +45,7 @@ public class MovieMainFolder extends Thread {
         }
 
         moviesToWatch = new ContentList<>(ContentList.MOVIES_TO_WATCH);
-        Path path = Paths.get(IO.getSAVE_PATH_MOVIE().toString(), moviesToWatch.getListName().concat(".xml"));
+        Path path = Paths.get(Config.getSAVE_PATH_MOVIE().toString(), moviesToWatch.getListName().concat(".xml"));
         log.debug("Attempt to remove \"{}\" ends with status \"{}\"", path.toString(), path.toFile().delete());
 
 
@@ -76,10 +74,5 @@ public class MovieMainFolder extends Thread {
         log.info("\"{}\" has now \"{}\" movies", ContentList.MOVIES_TO_WATCH, moviesToWatch.size());
     }
 
-
-    public static void setMainMovieFolder(File mainMovieFolder) {
-        MAIN_MOVIE_FOLDER = mainMovieFolder;
-        IO.updateParamInCfg("MAIN_MOVIE_FOLDER", mainMovieFolder.toString());
-    }
 
 }

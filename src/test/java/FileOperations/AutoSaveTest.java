@@ -1,5 +1,6 @@
 package FileOperations;
 
+import Configuration.Config;
 import MoviesAndActors.Actor;
 import org.junit.jupiter.api.*;
 
@@ -13,19 +14,19 @@ class AutoSaveTest {
 
     @BeforeEach
     void clearTmp() {
-        IO.deleteDirectoryRecursively(IO.TMP_FILES.toFile());
-        System.out.println(IO.TMP_FILES.toFile().mkdirs());
-        IO.changeSavePath(IO.TMP_FILES.toFile(), false);
+        IO.deleteDirectoryRecursively(Config.TMP_FILES.toFile());
+        System.out.println(Config.TMP_FILES.toFile().mkdirs());
+        Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
     }
 
     @BeforeAll
     static void beforeAll() {
-        IO.changeSavePath(IO.TMP_FILES.toFile(), false);
+        Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
     }
 
     @AfterAll
     static void afterAll() {
-        IO.changeSavePath(new File(System.getProperty("user.dir").concat("\\savedData")), false);
+        Config.setSAVE_PATH(new File(System.getProperty("user.dir").concat("\\savedData")), false);
     }
 
 

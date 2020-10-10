@@ -1,11 +1,10 @@
 package FileOperations;
 
+import Configuration.Config;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentType;
 import MoviesAndActors.Movie;
-import MyMovieManager.MovieMainFolder;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
@@ -16,17 +15,9 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
  * Fully static and final class with private constructor to manage some I/O operations
@@ -35,120 +26,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class IO {
 
-//    == fields ==
-    @Getter
-    private static Path SAVE_PATH;
-    @Getter
-    private static Path SAVE_PATH_MOVIE;
-    @Getter
-    private static Path SAVE_PATH_ACTOR;
-
-//    == constants ==
-    /**
-     * Path for files that are needed only for some time
-     */
-    public static final Path TMP_FILES = Paths.get(System.getProperty("user.dir"), "tmp");
-    /**
-     * File to be used when there is no available image of something on the web
-     */
-    public static final Path NO_IMAGE = Paths.get("src","main", "resources", "iHaveNoImage.jpg");
-    /**
-     * File that contains last saw files in {@link MovieMainFolder#getMAIN_MOVIE_FOLDER()}
-     */
-    public static final File LAST_RIDE = Paths.get("src","main", "resources", "lastRide.xml").toFile();
-
-//  == static initializer ==
-    static {
-        initCfg();
-        XMLOperator.setLocalPaths();
-
-        File tmpFiles = TMP_FILES.toFile();
-        if(!tmpFiles.mkdir()) {
-            IO.deleteDirectoryRecursively(tmpFiles);
-            tmpFiles.mkdir();
-        }
-    }
-
-//    == private static methods ==
-
-    private static void initCfg() {
-        File cfg = Paths.get("src","main", "resources", "config.cfg").toFile();
-        if(cfg.exists() && !cfg.isDirectory()) {
-            Document doc = XMLOperator.createDocToRead(cfg);
-            if(doc != null) {
-                Element root = doc.getDocumentElement();
-                NodeList element = root.getElementsByTagName("SAVE_PATH");
-                SAVE_PATH = Paths.get(element.item(0).getChildNodes().item(0).getTextContent());
-                element = root.getElementsByTagName("MAIN_MOVIE_FOLDER");
-                MovieMainFolder.setMainMovieFolder(new File(element.item(0).getChildNodes().item(0).getTextContent()));
-            }
-        } else {
-            Document doc = XMLOperator.createDoc();
-            if(doc != null) {
-                Element rootElement = doc.createElement("config");
-                rootElement.appendChild(doc.createTextNode("\n\t"));
-                doc.appendChild(rootElement);
-                Element element = doc.createElement("SAVE_PATH");
-                rootElement.appendChild(element);
-                rootElement.appendChild(doc.createTextNode("\n\t"));
-                element = doc.createElement("MAIN_MOVIE_FOLDER");
-                rootElement.appendChild(element);
-                rootElement.appendChild(doc.createTextNode("\n"));
-                XMLOperator.makeSimpleSave(doc, cfg);
-            }
-            updateParamInCfg("SAVE_PATH", System.getProperty("user.dir").concat("\\savedData"));
-            updateParamInCfg("MAIN_MOVIE_FOLDER", Paths.get("E:", "Rafał", "Filmy").toString());
-            boolean made1 = Paths.get(System.getProperty("user.dir"), "savedData").toFile().mkdir();
-            SAVE_PATH = Paths.get(System.getProperty("user.dir"), "savedData");
-        }
-        boolean made2 =  SAVE_PATH.toFile().mkdirs();
-        updateRelativePaths();
-    }
-
-
-//    == package-private static methods ==
-
-    static void updateRelativePaths() {
-        SAVE_PATH_MOVIE = Paths.get(SAVE_PATH.toString(), Movie.class.getSimpleName());
-        SAVE_PATH_ACTOR = Paths.get(SAVE_PATH.toString(), Actor.class.getSimpleName());
-        boolean made1 = SAVE_PATH_MOVIE.toFile().mkdir();
-        boolean made2 = SAVE_PATH_ACTOR.toFile().mkdir();
-        XMLOperator.setLocalPaths();
-    }
-
-
 //    == public static methods ==
-
-    public static void changeSavePath(File newDirectory, boolean moveFiles) {
-        if(newDirectory != null) {
-            newDirectory.mkdir();
-            if(moveFiles) {
-                try {
-                    Files.move(SAVE_PATH, newDirectory.toPath(), REPLACE_EXISTING);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            updateParamInCfg("SAVE_PATH", newDirectory.toString());
-            SAVE_PATH = newDirectory.toPath();
-            log.debug("SAVE_PATH changed to \"{}\"", newDirectory.toString());
-            updateRelativePaths();
-        } else {
-            log.warn("Couldn't change SAVE_PATH to \"{}\". SAVE_PATH is still \"{}\"", newDirectory, SAVE_PATH);
-        }
-    }
-
-    public static void updateParamInCfg(String parameter, String value) {
-        File cfg = Paths.get("src","main", "resources", "config.cfg").toFile();
-        Document doc = XMLOperator.createDocToRead(cfg);
-        if(doc == null) return;
-        NodeList element = doc.getElementsByTagName(parameter);
-        if(!element.item(0).getTextContent().equals(value)) {
-            element.item(0).setTextContent(value);
-            XMLOperator.makeSimpleSave(doc, cfg);
-            log.info("Parameter \"{}\" changed to \"{}\" in config.cfg", parameter, value);
-        }
-    }
 
     /** Lists directory to ArrayList
      * @param directory
@@ -233,15 +111,15 @@ public final class IO {
      *     Object implementing {@link ContentType} interface - {@link Actor} or {@link Movie}
      *
      * @return
-     * Empty {@link File} (directory). {@link #getSAVE_PATH_ACTOR()} ()} or {@link #getSAVE_PATH_MOVIE()} ()}
+     * Empty {@link File} (directory). {@link Config#getSAVE_PATH_ACTOR()} ()} or {@link Config#getSAVE_PATH_MOVIE()} ()}
      * and then \\actor or \\movie and in the end content id. For example: C:\ProjectPath\savedData\actor42
      */
     public static <E extends ContentType<E>> File createContentDirectory(E content) {
-        File outDir = null;
+        File outDir;
         if (content instanceof Actor) {
-            outDir = new File(getSAVE_PATH_ACTOR() + "\\actor" + content.getId());
+            outDir = new File(Config.getSAVE_PATH_ACTOR() + "\\actor" + content.getId());
         } else if(content instanceof Movie) {
-            outDir = new File(getSAVE_PATH_MOVIE() + "\\movie" + content.getId());
+            outDir = new File(Config.getSAVE_PATH_MOVIE() + "\\movie" + content.getId());
         } else return null;
         if (outDir.mkdir()) {
             log.info("New directory \"{}\" created", outDir);
@@ -395,7 +273,7 @@ public final class IO {
                 rootElement.appendChild(element);
             }
             rootElement.appendChild(doc.createTextNode("\n"));
-            XMLOperator.makeSimpleSave(doc, LAST_RIDE);
+            XMLOperator.makeSimpleSave(doc, Config.LAST_RIDE);
             log.info("Saved \"{}\" files from MainMovieFolder to lastly saw file", map.size());
         } else {
             log.warn("Couldn't save state of MainMovieFolder");
@@ -405,7 +283,7 @@ public final class IO {
 
     public static Map<File, Integer> readLastStateOfMainMovieFolder() {
         Map<File, Integer> lastState = new HashMap<>();
-        Document doc = XMLOperator.createDocToRead(LAST_RIDE);
+        Document doc = XMLOperator.createDocToRead(Config.LAST_RIDE);
         if(doc != null) {
             Element root = doc.getDocumentElement();
             NodeList elements = root.getElementsByTagName("folder");
@@ -426,128 +304,9 @@ public final class IO {
                 }
             }
         } else {
-            log.warn("Couldn't read data from \"{}\"", MovieMainFolder.getMAIN_MOVIE_FOLDER());
+            log.warn("Couldn't read data from \"{}\"", Config.getMAIN_MOVIE_FOLDER());
         }
         return lastState;
-    }
-
-//    == public static inner classes ==
-
-    public static class ExportAll extends Thread {
-
-        File outPutFile;
-
-        public ExportAll(File outPutFile) {
-            if(outPutFile != null) {
-                if(!outPutFile.getName().endsWith(".zip")) {
-                    outPutFile = new File(outPutFile.getName().concat(".zip"));
-                }
-            }
-            this.outPutFile = outPutFile;
-        }
-
-        public ExportAll() {
-        }
-
-        @Override
-        public void run() {
-            setName("ExportAll");
-            if(outPutFile == null) {
-                outPutFile = new File(
-                        System.getProperty("user.dir")
-                        .concat("\\MyMovieManager_exported_data_")
-                        .concat(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
-                        .replaceAll("\\..*$", "")
-                        .replaceAll(":", "_")
-                        .concat(".zip")));
-            }
-            try {
-                zipFile(getSAVE_PATH().toFile(), outPutFile);
-                log.info("All data was successfully zipped end exported to \"{}\"", outPutFile);
-            } catch (IOException e) {
-                log.warn("Failed to ExportAll and ZIP file");
-            }
-
-        }
-
-        private void zipFile(File fileToZip, File zipOut) throws IOException {
-            ZipOutputStream zipOutStream = new ZipOutputStream(new FileOutputStream(zipOut.toString()));
-            zipFile(fileToZip, "exported", zipOutStream);
-            zipOutStream.close();
-        }
-
-        private void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
-            if(fileToZip == null) return;
-            List<File> files = IO.listDirectory(fileToZip);
-            if(files.size() == 0) files.add(fileToZip);
-            for(File file : files) {
-                if(file.isDirectory()) {
-                    zipFile(file, fileName.concat("\\").concat(file.getName()), zipOut);
-                } else {
-                    FileInputStream fis = new FileInputStream(file);
-                    ZipEntry zipEntry = new ZipEntry(fileName.concat("\\").concat(file.getName()));
-                    zipOut.putNextEntry(zipEntry);
-                    byte[] bytes = new byte[1024];
-                    int length;
-                    while((length = fis.read(bytes)) >= 0) {
-                        zipOut.write(bytes, 0, length);
-                    }
-                    zipOut.closeEntry();
-                    fis.close();
-                }
-            }
-        }
-
-
-
-    }
-
-    public static class ImportAll extends Thread {
-
-        File inputFile;
-
-        public ImportAll(File inputFile) {
-            this.inputFile = inputFile;
-        }
-
-        @Override
-        public void run() {
-            setName("ImportAll");
-            try {
-                deleteDirectoryRecursively(getSAVE_PATH().toFile());
-                unZipFile();
-                log.info("Successfully imported data from \"{}\"", inputFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-                log.warn("Failed to import file \"{}\"", inputFile);
-            }
-        }
-
-        private void unZipFile() throws IOException{
-            File destDir = getSAVE_PATH().toFile();
-            byte[] buffer = new byte[1024];
-            ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile));
-            ZipEntry zipEntry = zis.getNextEntry();
-            while (zipEntry != null) {
-                String zipName;
-                if(zipEntry.getName().startsWith("exported")) {
-                    zipName = zipEntry.getName().substring(zipEntry.getName().indexOf('\\'));
-                } else throw new IOException("Wrong ZIP file, can't import data");
-                String relPath = zipName.substring(0, zipName.lastIndexOf('\\'));
-                new File(destDir, relPath).mkdirs();
-                File newFile = new File(destDir, zipName);
-                FileOutputStream fos = new FileOutputStream(newFile);
-                int len;
-                while ((len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
-                }
-                fos.close();
-                zipEntry = zis.getNextEntry();
-            }
-            zis.closeEntry();
-            zis.close();
-        }
-
     }
 
 

@@ -107,25 +107,21 @@ public class ContentList<T extends ContentType<T>> {
         return list.size();
     }
 
-    public boolean remove(T obj) {
+    public void remove(T obj) {
         if(list.remove(obj)) {
             log.debug("\"{}\" removed from \"{}\"", obj.toString(), getListName());
             XMLOperator.removeFromContentList(this, obj.getId());
-            return true;
+            return;
         }
         log.warn("\"{}\" didn't removed from \"{}\"", obj.toString(), getListName());
-        return false;
     }
 
-    public boolean remove(int index) {
+    public void remove(int index) {
         if(index < list.size()) {
             log.debug("\"{}\" removed from \"{}\"", list.get(index), getListName());
             XMLOperator.removeFromContentList(this, list.remove(index).getId());
-            return true;
         }
         log.warn("Index out of range - provided \"{}\", a list has only \"{}\" positions", index, getListName());
-        return false;
-
     }
 
     public void clear() {

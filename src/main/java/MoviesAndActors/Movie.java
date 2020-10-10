@@ -1,5 +1,6 @@
 package MoviesAndActors;
 
+import Configuration.Config;
 import FileOperations.AutoSave;
 import FileOperations.IO;
 import lombok.AccessLevel;
@@ -116,7 +117,7 @@ public final class Movie implements ContentType<Movie> {
 //   == private static methods ==
 
     private synchronized static void updateClassMovieId() {
-        File movieDir = IO.getSAVE_PATH_MOVIE().toFile();
+        File movieDir = Config.getSAVE_PATH_MOVIE().toFile();
         List<String> files = IO.getFileNamesInDirectory(movieDir);
         if(files.size() == 0 && classMovieId == -1) {
             classMovieId = 0;

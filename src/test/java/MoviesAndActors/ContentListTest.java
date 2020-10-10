@@ -1,5 +1,6 @@
 package MoviesAndActors;
 
+import Configuration.Config;
 import FileOperations.IO;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -48,21 +49,21 @@ class ContentListTest {
 
     @BeforeEach
     void clearTmp() {
-        IO.deleteDirectoryRecursively(IO.TMP_FILES.toFile());
-        System.out.println(IO.TMP_FILES.toFile().mkdirs());
-        IO.changeSavePath(IO.TMP_FILES.toFile(), false);
+        IO.deleteDirectoryRecursively(Config.TMP_FILES.toFile());
+        System.out.println(Config.TMP_FILES.toFile().mkdirs());
+        Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
     }
 
     @BeforeAll
     static void beforeAll() {
         contentListActor = new ContentList<>("myActorListTest");
         contentListMovie = new ContentList<>("myMovieListTest");
-        IO.changeSavePath(IO.TMP_FILES.toFile(), false);
+        Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
     }
 
     @AfterAll
     static void afterAll() {
-        IO.changeSavePath(new File(System.getProperty("user.dir").concat("\\savedData")), false);
+        Config.setSAVE_PATH(new File(System.getProperty("user.dir").concat("\\savedData")), false);
     }
 
 

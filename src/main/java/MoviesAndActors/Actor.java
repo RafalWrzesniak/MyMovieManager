@@ -1,5 +1,6 @@
 package MoviesAndActors;
 
+import Configuration.Config;
 import FileOperations.AutoSave;
 import FileOperations.IO;
 import lombok.Getter;
@@ -164,7 +165,7 @@ public final class Actor implements ContentType<Actor> {
 //    == private static methods ==
 
     private synchronized static void updateClassActorId() {
-        File actorDir = IO.getSAVE_PATH_ACTOR().toFile();
+        File actorDir = Config.getSAVE_PATH_ACTOR().toFile();
         List<String> files = IO.getFileNamesInDirectory(actorDir);
         if(files.size() == 0 && classActorId == -1) {
             classActorId = 0;
