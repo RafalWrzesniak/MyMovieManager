@@ -128,7 +128,7 @@ public final class Config {
             updateParamInCfg("MAIN_MOVIE_FOLDER", DEFAULT_MAIN_MOVIE.toString());
 
         }
-        if(!SAVE_PATH.toFile().mkdirs()) {
+        if(!SAVE_PATH.toFile().exists() && !SAVE_PATH.toFile().mkdirs()) {
             log.warn("Could not create directory \"{}\"", SAVE_PATH);
         }
         updateRelativePaths();
@@ -142,10 +142,10 @@ public final class Config {
         SAVE_PATH_ACTOR = Paths.get(SAVE_PATH.toString(), Actor.class.getSimpleName());
         File moviePath = SAVE_PATH_MOVIE.toFile();
         File actorPath = SAVE_PATH_ACTOR.toFile();
-        if(!moviePath.mkdir()) {
+        if(!moviePath.exists() && !moviePath.mkdir()) {
             log.warn("Could not create directory \"{}\"", moviePath);
         }
-        if(!actorPath.mkdir()) {
+        if(!actorPath.exists() && !actorPath.mkdir()) {
             log.warn("Could not create directory \"{}\"", actorPath);
         }
     }
@@ -159,6 +159,15 @@ public final class Config {
             element.item(0).setTextContent(value);
             XMLOperator.makeSimpleSave(doc, cfg);
             log.info("Parameter \"{}\" changed to \"{}\" in config.cfg", parameter, value);
+        }
+    }
+
+
+//    == Exceptions ==
+
+    public static class ArgumentIssue extends Exception {
+        public ArgumentIssue(String errorMessage) {
+            super(errorMessage);
         }
     }
 }
