@@ -1,5 +1,6 @@
 package MoviesAndActors;
 
+import Configuration.Config;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -137,11 +138,11 @@ class ActorTest {
 
     @org.junit.jupiter.api.Test
     void checkForNullOrEmptyOrIllegalChar() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        Config.ArgumentIssue exception = assertThrows(Config.ArgumentIssue.class,
             () -> ContentType.checkForNullOrEmptyOrIllegalChar(null, "Name"));
         assertEquals("Name argument cannot be null!", exception.getMessage());
 
-        IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class,
+        Config.ArgumentIssue exception2 = assertThrows(Config.ArgumentIssue.class,
                 () -> ContentType.checkForNullOrEmptyOrIllegalChar("", "Surname"));
         assertEquals("Surname argument cannot be empty!", exception2.getMessage());
 

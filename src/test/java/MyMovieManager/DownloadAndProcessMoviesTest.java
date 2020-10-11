@@ -60,18 +60,18 @@ class DownloadAndProcessMoviesTest {
 
     @Test
     void handleMovieFromUrl() throws MalformedURLException {
-        int numberOfFiles = IO.listDirectory(IO.getSAVE_PATH_MOVIE().toFile()).size();
+        int numberOfFiles = IO.listDirectory(Config.getSAVE_PATH_MOVIE().toFile()).size();
         URL url = new URL("https://www.filmweb.pl/film/12+ma%C5%82p-1995-1210");
         DownloadAndProcessMovies.handleMovieFromUrl(url, allMovies, allActors);
 
-        assertEquals(IO.listDirectory(IO.getSAVE_PATH_MOVIE().toFile()).size(), numberOfFiles + 1);
+        assertEquals(IO.listDirectory(Config.getSAVE_PATH_MOVIE().toFile()).size(), numberOfFiles + 1);
         assertEquals("12 małp", allMovies.getObjByUrlIfExists(url).getTitle());
     }
 
     @Test
     void handleMovieFromFile() throws MalformedURLException {
         URL url = new URL("https://www.filmweb.pl/film/Planeta+ma%C5%82p-2001-8692");
-        File movieFile = IO.getSAVE_PATH_MOVIE().resolve("Planeta małp").toFile();
+        File movieFile = Config.getSAVE_PATH_MOVIE().resolve("Planeta małp").toFile();
         System.out.println(movieFile.mkdir());
         int numberOfFiles = IO.listDirectory(movieFile).size();
 

@@ -97,11 +97,6 @@ class MovieTest {
         assertEquals(map.get(Movie.PREMIERE).get(0), movie.getPremiere().toString());
     }
 
-    @Test
-    void convertStrToLocalDate() {
-        String str = "1998-04-11";
-        assertEquals(LocalDate.of(1998, 4, 11), Movie.convertStrToLocalDate(str));
-    }
 
     @Test
     void setLength() {
@@ -110,15 +105,6 @@ class MovieTest {
         assertEquals(100, movie.getDuration());
     }
 
-    @Test
-    void changeLenStrFromIMDBToInt() {
-        String longPattern = "PT1H50M";
-        String hourPattern = "PT2H";
-        String shortPattern = "PT49M";
-        assertEquals(110, Movie.changeLenStrFromIMDBToInt(longPattern));
-        assertEquals(120, Movie.changeLenStrFromIMDBToInt(hourPattern));
-        assertEquals(49, Movie.changeLenStrFromIMDBToInt(shortPattern));
-    }
 
     @Test
     void setRate() {
@@ -127,10 +113,10 @@ class MovieTest {
         assertEquals(7.87, movie.getRate());
         setUp();
         movie.setRate(12);
-        assertEquals(0, movie.getRate());
+        assertNull(movie.getRate());
         setUp();
         movie.setRate(-1);
-        assertEquals(0, movie.getRate());
+        assertEquals(null, movie.getRate());
     }
 
     @Test
@@ -177,7 +163,7 @@ class MovieTest {
         setUp();
         List<String> tab = Arrays.asList("Akcja", "Thriller");
         movie.addGenres(tab);
-        assertEquals(tab, movie.getGenres());
+        assertTrue(movie.getGenres().contains("Akcja") && movie.getGenres().contains("Thriller"));
     }
 
     @Test
