@@ -1,5 +1,7 @@
 package MoviesAndActors;
 
+import Configuration.Config;
+
 import java.net.URL;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -22,15 +24,15 @@ public interface ContentType<T> extends Comparable<T> {
     int getId();
 
 //    == default methods ==
-    static String checkForNullOrEmptyOrIllegalChar(String stringToCheck, String argName) {
+    static String checkForNullOrEmptyOrIllegalChar(String stringToCheck, String argName) throws Config.ArgumentIssue {
         if(stringToCheck == null) {
-            throw new IllegalArgumentException(String.format("%s argument cannot be null!", argName));
+            throw new Config.ArgumentIssue(String.format("%s argument cannot be null!", argName));
         } else if(stringToCheck.isEmpty()) {
-            throw new IllegalArgumentException(String.format("%s argument cannot be empty!", argName));
+            throw new Config.ArgumentIssue(String.format("%s argument cannot be empty!", argName));
         }
 
         if(stringToCheck.matches(".*?(&.+;).*?")) {
-            throw new IllegalArgumentException(String.format("%s argument \"%s\" contains some not formatted signs", argName, stringToCheck));
+            throw new Config.ArgumentIssue(String.format("%s argument \"%s\" contains some not formatted signs", argName, stringToCheck));
         }
         Pattern correctCharPattern;
         Pattern incorrectCharPattern;
@@ -46,7 +48,7 @@ public interface ContentType<T> extends Comparable<T> {
                 }
             }
             getAllIncorrectChars.replace(getAllIncorrectChars.length()-2, getAllIncorrectChars.length(), "");
-            throw new IllegalArgumentException(String.format("%s argument \"%s\" contains illegal chars: %s", argName, stringToCheck, getAllIncorrectChars.toString()));
+            throw new Config.ArgumentIssue(String.format("%s argument \"%s\" contains illegal chars: %s", argName, stringToCheck, getAllIncorrectChars.toString()));
         }
         return stringToCheck;
     }
