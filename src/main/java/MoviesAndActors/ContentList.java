@@ -1,5 +1,6 @@
 package MoviesAndActors;
 
+import Configuration.Config;
 import FileOperations.AutoSave;
 import FileOperations.XMLOperator;
 import lombok.Getter;
@@ -30,7 +31,14 @@ public class ContentList<T extends ContentType<T>> {
         if(NAMES.contains(listName)) {
             throw new NullPointerException(listName + " is already defined in the scope, change name of the list!");
         }
-        this.listName = ContentType.checkForNullOrEmptyOrIllegalChar(listName, "listName");
+        String tmpListName;
+        try {
+            tmpListName = ContentType.checkForNullOrEmptyOrIllegalChar(listName, "listName");
+        } catch (Config.ArgumentIssue argumentIssue) {
+            log.warn("Couldn't create ContentList with name \"{}\"", listName);
+            tmpListName = "MyContentList#" + NAMES.size();
+        }
+        this.listName = tmpListName;
         NAMES.add(listName);
     }
 
