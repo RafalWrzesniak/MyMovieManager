@@ -3,6 +3,7 @@ package MoviesAndActors;
 import Configuration.Config;
 import FileOperations.AutoSave;
 import FileOperations.IO;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public final class Actor implements ContentType<Actor> {
     @Getter @Setter private LocalDate birthday;
     @Getter @Setter private Path imagePath;
     @Getter @Setter private URL imageUrl;
-    @Getter @Setter private URL filmweb;
+    @Getter @Setter(AccessLevel.PRIVATE) private URL filmweb;
     // actor
     @Getter private boolean isActor = false;
     private final List<Movie> playedInMovies = new ArrayList<>();
@@ -45,6 +46,7 @@ public final class Actor implements ContentType<Actor> {
 
 //    == static fields ==
     private static int classActorId = -1;
+    private boolean iAmFromConstructor;
 
 //    == constants ==
     public static final String NAME = "name", SURNAME = "surname", NATIONALITY = "nationality", BIRTHDAY = "birthday",
@@ -61,7 +63,9 @@ public final class Actor implements ContentType<Actor> {
 
     public Actor(Map<String, String> actorMap) {
         updateClassActorId();
-        try { setFilmweb(new URL(actorMap.get(FILMWEB)));
+        iAmFromConstructor = true;
+        try {
+            setFilmweb(new URL(actorMap.get(FILMWEB)));
         } catch (MalformedURLException ignored) {
             throw new NullPointerException("Can't create actor when filmweb " + actorMap.get(FILMWEB) + " is incorrect");
         }
@@ -69,7 +73,7 @@ public final class Actor implements ContentType<Actor> {
         setSurname(actorMap.get(SURNAME));
         setNationality(actorMap.get(NATIONALITY));
         try { this.imagePath = Paths.get(actorMap.get(IMAGE_PATH)); } catch (NullPointerException ignored) { }
-        try { this.imageUrl = new URL(actorMap.get(IMAGE_URL)); } catch (MalformedURLException ignored) { }
+        try { this.imageUrl = new URL(actorMap.get(IMAGE_URL)); } catch (MalformedURLException | NullPointerException ignored) { }
         this.birthday = convertBdStringToLocalDate(actorMap.get(Actor.BIRTHDAY));
         if(actorMap.get(Actor.DEATH_DAY) != null) {
             setDeathDay(LocalDate.parse(actorMap.get(Actor.DEATH_DAY)));
@@ -79,6 +83,7 @@ public final class Actor implements ContentType<Actor> {
         if(id == -1) {
             this.id = classActorId;
             classActorId++;
+            iAmFromConstructor = false;
             saveMe();
         } else {
             this.id = id;
@@ -112,15 +117,24 @@ public final class Actor implements ContentType<Actor> {
 //    == setters ==
 
     public void setName(String name) {
-        this.name = ContentType.checkForNullOrEmptyOrIllegalChar(name, Actor.NAME);
+        try {
+            this.name = ContentType.checkForNullOrEmptyOrIllegalChar(name, Actor.NAME);
+            saveMe();
+        } catch (Config.ArgumentIssue ignored) { }
     }
 
     public void setSurname(String surname) {
-        this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(surname, Actor.SURNAME);
+        try {
+            this.surname = ContentType.checkForNullOrEmptyOrIllegalChar(surname, Actor.SURNAME);
+            saveMe();
+        } catch (Config.ArgumentIssue ignored) { }
     }
 
     public void setNationality(String nationality) {
-        this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar(nationality, Actor.NATIONALITY);
+        try {
+            this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar(nationality, Actor.NATIONALITY);
+            saveMe();
+        } catch (Config.ArgumentIssue ignored) { }
     }
 
     private void setAge() {
@@ -130,6 +144,7 @@ public final class Actor implements ContentType<Actor> {
         } else {
             this.age = deathDay.minusYears(birthday.getYear()).getYear();
         }
+        saveMe();
     }
 
     public void setDeathDay(LocalDate deathDay) {
@@ -138,6 +153,7 @@ public final class Actor implements ContentType<Actor> {
         }
         this.deathDay = deathDay;
         setAge();
+        saveMe();
     }
 
     public void setIsAnActor(boolean isActor) {
@@ -346,7 +362,7 @@ public final class Actor implements ContentType<Actor> {
     @Override
     public void saveMe() {
         synchronized (AutoSave.NEW_OBJECTS) {
-            if(!AutoSave.NEW_OBJECTS.contains(this)) {
+            if(!AutoSave.NEW_OBJECTS.contains(this) && !iAmFromConstructor) {
                 AutoSave.NEW_OBJECTS.add(this);
                 AutoSave.NEW_OBJECTS.notify();
                 log.debug("Actor \"{}\" added to the list of new objects", this);
