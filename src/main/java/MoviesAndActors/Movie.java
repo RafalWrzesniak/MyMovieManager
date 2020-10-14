@@ -3,9 +3,7 @@ package MoviesAndActors;
 import Configuration.Config;
 import FileOperations.AutoSave;
 import FileOperations.IO;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -14,102 +12,70 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
-@Getter
 public final class Movie implements ContentType<Movie> {
 
 //   == fields ==
-    private int id;
-    private int duration;
-    private int rateCount;
-    private double rate;
-    private String title;
-    private String titleOrg;
-    private String description;
-    private LocalDate premiere;
-    private Path imagePath;
-    private URL imageUrl;
-    @Setter private URL filmweb;
-    private List<Actor> cast = new ArrayList<>();
-    private List<Actor> directors = new ArrayList<>();
-    private List<Actor> writers = new ArrayList<>();
-    private List<String> genres = new ArrayList<>();
-    private List<String> production = new ArrayList<>();
+    @Getter private int id;
+    @Getter private String title;
+    @Getter private String titleOrg;
+    @Getter private String description;
+    @Getter private Integer duration;
+    @Getter private Integer rateCount;
+    @Getter private Double rate;
+    @Getter private LocalDate premiere;
+    @Getter private Path imagePath;
+    @Getter private URL imageUrl;
+    @Getter private URL filmweb;
+    private final Set<Actor> cast = new LinkedHashSet<>();
+    private final Set<Actor> directors = new LinkedHashSet<>();
+    private final Set<Actor> writers = new LinkedHashSet<>();
+    private final Set<String> genres = new HashSet<>();
+    private final Set<String> production = new HashSet<>();
 
-    @Getter(AccessLevel.NONE)
     private static int classMovieId = -1;
-    @Getter(AccessLevel.NONE)
-    private boolean iAmFromConstructor = false;
+    private boolean iAmFromConstructor;
 
 //    == constants ==
-    @Getter(AccessLevel.NONE)
-    public static String TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", DURATION = "duration",
+    public static final String TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", DURATION = "duration",
             RATE = "rate", RATE_COUNT = "rateCount", CAST = "cast", DIRECTORS = "directors", WRITERS = "writers",
             GENRES = "genres", PRODUCTION = "production", DESCRIPTION = "description";
-    @Getter(AccessLevel.NONE)
     public static final List<String> FIELD_NAMES = List.of(ContentType.ID, TITLE, TITLE_ORG, PREMIERE, DURATION,
             RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, IMAGE_PATH, IMAGE_URL, FILMWEB);
 
-    @Getter(AccessLevel.NONE)
     public static final Comparator<Movie> COMP_ID = Comparator.comparingInt(Movie::getId);
-    @Getter(AccessLevel.NONE)
     public static final Comparator<Movie> COMP_DURATION = Comparator.comparingInt(Movie::getDuration);
-    @Getter(AccessLevel.NONE)
     public static final Comparator<Movie> COMP_PREMIERE = Comparator.comparing(Movie::getPremiere);
-    @Getter(AccessLevel.NONE)
     public static final Comparator<Movie> COMP_RATE = Comparator.comparingDouble(Movie::getRate);
 
 
 //    == constructors ==
 
-    public Movie(Map<String, List<String>> fieldMap, ContentList<Actor> allActors) {
+    // constructor to use when creating instance from XML
+    public Movie(Map<String, List<String>> movieMap, ContentList<Actor> allActors) {
         updateClassMovieId();
         iAmFromConstructor = true;
-        try {
-            setFilmweb(new URL(fieldMap.get(Movie.FILMWEB).get(0)));
-        } catch (MalformedURLException ignored) {
-            throw new NullPointerException("Can't create movie when filmweb is incorrect");
-        }
-        for(String field : fieldMap.keySet()) {
-            setFieldWithList(field, fieldMap.get(field));
-        }
-        if(id == -1) {
-            id = classMovieId;
-            classMovieId++;
-        }
-        log.info("New movie \"{}\" created", this.toString());
+        setAllNonActorFields(movieMap);
+        addActors(allActors.convertStrIdsToObjects(movieMap.get(Movie.CAST)));
+        addDirectors(allActors.convertStrIdsToObjects(movieMap.get(Movie.DIRECTORS)));
+        addWriters(allActors.convertStrIdsToObjects(movieMap.get(Movie.WRITERS)));
         iAmFromConstructor = false;
-        setFieldWithList("cast", allActors.convertStrIdsToObjects(fieldMap.get("cast")));
-        setFieldWithList("directors", allActors.convertStrIdsToObjects(fieldMap.get("directors")));
-        setFieldWithList("writers", allActors.convertStrIdsToObjects(fieldMap.get("writers")));
+        log.info("New movie \"{}\" created", this.toString());
     }
 
-    public Movie(Map<String, List<String>> fieldMap) {
+    // constructor to use when creating instance from WEB
+    public Movie(Map<String, List<String>> movieMap) {
         updateClassMovieId();
         iAmFromConstructor = true;
-        try {
-            setFilmweb(new URL(fieldMap.get(Movie.FILMWEB).get(0)));
-        } catch (MalformedURLException ignored) {
-            throw new NullPointerException("Can't create movie when filmweb is incorrect");
-        }
-        for(String field : fieldMap.keySet()) {
-            setFieldWithList(field, fieldMap.get(field));
-        }
-        int id = fieldMap.get(ID) == null ? -1 : Integer.parseInt(fieldMap.get(ID).get(0));
-        if(id == -1) {
-            this.id = classMovieId;
-            classMovieId++;
-        }
-        log.info("New movie \"{}\" created", this.toString());
+        setAllNonActorFields(movieMap);
         iAmFromConstructor = false;
+        log.info("New movie \"{}\" created", this.toString());
         saveMe();
     }
 
@@ -125,230 +91,241 @@ public final class Movie implements ContentType<Movie> {
             for (String name : files) {
                 Pattern pattern = Pattern.compile("^movie(\\d+)$");
                 Matcher matcher = pattern.matcher(name);
-                if (matcher.find() && Integer.parseInt(matcher.group(1)) >= classMovieId) {
-                    classMovieId = Integer.parseInt(matcher.group(1));
-                    classMovieId++;
+                if (matcher.find()) {
+                    int readId = Integer.parseInt(matcher.group(1));
+                    if(readId >= classMovieId) {
+                        classMovieId = readId + 1;
+                    }
                 }
             }
         }
         if(classMovieId == -1) classMovieId = 0;
     }
 
+    private static LocalDate convertStrToLocalDate(String string) {
+        if(string == null || string.isEmpty()) {
+            throw new IllegalArgumentException("Argument cannot be null or empty!");
+        }
+        return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
+    }
 
-//  == setters ==
 
-    private <E> void setFieldString(String field, E value) {
-        try { //check if value is int or double
-            setFieldDigit(field, Integer.parseInt((String) value));
-            return;
-        } catch (NumberFormatException e) {
-//            e.printStackTrace();
-            try {
-                setFieldDigit(field, Double.parseDouble((String) value));
-                return;
-            } catch (NumberFormatException d) {
-//                d.printStackTrace();
+
+//    == setters ==
+
+    private void setAllNonActorFields(Map<String, List<String>> inputMovieMap) {
+        // prepare fields if not complete
+        Map<String, List<String>> movieMap = new HashMap<>(inputMovieMap);
+        for(String field : FIELD_NAMES) {
+            if(movieMap.get(field) == null) {
+                List<String> nullList = new ArrayList<>();
+                nullList.add(null);
+                movieMap.put(field, nullList);
             }
         }
-
+        // filmweb
         try {
-            if (Movie.class.getDeclaredField(field).toString().contains("java.time.LocalDate")) {
-                Movie.class.getDeclaredField(field).set(this, convertStrToLocalDate(String.valueOf(value)));
-            }
-            else if (Movie.class.getDeclaredField(field).toString().contains("java.net.URL")) {
-                Movie.class.getDeclaredField(field).set(this, new URL(String.valueOf(value)));
-            }
-            else if (Movie.class.getDeclaredField(field).toString().contains("java.nio.file.Path")) {
-                Movie.class.getDeclaredField(field).set(this, Paths.get(String.valueOf(value)));
-            }
-            else {
-                Movie.class.getDeclaredField(field).set(this, ContentType.checkForNullOrEmptyOrIllegalChar(String.valueOf(value), field));
-            }
+            setFilmweb(new URL(movieMap.get(Movie.FILMWEB).get(0)));
+        } catch (MalformedURLException ignored) {
+            throw new NullPointerException("Can't create movie when filmweb is incorrect");
+        }
+        // id
+        int id = movieMap.get(ID).get(0) == null ? -1 : Integer.parseInt(movieMap.get(ID).get(0));
+        if(id == -1) {
+            this.id = classMovieId;
+            classMovieId++;
+        } else {
+            this.id = id;
+        }
+        // String
+        setTitle(movieMap.get(Movie.TITLE).get(0));
+        setTitleOrg(movieMap.get(Movie.TITLE_ORG).get(0));
+        setDescription(movieMap.get(Movie.DESCRIPTION).get(0));
+        // Integer
+        if(movieMap.get(Movie.DURATION).get(0) != null) {
+            setDuration(Integer.parseInt(movieMap.get(Movie.DURATION).get(0)));
+        }
+        if((movieMap.get(Movie.RATE_COUNT).get(0)) != null) {
+            setRateCount(Integer.parseInt(movieMap.get(Movie.RATE_COUNT).get(0)));
+        }
+        // Double
+        if(movieMap.get(Movie.RATE).get(0) != null) {
+            setRate(Double.parseDouble(movieMap.get(Movie.RATE).get(0)));
+        }
+        // LocalDate
+        setPremiere(convertStrToLocalDate(movieMap.get(Movie.PREMIERE).get(0)));
+        // Path
+        if(movieMap.get(Movie.IMAGE_PATH).get(0) != null) {
+            setImagePath(Paths.get(movieMap.get(Movie.IMAGE_PATH).get(0)));
+        }
+        // URL
+        if(movieMap.get(Movie.IMAGE_URL).get(0) != null) {
+            try { setImageUrl(new URL(movieMap.get(Movie.IMAGE_URL).get(0))); } catch (MalformedURLException ignored) { }
+        }
+        // List<String>
+        addGenres(movieMap.get(Movie.GENRES));
+        addProductions(movieMap.get(Movie.PRODUCTION));
+    }
+
+
+    // String
+    public void setTitle(String title) {
+        try {
+            this.title = ContentType.checkForNullOrEmptyOrIllegalChar(title, Movie.TITLE);
             saveMe();
-        } catch (NoSuchFieldException | IllegalAccessException | MalformedURLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private <E> void setFieldDigit(String field, E value) {
-        if (!(value instanceof Integer) && !(value instanceof Double)) return;
-
-        try {
-            if(Movie.class.getDeclaredField(field).get(this).toString().equals("0") || Movie.class.getDeclaredField(field).get(this).toString().equals("0.0")) {
-                if(field.equals(Movie.RATE)) {
-                    double doubleValue = (double) value;
-                    if(doubleValue > 0 && doubleValue <= 10) {
-                        Movie.class.getDeclaredField(field).set(this, (double) (Math.round(doubleValue * 100)) / 100);
-                    } else {
-                        log.warn("Unsuccessful set of \"{}\" in movie \"{}\" - rate has to be in range (0,10]", field, this.toString());
-                    }
-                } else {
-                    Movie.class.getDeclaredField(field).set(this, value);
-                }
-//                logger.debug("Field \"{}\" of \"{}\" set to \"{}\"",  field, this.toString(), Movie.class.getDeclaredField(field).get(this));
-                saveMe();
-            } else {
-                log.warn("Unsuccessful set of \"{}\" in movie \"{}\" - this field is already set", field, this.toString());
-            }
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private <E> void setField(String field, E value) {
-        if(value == null) {
-            log.warn("Unsuccessful set of \"{}\" in \"{}\" - null as input", field, this);
-            return;
-        }
-        try {
-            if(!(Movie.class.getDeclaredField(field).get(this) instanceof List)) {
-                setFieldString(field, value);
-                return;
-            }
-
-            if(value instanceof Actor) {
-                @SuppressWarnings("unchecked")
-                List<Actor> list = (List<Actor>) Movie.class.getDeclaredField(field).get(this);
-                if(!list.contains(value)) {
-                    list.add((Actor) value);
-                    Movie.class.getDeclaredField(field).set(this, list);
-                    switch(field) {
-                        case "cast":
-                            ((Actor) value).addMovieActorPlayedIn(this);
-                            break;
-                        case "directors":
-                            ((Actor) value).addMovieDirectedBy(this);
-                            break;
-                        case "writers":
-                            ((Actor) value).addMovieWrittenBy(this);
-                            break;
-                    }
-                } else {
-                    log.warn("Unsuccessful set of {}. \"{}\" is already on the list", "\"" + field + "\" in " + this, value);
-                    return;
-                }
-            } else if(value instanceof String) {
-                @SuppressWarnings("unchecked")
-                List<String> list = (List<String>) Movie.class.getDeclaredField(field).get(this);
-                String fieldName = Movie.class.getDeclaredField(field).getName();
-                if (list.contains(value)) {
-                    log.warn("Unsuccessful set of {}. \"{}\" is already on the list", "\"" + field + "\" in " + this, value);
-                    return;
-                } else if(fieldName.equals("cast") || fieldName.equals("directors") || fieldName.equals("writers")) return;
-                list.add((String) value);
-                Movie.class.getDeclaredField(field).set(this, list);
-            }
-            saveMe();
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private <E> void setFieldWithList(String field, List<E> list) {
-        if(list.size() > 0) {
-            for (E obj : list) {
-                setField(field, obj);
-            }
-        }
-    }
-
-
-    public void setDuration(int duration) {
-        setFieldDigit(DURATION, duration);
-    }
-
-    public void setLength(String length) {
-        setFieldString(DURATION, length);
-    }
-
-    public void setRate(double rate) {
-        if(rate > 0 && rate <= 10) {
-            setFieldDigit(RATE, rate);
-        }
-    }
-
-    public void setRateCount(int rateCount) {
-        setFieldDigit(RATE_COUNT, rateCount);
+        } catch (Config.ArgumentIssue ignored) { }
     }
 
     public void setTitleOrg(String titleOrg) {
-        setFieldString(TITLE_ORG, titleOrg);
+        try {
+            this.titleOrg = ContentType.checkForNullOrEmptyOrIllegalChar(titleOrg, Movie.TITLE_ORG);
+            saveMe();
+        } catch (Config.ArgumentIssue ignored) { }
     }
 
     public void setDescription(String description) {
-        setFieldString(DESCRIPTION, description);
+        try {
+            this.description = ContentType.checkForNullOrEmptyOrIllegalChar(description, Movie.DESCRIPTION);
+            saveMe();
+        } catch (Config.ArgumentIssue ignored) { }
     }
 
+
+    // Integer
+    public void setDuration(Integer duration) {
+        if(duration <= 0) return;
+        this.duration = duration;
+        saveMe();
+    }
+
+    public void setRateCount(Integer rateCount) {
+        if(rateCount <= 0) return;
+        this.rateCount = rateCount;
+        saveMe();
+    }
+
+
+    // Double
+    public void setRate(double rate) {
+        if(rate > 0 && rate <= 10) {
+            this.rate = (double) (Math.round(rate * 100)) / 100;
+            saveMe();
+        }
+    }
+
+
+    // LocalDate
+    public void setPremiere(LocalDate premiere) {
+        this.premiere = premiere;
+        saveMe();
+    }
+
+
+    // Path
     public void setImagePath(Path imagePath) {
-        setFieldString(IMAGE_PATH, imagePath.toString());
+        this.imagePath = imagePath;
+        saveMe();
     }
 
+
+    // URL
     public void setImageUrl(URL imageUrl) {
         this.imageUrl = imageUrl;
+        saveMe();
     }
 
-    //production
+    public void setFilmweb(URL filmweb) {
+        this.filmweb = filmweb;
+        saveMe();
+    }
+
+
+    // Set<String>
+
+    // production
     public void addProduction(String production) {
-        setField(PRODUCTION, production);
+        try{
+            this.production.add(ContentType.checkForNullOrEmptyOrIllegalChar(production, Movie.PRODUCTION));
+            saveMe();
+        } catch(Config.ArgumentIssue ignored) {}
     }
-
     public void addProductions(List<String> producers) {
-        setFieldWithList(PRODUCTION, producers);
+        for(String producer : producers) {
+            addProduction(producer);
+        }
     }
-
-
     // genres
     public void addGenre(String genre) {
-        setField(GENRES, genre);
+        try {
+            genres.add(ContentType.checkForNullOrEmptyOrIllegalChar(genre, Movie.GENRES));
+            saveMe();
+        } catch(Config.ArgumentIssue ignored) {}
     }
-
     public void addGenres(List<String> genres) {
-        setFieldWithList(GENRES, genres);
+        for(String genre : genres) {
+            addGenre(genre);
+        }
     }
 
+
+    // Set<Actor>
 
     // actors
     public void addActor(Actor actor) {
-        setField(CAST, actor);
+        if(actor == null) return;
+        cast.add(actor);
+        actor.addMovieActorPlayedIn(this);
+        saveMe();
     }
-
     public void addActors(List<Actor> actors) {
-        setFieldWithList(CAST, actors);
+        if(actors == null || actors.size() == 0) return;
+        for(Actor actor : actors) {
+            addActor(actor);
+        }
     }
 
     // directors
     public void addDirector(Actor director) {
-        setField(DIRECTORS, director);
+        if(director == null) return;
+        directors.add(director);
+        director.addMovieDirectedBy(this);
+        saveMe();
     }
-
     public void addDirectors(List<Actor> directors) {
-        setFieldWithList(DIRECTORS, directors);
+        if(directors == null || directors.size() == 0) return;
+        for(Actor director : directors) {
+            addDirector(director);
+        }
     }
 
     // writers
     public void addWriter(Actor writer) {
-        setField(WRITERS, writer);
+        if(writer == null) return;
+        writers.add(writer);
+        writer.addMovieWrittenBy(this);
+        saveMe();
     }
-
     public void addWriters(List<Actor> writers) {
-        setFieldWithList(WRITERS, writers);
+        if(writers == null || writers.size() == 0) return;
+        for(Actor writer : writers) {
+            addWriter(writer);
+        }
     }
 
 
 
 //    == getters ==
 
-    public List<Actor> getWriters() {
-        return new ArrayList<>(writers);
+    public List<Actor> getCast() {
+        return new ArrayList<>(cast);
     }
 
     public List<Actor> getDirectors() {
         return new ArrayList<>(directors);
     }
 
-    public List<Actor> getCast() {
-        return new ArrayList<>(cast);
+    public List<Actor> getWriters() {
+        return new ArrayList<>(writers);
     }
 
     public List<String> getGenres() {
@@ -396,7 +373,8 @@ public final class Movie implements ContentType<Movie> {
         }
     }
 
-    public List<String> getTop3Names(List<Actor> list) {
+    public List<String> getTop3Names(Set<Actor> list) {
+        Iterator<Actor> asd = list.iterator();
         List<String> result = new ArrayList<>();
         if(list.size() < 4) {
             for (Actor actor : list) {
@@ -404,7 +382,7 @@ public final class Movie implements ContentType<Movie> {
             }
         } else {
             for (int i = 0; i < 3; i++) {
-                result.add(list.get(i).getNameAndSurname());
+                result.add(asd.next().getNameAndSurname());
             }
         }
         return result;
@@ -432,8 +410,9 @@ public final class Movie implements ContentType<Movie> {
 
     @Override
     public Map<String, String> getAllFieldsAsStrings() {
-        Function<List<?>, String> getFromList = objects -> {
-            if(objects == null || objects.size() == 0) return null;
+        Function<Set<?>, String> getFromList = setObjects -> {
+            if(setObjects == null || setObjects.size() == 0) return null;
+            List<?> objects = Collections.singletonList(setObjects);
             String tmpStr = "";
             if(objects.get(0) instanceof Actor) {
                 for (Object o : objects) {
@@ -470,33 +449,6 @@ public final class Movie implements ContentType<Movie> {
         return map;
     }
 
-    public static LocalDate convertStrToLocalDate(String string) {
-        if(string == null || string.isEmpty()) {
-            throw new IllegalArgumentException("Argument cannot be null or empty!");
-        }
-        return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
-    }
-
-
-    public static int changeLenStrFromIMDBToInt(String lenString){
-        if(lenString == null || lenString.isEmpty()) {
-            return 0;
-        }
-        DateTimeFormatter longPattern = DateTimeFormatter.ofPattern("'PT'H'H'mm'M'");
-        DateTimeFormatter hourPattern = DateTimeFormatter.ofPattern("'PT'H'H'");
-        LocalTime time;
-        try {
-            time = LocalTime.parse(lenString, longPattern);
-        } catch (DateTimeParseException e) {
-            try {
-                time = LocalTime.parse(lenString, hourPattern);
-            } catch (DateTimeParseException e2) {
-                lenString = lenString.replace("PT", "PT0H");
-                time = LocalTime.parse(lenString, longPattern);
-            }
-        }
-        return time.getHour()*60 + time.getMinute();
-    }
 
     @Override
     public boolean searchFor(String strToFind) {
@@ -575,6 +527,7 @@ public final class Movie implements ContentType<Movie> {
         synchronized (AutoSave.NEW_OBJECTS) {
             if (!AutoSave.NEW_OBJECTS.contains(this) && !iAmFromConstructor) {
                 AutoSave.NEW_OBJECTS.add(this);
+                AutoSave.NEW_OBJECTS.notify();
                 log.debug("Movie \"{}\" added to the list of new objects", this);
             }
         }
