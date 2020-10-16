@@ -166,7 +166,7 @@ class ActorTest {
                 Map.entry(Actor.FILMWEB, "https://www.filmweb.pl/person/someone2"),
                 Map.entry(Actor.IMAGE_PATH, "E:\\xInne\\dk.jpg")
         ));
-        assertFalse(person.equals(person2));
+        assertNotEquals(person, person2);
 
     }
 

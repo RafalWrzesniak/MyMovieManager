@@ -40,6 +40,7 @@ public class ContentList<T extends ContentType<T>> {
         }
         this.listName = tmpListName;
         NAMES.add(listName);
+        log.info("New ContentList object created: \"{}\"", listName);
     }
 
 

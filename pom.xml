@@ -11,6 +11,8 @@
 <!--    versions    -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javax.annotation.version>1.3.2</javax.annotation.version>
+        <spring.mvc.version>5.2.9.RELEASE</spring.mvc.version>
         <compiler.version>3.8.1</compiler.version>
         <assembly.version>3.3.0</assembly.version>
         <logback.version>1.2.3</logback.version>
@@ -46,6 +48,19 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
+<!--    spring mvc -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.mvc.version}</version>
+        </dependency>
+<!--    javax annotation -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>${javax.annotation.version}</version>
+        </dependency>
+
 
     </dependencies>
 

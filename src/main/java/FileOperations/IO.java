@@ -169,9 +169,11 @@ public final class IO {
         String line;
         while((line = reader.readLine()) != null) {
             if ((line.contains(textToFind))) {
+                reader.close();
                 return line;
             }
         }
+        reader.close();
         return null;
     }
 

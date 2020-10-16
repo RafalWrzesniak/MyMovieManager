@@ -72,6 +72,7 @@ public final class XMLOperator {
         rootElement.appendChild(typeElement);
         rootElement.appendChild(doc.createTextNode("\n"));
         makeSimpleSave(doc, savedFile);
+        log.info("ContentList \"{}\" properly created and saved in \"{}\"", list, savedFile);
     }
 
     public static <E extends ContentType<E>> void updateSavedContentListWith(ContentList<E> list, E content) {
@@ -221,7 +222,7 @@ public final class XMLOperator {
     }
 
 
-//    == public static inner classes
+//    == public static inner classes ==
 
     public static class ReadAllDataFromFiles extends Thread {
         private List<ContentList<Actor>> allActorsLists;

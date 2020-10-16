@@ -117,7 +117,7 @@ public final class Movie implements ContentType<Movie> {
         // prepare fields if not complete
         Map<String, List<String>> movieMap = new HashMap<>(inputMovieMap);
         for(String field : FIELD_NAMES) {
-            if(movieMap.get(field) == null) {
+            if(movieMap.get(field).size() == 0) {
                 List<String> nullList = new ArrayList<>();
                 nullList.add(null);
                 movieMap.put(field, nullList);
@@ -412,7 +412,7 @@ public final class Movie implements ContentType<Movie> {
     public Map<String, String> getAllFieldsAsStrings() {
         Function<Set<?>, String> getFromList = setObjects -> {
             if(setObjects == null || setObjects.size() == 0) return null;
-            List<?> objects = Collections.singletonList(setObjects);
+            List<?> objects = List.of(setObjects.toArray());
             String tmpStr = "";
             if(objects.get(0) instanceof Actor) {
                 for (Object o : objects) {
@@ -434,9 +434,9 @@ public final class Movie implements ContentType<Movie> {
         map.put(TITLE, title);
         map.put(TITLE_ORG, titleOrg);
         map.put(PREMIERE, premiere != null ? premiere.toString() : null);
-        map.put(DURATION, String.valueOf(duration));
-        map.put(RATE, String.valueOf(rate));
-        map.put(RATE_COUNT, String.valueOf(rateCount));
+        map.put(DURATION, duration != null ? String.valueOf(duration) : null);
+        map.put(RATE, rate != null ? String.valueOf(rate) : null);
+        map.put(RATE_COUNT, rateCount != null ? String.valueOf(rateCount) : null);
         map.put(CAST, getFromList.apply(cast));
         map.put(DIRECTORS, getFromList.apply(directors));
         map.put(WRITERS, getFromList.apply(writers));
