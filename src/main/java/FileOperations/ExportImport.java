@@ -33,12 +33,12 @@ public final class ExportImport {
 
     public static class ExportAll extends Thread {
 
-        File outPutFile;
+        private File outPutFile;
 
         public ExportAll(File outPutFile) {
             if(outPutFile != null) {
-                if(!outPutFile.getName().endsWith(".zip")) {
-                    outPutFile = new File(outPutFile.getName().concat(".zip"));
+                if(!outPutFile.getPath().endsWith(".zip")) {
+                    outPutFile = new File(outPutFile.getPath().concat(".zip"));
                 }
             }
             this.outPutFile = outPutFile;
@@ -102,7 +102,7 @@ public final class ExportImport {
 
     public static class ImportAll extends Thread {
 
-        File inputFile;
+        private final File inputFile;
 
         public ImportAll(File inputFile) {
             this.inputFile = inputFile;
@@ -116,8 +116,7 @@ public final class ExportImport {
                 unZipFile();
                 log.info("Successfully imported data from \"{}\"", inputFile);
             } catch (IOException e) {
-                e.printStackTrace();
-                log.warn("Failed to import file \"{}\"", inputFile);
+                log.warn("Failed to import file \"{}\" because of \"{}\"", inputFile, e.getMessage());
             }
         }
 
@@ -132,9 +131,7 @@ public final class ExportImport {
                     zipName = zipEntry.getName().substring(zipEntry.getName().indexOf('\\'));
                 } else throw new IOException("Wrong ZIP file, can't import data");
                 String relPath = zipName.substring(0, zipName.lastIndexOf('\\'));
-                if(!new File(destDir, relPath).mkdirs()) {
-                    log.warn("Could not create directory \"{}\"", new File(destDir, relPath));
-                }
+                new File(destDir, relPath).mkdirs();
                 File newFile = new File(destDir, zipName);
                 FileOutputStream fos = new FileOutputStream(newFile);
                 int len;
@@ -180,6 +177,9 @@ public final class ExportImport {
 
 
         private static void exportAll(File exportFile) {
+            if(!exportFile.getPath().endsWith(".xml")) {
+                exportFile = new File(exportFile.getPath().concat(".xml"));
+            }
             Document doc = XMLOperator.createDoc();
             assert doc != null;
             Element rootElement = doc.createElement("exported");
