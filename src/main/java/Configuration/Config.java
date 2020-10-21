@@ -40,7 +40,7 @@ public final class Config {
     /**
      * Default path for saving data by application
      */
-    private static final Path DEFAULT_SAVED_DATA = Paths.get(System.getProperty("user.dir"),"savedData");
+    public static final Path DEFAULT_SAVED_DATA = Paths.get(System.getProperty("user.dir"),"savedData");
     /**
      * Default path of location of main movies folder
      */
@@ -61,7 +61,7 @@ public final class Config {
         File tmpFiles = TMP_FILES.toFile();
         if(!tmpFiles.mkdir()) {
             IO.deleteDirectoryRecursively(tmpFiles);
-            if(!tmpFiles.mkdir()) {
+            if(!tmpFiles.exists() && !tmpFiles.mkdir()) {
                 log.warn("Could not create TMP directory \"{}\"", tmpFiles);
             }
         }
@@ -78,7 +78,7 @@ public final class Config {
 
     public static void setSAVE_PATH(File newDirectory, boolean moveFiles) {
         if(newDirectory != null) {
-            if(!newDirectory.mkdir()) {
+            if(!newDirectory.exists() && !newDirectory.mkdir()) {
                 log.warn("Could not create directory \"{}\"", newDirectory);
             }
             if(moveFiles) {

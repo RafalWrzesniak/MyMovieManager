@@ -46,7 +46,7 @@ class XMLOperatorTest {
 
     @AfterAll
     static void afterAll() {
-        Config.setSAVE_PATH(new File(System.getProperty("user.dir").concat("\\savedData")), false);
+        Config.setSAVE_PATH(Config.DEFAULT_SAVED_DATA.toFile(), false);
     }
 
     @BeforeEach
@@ -55,7 +55,6 @@ class XMLOperatorTest {
         if(Config.TMP_FILES.toFile().mkdirs()) {
             Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
         }
-
     }
 
     @Test
@@ -112,7 +111,7 @@ class XMLOperatorTest {
             IO.deleteDirectoryRecursively(file);
         }
 
-        Path files = Paths.get("src","test", "resources", "DataForReadAllTest");
+        Path files = Paths.get("src","test", "resources", "SomeTestData");
         try {
             FileSystemUtils.copyRecursively(files, Config.getSAVE_PATH());
         } catch (IOException e) {

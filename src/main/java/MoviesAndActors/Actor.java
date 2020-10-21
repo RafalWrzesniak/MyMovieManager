@@ -4,6 +4,7 @@ import Configuration.Config;
 import FileOperations.AutoSave;
 import FileOperations.IO;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
+@EqualsAndHashCode(of = "filmweb")
 public final class Actor implements ContentType<Actor> {
 
 //    == fields ==
@@ -330,13 +332,6 @@ public final class Actor implements ContentType<Actor> {
         return false;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Actor)) return false;
-        Actor actor = (Actor) o;
-        return filmweb.equals(actor.getFilmweb());
-    }
 
     @Override
     public String toString() {

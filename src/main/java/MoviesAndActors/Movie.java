@@ -3,6 +3,7 @@ package MoviesAndActors;
 import Configuration.Config;
 import FileOperations.AutoSave;
 import FileOperations.IO;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
+@EqualsAndHashCode(of = "filmweb")
 public final class Movie implements ContentType<Movie> {
 
 //   == fields ==
@@ -117,7 +119,7 @@ public final class Movie implements ContentType<Movie> {
         // prepare fields if not complete
         Map<String, List<String>> movieMap = new HashMap<>(inputMovieMap);
         for(String field : FIELD_NAMES) {
-            if(movieMap.get(field).size() == 0) {
+            if(movieMap.get(field) == null || movieMap.get(field).size() == 0) {
                 List<String> nullList = new ArrayList<>();
                 nullList.add(null);
                 movieMap.put(field, nullList);
@@ -503,15 +505,6 @@ public final class Movie implements ContentType<Movie> {
         System.out.println("WebLink    : " + filmweb);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if(obj == null) return false;
-        if(obj instanceof Movie) {
-            Movie movie = (Movie) obj;
-            return filmweb.equals(movie.getFilmweb());
-        }
-        return false;
-    }
 
     @Override
     public int compareTo(Movie movie) {

@@ -293,6 +293,7 @@ class ActorTest {
         ));
         assertEquals(actor2, actor);
         assertNotEquals(actor3, actor);
+        assertNotEquals(actor, null);
     }
 
     @Test
