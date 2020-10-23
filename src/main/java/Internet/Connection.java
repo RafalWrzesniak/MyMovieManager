@@ -31,15 +31,14 @@ public final class Connection {
 
 //    == fields ==
     private URL websiteUrl;
-    @Getter
-    private URL mainMoviePage;
+    @Getter private URL mainMoviePage;
 
 //    == constants ==
     private static final String FILMWEB = "https://www.filmweb.pl";
-    private static final String MOVIE_LINE_KEY  = "data-linkable=\"filmMain\"";
-    private static final String MOVIE_LINE_KEY2 = "data-source=\"linksData\"";
-    private static final String ACTOR_LINE_KEY  = "personMainHeader";
-    private static final String CAST_LINE_KEY   = "data-linkable=\"filmFullCast\"";
+    private static final String LINE_WITH_MOVIE_DATA = "data-linkable=\"filmMain\"";
+    private static final String LINE_WITH_MOVIE_DATA2 = "data-source=\"linksData\"";
+    private static final String LINE_WITH_ACTOR_DATA = "personMainHeader";
+    private static final String LINE_WITH_CAST_DATA = "data-linkable=\"filmFullCast\"";
     private static final Map<String, String> ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
             entry(Actor.NAME,        "name"),
             entry(Actor.NATIONALITY, "birthPlace"),
@@ -75,7 +74,7 @@ public final class Connection {
     }
 
     public Connection(URL websiteUrl) throws IOException {
-        changeUrlTo(websiteUrl.toString());
+        changeUrlTo(websiteUrl);
     }
 
 
@@ -116,29 +115,29 @@ public final class Connection {
         return true;
     }
 
-    public URL getImageUrl(boolean movie) throws IOException {
+    public URL getImageUrl(boolean fromMovie) throws IOException {
         String foundLine;
-        if(movie) {
-            foundLine = grepLineFromWebsite(MOVIE_LINE_KEY);
-            if(!foundLine.contains(MOVIE_LINE_KEY2)){
-                foundLine = foundLine.concat(grepLineFromWebsite(MOVIE_LINE_KEY2));
+        if(fromMovie) {
+            foundLine = grepLineFromWebsite(LINE_WITH_MOVIE_DATA);
+            if(!foundLine.contains(LINE_WITH_MOVIE_DATA2)){
+                foundLine = foundLine.concat(grepLineFromWebsite(LINE_WITH_MOVIE_DATA2));
             }
-            return new URL(Objects.requireNonNull(extractItemFromFilmwebLine(MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Movie.IMAGE_PATH), foundLine)));
+            return new URL(Objects.requireNonNull(extractItemFromFilmwebLine(MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Movie.IMAGE_URL), foundLine)));
         } else {
-            foundLine = grepLineFromWebsite(ACTOR_LINE_KEY);
-            return new URL(Objects.requireNonNull(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_PATH), foundLine)));
+            foundLine = grepLineFromWebsite(LINE_WITH_ACTOR_DATA);
+            return new URL(Objects.requireNonNull(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_URL), foundLine)));
         }
     }
 
-    public void changeUrlTo(String newUrl) throws IOException {
+    public void changeUrlTo(URL newUrl) throws IOException {
         if(newUrl == null) {
             log.warn("Null as input - cannot change URL to null");
             throw new IOException("Null as input - cannot change URL to null");
         }
-        if (newUrl.matches("^" + FILMWEB + "/film/[^/]+?$")) {
-            this.mainMoviePage = new URL(newUrl);
+        if (newUrl.toString().matches("^" + FILMWEB + "/film/[^/]+?$")) {
+            this.mainMoviePage = newUrl;
         }
-        this.websiteUrl = new URL(newUrl);
+        this.websiteUrl = newUrl;
         if (websiteUrl.getQuery() == null) {
             log.debug("Changed Connection URL to \"{}\"", websiteUrl);
         } else {
@@ -149,7 +148,7 @@ public final class Connection {
 
     public Actor createActorFromFilmwebLink() throws IOException, NullPointerException {
         Map<String, String> actorData = new HashMap<>();
-        String foundLine = grepLineFromWebsite(ACTOR_LINE_KEY);
+        String foundLine = grepLineFromWebsite(LINE_WITH_ACTOR_DATA);
 
         String fullName = Objects.requireNonNull(
                 extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine))
@@ -184,7 +183,7 @@ public final class Connection {
     public List<Actor> createActorsFromFilmwebLinks(List<String> actorUrls, ContentList<Actor> allActors) {
         List<Actor> actorList = new ArrayList<>();
         if(actorUrls == null || actorUrls.size() == 0 || allActors == null) {
-             log.warn("Null or empty argument passed to createActorsFromFilmwebLinks");
+             log.warn("Null or empty argument passed to createActorsFromFilmwebLinks()");
             return actorList;
         }
         for(String actorUrl : actorUrls) {
@@ -222,9 +221,9 @@ public final class Connection {
 
     public Movie createMovieFromFilmwebLink() throws IOException, NullPointerException {
         Map<String, List<String>> movieData = new HashMap<>();
-        String foundLine = grepLineFromWebsite(MOVIE_LINE_KEY);
-        if(!foundLine.contains(MOVIE_LINE_KEY2)){
-            foundLine = foundLine.concat(grepLineFromWebsite(MOVIE_LINE_KEY2));
+        String foundLine = grepLineFromWebsite(LINE_WITH_MOVIE_DATA);
+        if(!foundLine.contains(LINE_WITH_MOVIE_DATA2)){
+            foundLine = foundLine.concat(grepLineFromWebsite(LINE_WITH_MOVIE_DATA2));
         }
 
         for (Map.Entry<String, String> pair : MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.entrySet()) {
@@ -263,7 +262,10 @@ public final class Connection {
     }
 
 
-    public String getMostSimilarTitleUrlFromQuery(String desiredTitle) throws IOException {
+    //    == private methods ==
+
+
+    private URL getMostSimilarTitleUrlFromQuery(String desiredTitle) throws IOException {
         String urlToReturn = null;
         Function<String, Map<Character, Integer>> createCharCountMap = string -> {
             Map<Character, Integer> tmpMap = new HashMap<>();
@@ -276,7 +278,7 @@ public final class Connection {
             assert url != null;
             try {
                 changeUrlTo(url);
-                String lineOfCurrentTitle = grepLineFromWebsite(MOVIE_LINE_KEY).concat(MOVIE_LINE_KEY2);
+                String lineOfCurrentTitle = grepLineFromWebsite(LINE_WITH_MOVIE_DATA).concat(LINE_WITH_MOVIE_DATA2);
                 String premiereOfCurrentTitle = extractItemFromFilmwebLine(MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Movie.PREMIERE), lineOfCurrentTitle);
                 if(premiereOfCurrentTitle == null) return 0;
                 return LocalDate.parse(premiereOfCurrentTitle, DateTimeFormatter.ISO_DATE).getYear();
@@ -341,12 +343,15 @@ public final class Connection {
         } else {
             log.warn("For query \"{}\" there was found {}. Low correlation. Possibility of wrong movie assigning", desiredTitle, result);
         }
-        return urlToReturn;
+        return urlToReturn != null ? new URL(urlToReturn) : null;
     }
 
 
 
-    //    == private methods ==
+    private void changeUrlTo(String newUrl) throws IOException {
+        URL url = new URL(newUrl);
+        changeUrlTo(url);
+    }
 
     private String grepLineFromWebsite(String find) throws IOException {
         if(find == null) return null;
@@ -417,6 +422,7 @@ public final class Connection {
     }
 
     @Deprecated
+    @SuppressWarnings("unused")
     private List<String> extractListOfItemsFromFilmwebLineOldOne(String itemToExtract, String line) throws IOException {
         if(itemToExtract == null || line == null) {
             log.warn("Null as input - can't extract list of items \"{}\" from \"{}\"", itemToExtract, websiteUrl);
@@ -500,7 +506,7 @@ public final class Connection {
             log.warn("Wrong castType parameter, can't download cast data of \"{}\" from \"{}\"", castType, websiteUrl);
             throw new IllegalArgumentException("Wrong castType parameter");
         }
-        return extractCastLinksFromFilmwebLink(castType, grepLineFromWebsite(CAST_LINE_KEY));
+        return extractCastLinksFromFilmwebLink(castType, grepLineFromWebsite(LINE_WITH_CAST_DATA));
     }
 
     private static int countChar(String string, char character) {
