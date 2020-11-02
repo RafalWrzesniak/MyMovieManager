@@ -50,7 +50,7 @@ public final class Config {
     @Getter private static Path SAVE_PATH;
     @Getter private static Path SAVE_PATH_MOVIE;
     @Getter private static Path SAVE_PATH_ACTOR;
-    @Getter private static File MAIN_MOVIE_FOLDER;
+    @Getter private static Path MAIN_MOVIE_FOLDER;
 
 
 //  == static initializer ==
@@ -70,7 +70,7 @@ public final class Config {
 
 //    == setters ==
 
-    public static void setMAIN_MOVIE_FOLDER(File mainMovieFolder) {
+    public static void setMAIN_MOVIE_FOLDER(Path mainMovieFolder) {
         MAIN_MOVIE_FOLDER = mainMovieFolder;
         updateParamInCfg("MAIN_MOVIE_FOLDER", mainMovieFolder.toString());
     }
@@ -108,7 +108,7 @@ public final class Config {
             NodeList element = root.getElementsByTagName("SAVE_PATH");
             SAVE_PATH = Paths.get(element.item(0).getChildNodes().item(0).getTextContent());
             element = root.getElementsByTagName("MAIN_MOVIE_FOLDER");
-            setMAIN_MOVIE_FOLDER(new File(element.item(0).getChildNodes().item(0).getTextContent()));
+            setMAIN_MOVIE_FOLDER(Paths.get(element.item(0).getChildNodes().item(0).getTextContent()));
         } else {
             Document doc = XMLOperator.createDoc();
             if(doc != null) {

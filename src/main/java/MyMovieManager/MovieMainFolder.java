@@ -18,22 +18,41 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@RequiredArgsConstructor
 public class MovieMainFolder extends Thread {
 
 //    == fields ==
-    @Getter private ContentList<Movie> moviesToWatch;
+    @Getter private final ContentList<Movie> moviesToWatch;
 
 //    == required fields ==
     private final ContentList<Movie> allMovies;
     private final ContentList<Actor> allActors;
 
+
+//    == constructors ==
+    public MovieMainFolder(ContentList<Movie> allMovies, ContentList<Actor> allActors) {
+        this.allMovies = allMovies;
+        this.allActors = allActors;
+        this.moviesToWatch = new ContentList<>(ContentList.MOVIES_TO_WATCH);
+        Path path = Paths.get(Config.getSAVE_PATH_MOVIE().toString(), moviesToWatch.getListName().concat(".xml"));
+        log.debug("Attempt to remove \"{}\" ends with status \"{}\"", path.toString(), path.toFile().delete());
+    }
+
+    public MovieMainFolder(ContentList<Movie> moviesToWatch, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
+        this.allMovies = allMovies;
+        this.allActors = allActors;
+        this.moviesToWatch = moviesToWatch;
+    }
+
 //    == methods ==
     @Override
     public void run() {
         setName("MovieMainFolder");
+        if(allMovies == null || allActors == null || moviesToWatch == null) {
+            log.warn("Passed arguments cannot be null, MainMovieFolder was not updated");
+            return;
+        }
         Map<File, Integer> lastRideMap = IO.readLastStateOfMainMovieFolder();
-        List<File> currentState = IO.listDirectory(Configuration.Config.getMAIN_MOVIE_FOLDER());
+        List<File> currentState = IO.listDirectory(Configuration.Config.getMAIN_MOVIE_FOLDER().toFile());
         List<File> newPositionsToHandle = new ArrayList<>();
         Map<File, Integer> newStateMap = new HashMap<>();
         for(File file : currentState) {
@@ -43,11 +62,6 @@ public class MovieMainFolder extends Thread {
                 newStateMap.put(file, lastRideMap.get(file));
             }
         }
-
-        moviesToWatch = new ContentList<>(ContentList.MOVIES_TO_WATCH);
-        Path path = Paths.get(Config.getSAVE_PATH_MOVIE().toString(), moviesToWatch.getListName().concat(".xml"));
-        log.debug("Attempt to remove \"{}\" ends with status \"{}\"", path.toString(), path.toFile().delete());
-
 
         log.debug("Found \"{}\" new movies in main movie folder", newPositionsToHandle.size());
         if(newPositionsToHandle.size() > 0) {

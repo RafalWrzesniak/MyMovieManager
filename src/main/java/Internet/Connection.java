@@ -337,7 +337,7 @@ public final class Connection {
             }
 //            System.out.println("Correlation of \"" + foundTitle + "\" : " + Math.round(correlation*100) + "%");
         }
-        String result = String.format("\"%s\" with correlation: %d%%]", chosenTitle, Math.round(highestCorrelation * 100));
+        String result = String.format("\"%s\" with correlation: %d%%", chosenTitle, Math.round(highestCorrelation * 100));
         if(Math.round(highestCorrelation*100) > 50) {
             log.info("For query \"{}\" there was found {}", desiredTitle, result);
         } else {
