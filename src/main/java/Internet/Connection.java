@@ -199,7 +199,7 @@ public final class Connection {
                         if (Connection.downloadImage(actor.getImageUrl(), downloadedImagePath)) {
                             actor.setImagePath(downloadedImagePath);
                         } else {
-                            actor.setImagePath(Config.NO_IMAGE);
+                            actor.setImagePath(Config.NO_ACTOR_IMAGE);
                         }
                     } else if (actor != null) {
                         actor = allActors.get(actor);

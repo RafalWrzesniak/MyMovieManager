@@ -30,9 +30,13 @@ public final class Config {
      */
     public static final Path TMP_FILES = Paths.get(System.getProperty("user.dir"), "tmp");
     /**
-     * File to be used when there is no available image of something on the web
+     * File to be used when there is no available image of actor on the web
      */
-    public static final Path NO_IMAGE = Paths.get("src","main", "resources", "iHaveNoImage.jpg");
+    public static final Path NO_ACTOR_IMAGE = Paths.get("src","main", "resources", "iHaveNoImage.jpg");
+    /**
+     * File to be used when there is no available cover of movie on the web
+     */
+    public static final Path NO_MOVIE_COVER = Paths.get("src","main", "resources", "movieHasNoCover.jpg");
     /**
      * File that contains last saw files in {@link Config#getMAIN_MOVIE_FOLDER()}
      */

@@ -93,7 +93,7 @@ public final class DownloadAndProcessMovies extends Thread {
                 if( Connection.downloadImage(movie.getImageUrl(), downloadedImagePath) ) {
                     movie.setImagePath(downloadedImagePath);
                 } else {
-                    movie.setImagePath(Config.NO_IMAGE);
+                    movie.setImagePath(Config.NO_MOVIE_COVER);
                 }
                 long estimatedTime = System.nanoTime() - startTime;
                 log.debug("Movie \"{}\" downloaded and saved in \"{}\" [s]", movie, ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
@@ -130,7 +130,7 @@ public final class DownloadAndProcessMovies extends Thread {
                 if( Connection.downloadImage(movie.getImageUrl(), downloadedImagePath) ) {
                     movie.setImagePath(downloadedImagePath);
                 } else {
-                    movie.setImagePath(Config.NO_IMAGE);
+                    movie.setImagePath(Config.NO_MOVIE_COVER);
                 }
                 long estimatedTime = System.nanoTime() - startTime;
                 log.debug("Movie \"{}\" downloaded and saved in \"{}\" [s]", movie, ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
