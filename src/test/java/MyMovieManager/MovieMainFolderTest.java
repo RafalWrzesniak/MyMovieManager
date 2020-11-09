@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MovieMainFolderTest {
 
     private static Path currentMovieMainFolder;
-    private static final Path testMovieMain = Config.TMP_FILES.resolve("testMovieMain");
+    private static final Path testMovieMain = Configuration.Files.TMP_FILES.resolve("testMovieMain");
 
     private final Movie joker = new Movie(Map.ofEntries(
             Map.entry(Movie.TITLE, Collections.singletonList("Joker")),
@@ -43,15 +43,15 @@ class MovieMainFolderTest {
     ));
 
     static void clearTmp() {
-        IO.deleteDirectoryRecursively(Config.TMP_FILES.toFile());
-        System.out.println(Config.TMP_FILES.toFile().mkdirs());
-        Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
+        IO.deleteDirectoryRecursively(Configuration.Files.TMP_FILES.toFile());
+        System.out.println(Configuration.Files.TMP_FILES.toFile().mkdirs());
+        Config.setSAVE_PATH(Configuration.Files.TMP_FILES.toFile(), false);
     }
 
     @BeforeAll
     static void beforeAll() throws IOException {
         clearTmp();
-        Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
+        Config.setSAVE_PATH(Configuration.Files.TMP_FILES.toFile(), false);
         currentMovieMainFolder = Config.getMAIN_MOVIE_FOLDER();
         if(testMovieMain.toFile().mkdir()) {
             File movie1 = testMovieMain.resolve("Joker").toFile();
@@ -61,17 +61,17 @@ class MovieMainFolderTest {
         }
         Config.setMAIN_MOVIE_FOLDER(testMovieMain);
 
-        Files.move(Config.LAST_RIDE.toPath(), Config.TMP_FILES.resolve(Config.LAST_RIDE.getName()), REPLACE_EXISTING);
+        Files.move(Configuration.Files.LAST_RIDE.toPath(), Configuration.Files.TMP_FILES.resolve(Configuration.Files.LAST_RIDE.getName()), REPLACE_EXISTING);
 
         Path newLastRide = Paths.get("src","test", "resources", "lastRideTest.xml");
-        Files.copy(newLastRide, Config.LAST_RIDE.toPath(), REPLACE_EXISTING);
+        Files.copy(newLastRide, Configuration.Files.LAST_RIDE.toPath(), REPLACE_EXISTING);
     }
 
     @AfterAll
     static void afterAll() throws IOException {
         Config.setSAVE_PATH(new File(System.getProperty("user.dir").concat("\\savedData")), false);
         Config.setMAIN_MOVIE_FOLDER(currentMovieMainFolder);
-        Files.move(Config.TMP_FILES.resolve(Config.LAST_RIDE.getName()), Config.LAST_RIDE.toPath(), REPLACE_EXISTING);
+        Files.move(Configuration.Files.TMP_FILES.resolve(Configuration.Files.LAST_RIDE.getName()), Configuration.Files.LAST_RIDE.toPath(), REPLACE_EXISTING);
     }
 
 

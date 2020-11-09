@@ -32,19 +32,19 @@ class ConnectionTest {
 
     @BeforeAll
     static void beforeAll() {
-        Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
+        Config.setSAVE_PATH(Configuration.Files.TMP_FILES.toFile(), false);
     }
 
     @AfterAll
     static void afterAll() {
-        Config.setSAVE_PATH(Config.DEFAULT_SAVED_DATA.toFile(), false);
+        Config.setSAVE_PATH(Configuration.Files.DEFAULT_SAVED_DATA.toFile(), false);
     }
 
     @BeforeEach
     void clearTmp() {
-        IO.deleteDirectoryRecursively(Config.TMP_FILES.toFile());
-        if(Config.TMP_FILES.toFile().mkdirs()) {
-            Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
+        IO.deleteDirectoryRecursively(Configuration.Files.TMP_FILES.toFile());
+        if(Configuration.Files.TMP_FILES.toFile().mkdirs()) {
+            Config.setSAVE_PATH(Configuration.Files.TMP_FILES.toFile(), false);
         }
     }
 
@@ -53,17 +53,17 @@ class ConnectionTest {
         Connection connection = new Connection(movieUrl);
         File file = connection.downloadWebsite();
         assertTrue(Files.size(file.toPath()) > 100000);
-        assertTrue(IO.listDirectory(Config.TMP_FILES.toFile()).contains(file));
+        assertTrue(IO.listDirectory(Configuration.Files.TMP_FILES.toFile()).contains(file));
     }
 
     @Test
     void downloadImageTest() throws IOException {
         Connection connection = new Connection(actorURL);
         URL imageUrl = connection.getImageUrl(false);
-        Path file = Config.TMP_FILES.resolve("image.jpg");
+        Path file = Configuration.Files.TMP_FILES.resolve("image.jpg");
         Connection.downloadImage(imageUrl, file);
         assertTrue(Files.size(file) > 15000);
-        assertTrue(IO.listDirectory(Config.TMP_FILES.toFile()).contains(file.toFile()));
+        assertTrue(IO.listDirectory(Configuration.Files.TMP_FILES.toFile()).contains(file.toFile()));
     }
 
     @Test

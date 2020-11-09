@@ -1,6 +1,7 @@
 package FileOperations;
 
 import Configuration.Config;
+import Configuration.Files;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import org.junit.jupiter.api.AfterAll;
@@ -41,19 +42,19 @@ class XMLOperatorTest {
 
     @BeforeAll
     static void beforeAll() {
-        Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
+        Config.setSAVE_PATH(Files.TMP_FILES.toFile(), false);
     }
 
     @AfterAll
     static void afterAll() {
-        Config.setSAVE_PATH(Config.DEFAULT_SAVED_DATA.toFile(), false);
+        Config.setSAVE_PATH(Files.DEFAULT_SAVED_DATA.toFile(), false);
     }
 
     @BeforeEach
     void clearTmp() {
-        IO.deleteDirectoryRecursively(Config.TMP_FILES.toFile());
-        if(Config.TMP_FILES.toFile().mkdirs()) {
-            Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
+        IO.deleteDirectoryRecursively(Files.TMP_FILES.toFile());
+        if(Files.TMP_FILES.toFile().mkdirs()) {
+            Config.setSAVE_PATH(Files.TMP_FILES.toFile(), false);
         }
     }
 

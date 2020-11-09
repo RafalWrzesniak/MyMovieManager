@@ -1,6 +1,5 @@
 package Internet;
 
-import Configuration.Config;
 import FileOperations.IO;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
@@ -98,9 +97,9 @@ public final class Connection {
                 .concat(".html");
 
         ReadableByteChannel rbc = Channels.newChannel(websiteUrl.openStream());
-        FileOutputStream fos = new FileOutputStream(Config.TMP_FILES.resolve(tmpFileName).toString());
+        FileOutputStream fos = new FileOutputStream(Configuration.Files.TMP_FILES.resolve(tmpFileName).toString());
         fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-        return Config.TMP_FILES.resolve(tmpFileName).toFile();
+        return Configuration.Files.TMP_FILES.resolve(tmpFileName).toFile();
     }
 
     public static boolean downloadImage(URL fromImageUrl, Path toFileName) {
@@ -199,7 +198,7 @@ public final class Connection {
                         if (Connection.downloadImage(actor.getImageUrl(), downloadedImagePath)) {
                             actor.setImagePath(downloadedImagePath);
                         } else {
-                            actor.setImagePath(Config.NO_ACTOR_IMAGE);
+                            actor.setImagePath(Configuration.Files.NO_ACTOR_IMAGE);
                         }
                     } else if (actor != null) {
                         actor = allActors.get(actor);

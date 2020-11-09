@@ -1,6 +1,7 @@
 package FileOperations;
 
 import Configuration.Config;
+import Configuration.Files;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentType;
 import MoviesAndActors.Movie;
@@ -27,7 +28,6 @@ import java.util.List;
 public final class IO {
 
 //    == public static methods ==
-
     /** Lists directory to ArrayList
      * @param directory
      * File to list
@@ -275,7 +275,7 @@ public final class IO {
                 rootElement.appendChild(element);
             }
             rootElement.appendChild(doc.createTextNode("\n"));
-            XMLOperator.makeSimpleSave(doc, Config.LAST_RIDE);
+            XMLOperator.makeSimpleSave(doc, Files.LAST_RIDE);
             log.info("Saved \"{}\" files from MainMovieFolder to lastly saw file", map.size());
         } else {
             log.warn("Couldn't save state of MainMovieFolder");
@@ -285,7 +285,7 @@ public final class IO {
 
     public static Map<File, Integer> readLastStateOfMainMovieFolder() {
         Map<File, Integer> lastState = new HashMap<>();
-        Document doc = XMLOperator.createDocToRead(Config.LAST_RIDE);
+        Document doc = XMLOperator.createDocToRead(Files.LAST_RIDE);
         if(doc != null) {
             Element root = doc.getDocumentElement();
             NodeList elements = root.getElementsByTagName("folder");

@@ -1,6 +1,6 @@
 package MyMovieManager;
 
-import Configuration.Config;
+import Configuration.Files;
 import FileOperations.IO;
 import Internet.Connection;
 import MoviesAndActors.Actor;
@@ -93,7 +93,7 @@ public final class DownloadAndProcessMovies extends Thread {
                 if( Connection.downloadImage(movie.getImageUrl(), downloadedImagePath) ) {
                     movie.setImagePath(downloadedImagePath);
                 } else {
-                    movie.setImagePath(Config.NO_MOVIE_COVER);
+                    movie.setImagePath(Files.NO_MOVIE_COVER);
                 }
                 long estimatedTime = System.nanoTime() - startTime;
                 log.debug("Movie \"{}\" downloaded and saved in \"{}\" [s]", movie, ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
@@ -130,7 +130,7 @@ public final class DownloadAndProcessMovies extends Thread {
                 if( Connection.downloadImage(movie.getImageUrl(), downloadedImagePath) ) {
                     movie.setImagePath(downloadedImagePath);
                 } else {
-                    movie.setImagePath(Config.NO_MOVIE_COVER);
+                    movie.setImagePath(Files.NO_MOVIE_COVER);
                 }
                 long estimatedTime = System.nanoTime() - startTime;
                 log.debug("Movie \"{}\" downloaded and saved in \"{}\" [s]", movie, ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
@@ -140,7 +140,7 @@ public final class DownloadAndProcessMovies extends Thread {
             }
             movie.printPretty();
         } catch (IOException | NullPointerException e) {
-            log.warn("Unexpected error while downloading \"{}\" - \"{}\"", movieFile.getName(), e.getMessage());
+            log.warn("Unexpected error while downloading \"{}\" - \"{}\"", movieFile.getName(), e);
         }
         return movie;
     }

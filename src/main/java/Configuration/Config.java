@@ -24,45 +24,19 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Config {
 
-//    == constants ==
-    /**
-     * Path for files that are needed only for some time
-     */
-    public static final Path TMP_FILES = Paths.get(System.getProperty("user.dir"), "tmp");
-    /**
-     * File to be used when there is no available image of actor on the web
-     */
-    public static final Path NO_ACTOR_IMAGE = Paths.get("src","main", "resources", "iHaveNoImage.jpg");
-    /**
-     * File to be used when there is no available cover of movie on the web
-     */
-    public static final Path NO_MOVIE_COVER = Paths.get("src","main", "resources", "movieHasNoCover.jpg");
-    /**
-     * File that contains last saw files in {@link Config#getMAIN_MOVIE_FOLDER()}
-     */
-    public static final File LAST_RIDE = Paths.get("src","main", "resources", "lastRide.xml").toFile();
-    /**
-     * Default path for saving data by application
-     */
-    public static final Path DEFAULT_SAVED_DATA = Paths.get(System.getProperty("user.dir"),"savedData");
-    /**
-     * Default path of location of main movies folder
-     */
-    private static final Path DEFAULT_MAIN_MOVIE = Paths.get("E:", "Rafał", "Filmy");
-
 //    == fields ==
     @Getter private static Path SAVE_PATH;
     @Getter private static Path SAVE_PATH_MOVIE;
     @Getter private static Path SAVE_PATH_ACTOR;
     @Getter private static Path MAIN_MOVIE_FOLDER;
+    @Getter private static Path RECENTLY_WATCHED;
 
 
 //  == static initializer ==
-
     static {
         initCfg();
 
-        File tmpFiles = TMP_FILES.toFile();
+        File tmpFiles = Configuration.Files.TMP_FILES.toFile();
         if(!tmpFiles.mkdir()) {
             IO.deleteDirectoryRecursively(tmpFiles);
             if(!tmpFiles.exists() && !tmpFiles.mkdir()) {
@@ -111,6 +85,8 @@ public final class Config {
             Element root = doc.getDocumentElement();
             NodeList element = root.getElementsByTagName("SAVE_PATH");
             SAVE_PATH = Paths.get(element.item(0).getChildNodes().item(0).getTextContent());
+            element = root.getElementsByTagName("RECENTLY_WATCHED");
+            RECENTLY_WATCHED = Paths.get(element.item(0).getChildNodes().item(0).getTextContent());
             element = root.getElementsByTagName("MAIN_MOVIE_FOLDER");
             setMAIN_MOVIE_FOLDER(Paths.get(element.item(0).getChildNodes().item(0).getTextContent()));
         } else {
@@ -124,12 +100,18 @@ public final class Config {
                 rootElement.appendChild(doc.createTextNode("\n\t"));
                 element = doc.createElement("MAIN_MOVIE_FOLDER");
                 rootElement.appendChild(element);
+                rootElement.appendChild(doc.createTextNode("\n\t"));
+                element = doc.createElement("RECENTLY_WATCHED");
+                rootElement.appendChild(element);
                 rootElement.appendChild(doc.createTextNode("\n"));
                 XMLOperator.makeSimpleSave(doc, cfg);
             }
-            SAVE_PATH = DEFAULT_SAVED_DATA;
-            updateParamInCfg("SAVE_PATH", DEFAULT_SAVED_DATA.toString());
-            updateParamInCfg("MAIN_MOVIE_FOLDER", DEFAULT_MAIN_MOVIE.toString());
+            SAVE_PATH = Configuration.Files.DEFAULT_SAVED_DATA;
+            updateParamInCfg("SAVE_PATH", Configuration.Files.DEFAULT_SAVED_DATA.toString());
+            MAIN_MOVIE_FOLDER = Configuration.Files.DEFAULT_MAIN_MOVIE;
+            updateParamInCfg("MAIN_MOVIE_FOLDER", Configuration.Files.DEFAULT_MAIN_MOVIE.toString());
+            RECENTLY_WATCHED = Configuration.Files.DEFAULT_RECENTLY_WATCHED;
+            updateParamInCfg("RECENTLY_WATCHED", Configuration.Files.DEFAULT_RECENTLY_WATCHED.toString());
 
         }
         if(!SAVE_PATH.toFile().exists() && !SAVE_PATH.toFile().mkdirs()) {

@@ -1,6 +1,7 @@
 package MyMovieManager;
 
 import Configuration.Config;
+import Configuration.Files;
 import FileOperations.IO;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
@@ -21,14 +22,14 @@ class DownloadAndProcessMoviesTest {
 
     @BeforeEach
     void clearTmp() {
-        IO.deleteDirectoryRecursively(Config.TMP_FILES.toFile());
-        System.out.println(Config.TMP_FILES.toFile().mkdirs());
-        Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
+        IO.deleteDirectoryRecursively(Files.TMP_FILES.toFile());
+        System.out.println(Files.TMP_FILES.toFile().mkdirs());
+        Config.setSAVE_PATH(Files.TMP_FILES.toFile(), false);
     }
 
     @BeforeAll
     static void beforeAll() {
-        Config.setSAVE_PATH(Config.TMP_FILES.toFile(), false);
+        Config.setSAVE_PATH(Files.TMP_FILES.toFile(), false);
     }
 
     @AfterAll
@@ -41,11 +42,11 @@ class DownloadAndProcessMoviesTest {
         URL url1 = new URL("https://www.filmweb.pl/film/Geneza+planety+ma%C5%82p-2011-558709");
         URL url2 = new URL("https://www.filmweb.pl/film/Ewolucja+planety+ma%C5%82p-2014-644064");
         URL url3 = new URL("https://www.filmweb.pl/film/Wojna+o+planet%C4%99+ma%C5%82p-2017-700190");
-        File movieFile1 = Config.TMP_FILES.resolve("movies").resolve("Geneza planety małp").toFile();
-        File movieFile2 = Config.TMP_FILES.resolve("movies").resolve("Ewolucja planety małp").toFile();
-        File movieFile3 = Config.TMP_FILES.resolve("movies").resolve("Wojna o planetę małp").toFile();
+        File movieFile1 = Files.TMP_FILES.resolve("movies").resolve("Geneza planety małp").toFile();
+        File movieFile2 = Files.TMP_FILES.resolve("movies").resolve("Ewolucja planety małp").toFile();
+        File movieFile3 = Files.TMP_FILES.resolve("movies").resolve("Wojna o planetę małp").toFile();
         if(movieFile1.mkdirs() && movieFile2.mkdirs() && movieFile3.mkdirs()) System.out.println("All ready");
-        DownloadAndProcessMovies dap = new DownloadAndProcessMovies(IO.listDirectory(Config.TMP_FILES.resolve("movies").toFile()), allMovies, allActors);
+        DownloadAndProcessMovies dap = new DownloadAndProcessMovies(IO.listDirectory(Files.TMP_FILES.resolve("movies").toFile()), allMovies, allActors);
         dap.start();
         dap.join();
 
