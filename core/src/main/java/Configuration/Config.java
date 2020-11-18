@@ -31,6 +31,8 @@ public final class Config {
     @Getter private static Path MAIN_MOVIE_FOLDER;
     @Getter private static Path RECENTLY_WATCHED;
 
+//    == constants ==
+    private static final File cfg = Paths.get("core","src", "main", "resources", "config.cfg").toFile();
 
 //  == static initializer ==
     static {
@@ -78,7 +80,6 @@ public final class Config {
 //    == private methods ==
 
     private static void initCfg() {
-        File cfg = Paths.get("src","main", "resources", "config.cfg").toFile();
         if(cfg.exists() && !cfg.isDirectory() && XMLOperator.createDocToRead(cfg) != null) {
             Document doc = XMLOperator.createDocToRead(cfg);
             assert doc != null;
@@ -137,7 +138,6 @@ public final class Config {
     }
 
     public static void updateParamInCfg(String parameter, String value) {
-        File cfg = Paths.get("src","main", "resources", "config.cfg").toFile();
         Document doc = XMLOperator.createDocToRead(cfg);
         if(doc == null) return;
         NodeList element = doc.getElementsByTagName(parameter);

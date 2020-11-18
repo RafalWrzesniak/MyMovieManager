@@ -8,7 +8,6 @@ import MoviesAndActors.Movie;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -208,7 +207,7 @@ public final class XMLOperator {
         rootElement.appendChild(doc.createTextNode("\n"));
     }
 
-    static @Nullable Element createRootElementFromXml(File inputFile) {
+    static Element createRootElementFromXml(File inputFile) {
         if(inputFile == null) {
             log.warn("Null as input for XMLOperator passed");
             return null;

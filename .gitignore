@@ -10,6 +10,15 @@ encodings.xml
 /src/test/resources
 /target
 .gitignore
-MyMovieManager.iml
+.idea/MyMovieManager.iml
 MyMovieManager_exported.xml
 /.idea/misc.xml
+core/core.iml
+/core/src/main/java/xMain/Main.java
+/core/src/main/resources/lastRide.xml
+/sa_app/src/main/resources/iHaveNoImage.jpg
+/sa_app/src/main/resources/movieHasNoCover.jpg
+/sa_app/sa_app.iml
+/app/src/main/resources/iHaveNoImage.jpg
+/app/src/main/resources/movieHasNoCover.jpg
+/app/src/main/resources/favicon.ico
