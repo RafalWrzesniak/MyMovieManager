@@ -42,5 +42,9 @@ public final class Files {
      * File that contains last seen movies in {@link Config#getMAIN_MOVIE_FOLDER()}
      */
     public static final File LAST_RIDE = Paths.get("core","src", "main", "resources", "lastRide.xml").toFile();
+    /**
+     * File to store some app configuration
+     */
+    static final File CFG_FILE = Paths.get("core","src", "main", "resources", "config.cfg").toFile();
 
 }

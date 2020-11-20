@@ -31,8 +31,6 @@ public final class Config {
     @Getter private static Path MAIN_MOVIE_FOLDER;
     @Getter private static Path RECENTLY_WATCHED;
 
-//    == constants ==
-    private static final File cfg = Paths.get("core","src", "main", "resources", "config.cfg").toFile();
 
 //  == static initializer ==
     static {
@@ -80,8 +78,9 @@ public final class Config {
 //    == private methods ==
 
     private static void initCfg() {
-        if(cfg.exists() && !cfg.isDirectory() && XMLOperator.createDocToRead(cfg) != null) {
-            Document doc = XMLOperator.createDocToRead(cfg);
+        if(Configuration.Files.CFG_FILE.exists() && !Configuration.Files.CFG_FILE.isDirectory()
+                && XMLOperator.createDocToRead(Configuration.Files.CFG_FILE) != null) {
+            Document doc = XMLOperator.createDocToRead(Configuration.Files.CFG_FILE);
             assert doc != null;
             Element root = doc.getDocumentElement();
             NodeList element = root.getElementsByTagName("SAVE_PATH");
@@ -105,7 +104,7 @@ public final class Config {
                 element = doc.createElement("RECENTLY_WATCHED");
                 rootElement.appendChild(element);
                 rootElement.appendChild(doc.createTextNode("\n"));
-                XMLOperator.makeSimpleSave(doc, cfg);
+                XMLOperator.makeSimpleSave(doc, Configuration.Files.CFG_FILE);
             }
             SAVE_PATH = Configuration.Files.DEFAULT_SAVED_DATA;
             updateParamInCfg("SAVE_PATH", Configuration.Files.DEFAULT_SAVED_DATA.toString());
@@ -138,12 +137,12 @@ public final class Config {
     }
 
     public static void updateParamInCfg(String parameter, String value) {
-        Document doc = XMLOperator.createDocToRead(cfg);
+        Document doc = XMLOperator.createDocToRead(Configuration.Files.CFG_FILE);
         if(doc == null) return;
         NodeList element = doc.getElementsByTagName(parameter);
         if(!element.item(0).getTextContent().equals(value)) {
             element.item(0).setTextContent(value);
-            XMLOperator.makeSimpleSave(doc, cfg);
+            XMLOperator.makeSimpleSave(doc, Configuration.Files.CFG_FILE);
             log.info("Parameter \"{}\" changed to \"{}\" in config.cfg", parameter, value);
         }
     }
