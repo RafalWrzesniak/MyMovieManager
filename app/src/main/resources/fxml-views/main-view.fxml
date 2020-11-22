@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.effect.GaussianBlur?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane fx:id="main_view" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="750.0" prefWidth="1250.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <GridPane>
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <ToolBar prefHeight="60.0" prefWidth="0.0" styleClass="background-color" stylesheets="@../css-styles/context-menu.css">
+               <items>
+                  <Button layoutX="10.0" layoutY="3.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="50.0">
+                     <graphic>
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../icons/add_content_list_movies.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Button>
+                  <Button layoutX="10.0" layoutY="3.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="50.0">
+                     <graphic>
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../icons/add_content_list_actors.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Button>
+                  <Separator orientation="VERTICAL" />
+                  <Button mnemonicParsing="false" prefHeight="50.0" prefWidth="50.0">
+                     <graphic>
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../icons/add_movie_3_movies_icon.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Button>
+                  <Button mnemonicParsing="false" prefHeight="50.0" prefWidth="50.0">
+                     <graphic>
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../icons/add_movie_folder_icon.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Button>
+                  <Button mnemonicParsing="false" prefHeight="50.0" prefWidth="50.0">
+                     <graphic>
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../icons/add_movie_www_icon.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Button>
+                  <Separator orientation="VERTICAL" />
+                  <Button mnemonicParsing="false" prefHeight="50.0" prefWidth="50.0">
+                     <graphic>
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../icons/settings.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Button>
+               </items>
+               <GridPane.margin>
+                  <Insets right="50.0" />
+               </GridPane.margin>
+            </ToolBar>
+            <HBox alignment="CENTER_RIGHT" fillHeight="false" spacing="10.0" GridPane.columnIndex="1">
+               <children>
+                  <Label alignment="CENTER" prefHeight="40.0" style="-fx-font-size: 28; -fx-font-family: Gabriola;" styleClass="blue_text" text="My Movie Manager" textOverrun="CLIP" />
+                  <StackPane prefHeight="50.0" prefWidth="50.0">
+                     <children>
+                        <Circle radius="25.0" style="-fx-fill: my_blue;">
+                           <effect>
+                              <GaussianBlur />
+                           </effect>
+                        </Circle>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../logo.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </StackPane>
+               </children>
+            </HBox>
+         </children>
+         <BorderPane.margin>
+            <Insets bottom="10.0" left="5.0" right="10.0" top="5.0" />
+         </BorderPane.margin>
+      </GridPane>
+   </top>
+   <stylesheets>
+      <URL value="@../css-styles/basic.css" />
+      <URL value="@../css-styles/text.css" />
+      <URL value="@../css-styles/button.css" />
+   </stylesheets>
+   <left>
+      <VBox styleClass="borders">
+         <children>
+            <Label styleClass="blue_text" text="Content lists:" />
+            <ListView prefHeight="200.0" prefWidth="200.0" styleClass="background-color" />
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </VBox>
+   </left>
+</BorderPane>
