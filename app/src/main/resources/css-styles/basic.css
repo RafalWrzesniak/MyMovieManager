@@ -1,0 +1,24 @@
+.root {
+    background_color: #212121;
+    my_blue: #69c5e9;
+    my_green: #8fbf56;
+    dark_blue: #212832;
+    light_gray: #434953;
+    almost_white: #ebebeb;
+}
+
+.background-color {
+    -fx-background-color: background_color;
+}
+
+.borders {
+    -fx-border-color: light_gray;
+    -fx-border-width: 2;
+    -fx-border-radius: 10px;
+}
+
+.separator *.line {
+    -fx-border-style: solid;
+    -fx-border-width: 1; /* its make really one-pixel-border */
+    -fx-border-color: light_gray;
+}

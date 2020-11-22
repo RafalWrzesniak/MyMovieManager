@@ -1,0 +1,19 @@
+@import "basic.css";
+
+.context-menu .label {
+    -fx-font-family: Verdana;
+    -fx-font-size: 12;
+    -fx-text-fill: my_blue;
+    -fx-font-weight: bold;
+}
+
+.context-menu .menu-item:focused {
+     -fx-background-color: dark_blue;
+}
+
+.context-menu {
+     -fx-background-color: light_gray;
+     -fx-background-insets: 0, 1, 2;
+     -fx-background-radius: 0 6 6 6, 0 5 5 5, 0 4 4 4;
+     -fx-padding: 0.333333 0.083333 0.666667 0.083333;
+ }
