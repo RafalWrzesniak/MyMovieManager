@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+
+
+<StackPane fx:id="MoviePane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MoviePane">
+   <children>
+      <ImageView fx:id="cover"  fitHeight="250.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_LEFT" />
+      <Label fx:id="duration" style="-fx-background-color: rgba(21, 21, 21,  0.7); -fx-background-radius: 10 0 0 0;" styleClass="blue_text" StackPane.alignment="BOTTOM_RIGHT">
+         <StackPane.margin>
+            <Insets />
+         </StackPane.margin>
+         <padding>
+            <Insets bottom="4.0" left="5.0" right="5.0" top="4.0" />
+         </padding>
+      </Label>
+   </children>
+   <padding>
+      <Insets bottom="10" left="10" right="10" top="10" />
+   </padding>
+   <stylesheets>
+      <URL value="@../css-styles/basic.css" />
+      <URL value="@../css-styles/text.css" />
+   </stylesheets>
+</StackPane>
