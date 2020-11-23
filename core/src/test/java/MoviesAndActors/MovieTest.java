@@ -4,9 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -268,7 +266,7 @@ class MovieTest {
     void getLengthFormatted() {
         setUp();
         movie.setDuration(100);
-        assertEquals("1h 40min", movie.getLengthFormatted());
+        assertEquals("1h 40min", movie.getDurationFormatted());
     }
 
 

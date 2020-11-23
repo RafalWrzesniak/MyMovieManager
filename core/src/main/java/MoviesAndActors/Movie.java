@@ -338,8 +338,12 @@ public final class Movie implements ContentType<Movie> {
         return new ArrayList<>(production);
     }
 
-    public String getLengthFormatted() {
+    public String getDurationFormatted() {
         return String.format("%dh %dmin", duration /60, duration %60);
+    }
+
+    public String getDurationShortFormatted() {
+        return String.format("%d:%d", duration /60, duration %60);
     }
 
     @Override
@@ -394,7 +398,7 @@ public final class Movie implements ContentType<Movie> {
         Function<String, String> removeBrackets = string -> string.substring(1, string.length()-1);
         List<String> movieValues = new ArrayList<>();
         movieValues.add(title);
-        movieValues.add(this.getLengthFormatted());
+        movieValues.add(this.getDurationFormatted());
         movieValues.add(premiere.toString());
         movieValues.add(removeBrackets.apply(genres.toString()));
         movieValues.add(removeBrackets.apply(production.toString()));
@@ -493,7 +497,7 @@ public final class Movie implements ContentType<Movie> {
         System.out.println("Title      : " + title);
         System.out.println("TitleOrg   : " + titleOrg);
         System.out.println("Premiere   : " + premiere);
-        System.out.println("Duration   : " + getLengthFormatted());
+        System.out.println("Duration   : " + getDurationFormatted());
         System.out.println("Directors  : " + directors);
         System.out.println("Writers    : " + writers);
         System.out.println("Genres     : " + genres);
