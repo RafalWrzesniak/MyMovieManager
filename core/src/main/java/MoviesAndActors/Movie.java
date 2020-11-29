@@ -343,7 +343,13 @@ public final class Movie implements ContentType<Movie> {
     }
 
     public String getDurationShortFormatted() {
-        return String.format("%d:%d", duration /60, duration %60);
+        String text;
+        if(duration%60 < 10) {
+            text = "%d:0%d";
+        } else {
+            text = "%d:%d";
+        }
+        return String.format(text, duration/60, duration%60);
     }
 
     @Override
