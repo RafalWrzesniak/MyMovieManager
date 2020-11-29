@@ -7,6 +7,7 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.effect.GaussianBlur?>
@@ -22,7 +23,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 
-<BorderPane fx:id="main_view" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="750.0" prefWidth="1250.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
+<?import javafx.scene.control.Tooltip?>
+<BorderPane fx:id="main_view" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="750.0" prefWidth="1300.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
    <top>
       <GridPane>
          <columnConstraints>
@@ -35,7 +37,10 @@
          <children>
             <ToolBar prefHeight="60.0" prefWidth="499.0" styleClass="background-color" stylesheets="@../css-styles/context-menu.css">
                <items>
-                  <Button layoutX="10.0" layoutY="3.0" mnemonicParsing="false" fx:id="addContentMovies" onAction="#addContentList" prefHeight="50.0" prefWidth="50.0">
+                  <Button fx:id="addContentMovies" layoutX="10.0" layoutY="3.0" mnemonicParsing="false" onAction="#addContentList" prefHeight="50.0" prefWidth="50.0">
+                     <tooltip>
+                        <Tooltip text="dodaj coś" />
+                     </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -47,7 +52,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button layoutX="10.0" layoutY="3.0" mnemonicParsing="false" fx:id="addContentActors" onAction="#addContentList" prefHeight="50.0" prefWidth="50.0">
+                  <Button fx:id="addContentActors" layoutX="10.0" layoutY="3.0" mnemonicParsing="false" onAction="#addContentList" prefHeight="50.0" prefWidth="50.0">
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -72,7 +77,7 @@
                      </padding>
                   </Button>
                   <Separator orientation="VERTICAL" />
-                  <Button mnemonicParsing="false" fx:id="addFolderWithMovies" onAction="#addMoviesToApp" prefHeight="50.0" prefWidth="50.0">
+                  <Button fx:id="addFolderWithMovies" mnemonicParsing="false" onAction="#addMoviesToApp" prefHeight="50.0" prefWidth="50.0">
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -84,7 +89,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button mnemonicParsing="false" fx:id="addSingleMovie" onAction="#addMoviesToApp" prefHeight="50.0" prefWidth="50.0">
+                  <Button fx:id="addSingleMovie" mnemonicParsing="false" onAction="#addMoviesToApp" prefHeight="50.0" prefWidth="50.0">
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -96,7 +101,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button mnemonicParsing="false" fx:id="addMovieFromWeb" onAction="#addMoviesToApp" prefHeight="50.0" prefWidth="50.0">
+                  <Button fx:id="addMovieFromWeb" mnemonicParsing="false" onAction="#addMoviesToApp" prefHeight="50.0" prefWidth="50.0">
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -229,7 +234,14 @@
       </VBox>
    </left>
    <center>
-      <FlowPane fx:id="flowPaneContentList" prefHeight="200.0" prefWidth="200.0" />
+      <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent;" vbarPolicy="NEVER">
+         <content>
+            <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP">
+               <padding>
+                  <Insets top="5.0" />
+               </padding></FlowPane>
+         </content>
+      </ScrollPane>
    </center>
    <right>
       <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
