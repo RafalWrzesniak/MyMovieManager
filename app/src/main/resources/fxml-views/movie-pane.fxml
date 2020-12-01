@@ -3,27 +3,54 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.GaussianBlur?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Rectangle?>
 
-
-<StackPane fx:id="MoviePane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MoviePane">
+<StackPane fx:id="moviePane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="blurred-background" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MoviePane">
    <children>
-      <ImageView fx:id="cover"  fitHeight="250.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_LEFT" />
-      <Label fx:id="duration" style="-fx-background-color: rgba(21, 21, 21,  0.7); -fx-background-radius: 10 0 0 0;" styleClass="blue_text" StackPane.alignment="BOTTOM_RIGHT">
+      <Rectangle fx:id="blue_background" height="200.0" style="-fx-fill: my_blue;" visible="false" width="151.0">
+         <effect>
+            <GaussianBlur radius="40.0" />
+         </effect>
          <StackPane.margin>
             <Insets />
+         </StackPane.margin>
+      </Rectangle>
+      <Rectangle fx:id="green_background" height="200.0" layoutX="20.0" layoutY="25.0" style="-fx-fill: my_green;" visible="false" width="151.0">
+         <effect>
+            <GaussianBlur radius="40.0" />
+         </effect>
+      </Rectangle>
+      <ImageView fx:id="cover" fitHeight="200.0" fitWidth="140.0" onMouseClicked="#selectMovie" onMouseEntered="#lightBackground" onMouseExited="#hideBackground" pickOnBounds="true" StackPane.alignment="TOP_LEFT">
+         <StackPane.margin>
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+         </StackPane.margin>
+      </ImageView>
+      <Label fx:id="title" alignment="CENTER" maxWidth="140.0" onMouseClicked="#selectMovie" onMouseEntered="#lightBackground" onMouseExited="#hideBackground" style="-fx-background-color: rgba(33, 40, 50,  0.8); -fx-text-fill: almost_white;" styleClass="blue_text" text="Title" textAlignment="CENTER" wrapText="true" StackPane.alignment="TOP_LEFT">
+         <StackPane.margin>
+            <Insets bottom="15.0" left="15.0" top="15.0" />
+         </StackPane.margin>
+         <padding>
+            <Insets bottom="4.0" left="5.0" right="5.0" top="4.0" />
+         </padding>
+      </Label>
+      <Label fx:id="duration" onMouseClicked="#selectMovie" onMouseEntered="#lightBackground" onMouseExited="#hideBackground" style="-fx-text-fill: almost_white; -fx-background-color: rgba(33, 40, 50,  0.7); -fx-background-radius: 10 0 0 0;" styleClass="blue_text" StackPane.alignment="BOTTOM_RIGHT">
+         <StackPane.margin>
+            <Insets bottom="15.0" right="15.0" />
          </StackPane.margin>
          <padding>
             <Insets bottom="4.0" left="5.0" right="5.0" top="4.0" />
          </padding>
       </Label>
    </children>
-   <padding>
-      <Insets bottom="10" left="10" right="10" top="10" />
-   </padding>
    <stylesheets>
       <URL value="@../css-styles/basic.css" />
       <URL value="@../css-styles/text.css" />
+      <URL value="@../css-styles/context-menu.css" />
    </stylesheets>
+   <userData>
+      <fx:reference source="controller" />
+   </userData>
 </StackPane>
