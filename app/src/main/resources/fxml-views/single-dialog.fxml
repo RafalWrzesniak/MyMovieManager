@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<DialogPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DialogController">
+   <content>
+      <VBox spacing="15.0">
+         <children>
+            <Label fx:id="label" styleClass="white_text" text="Label" />
+            <TextField fx:id="textField" prefWidth="250.0" promptText="Enter your text here" />
+         </children>
+         <padding>
+            <Insets bottom="1.0" left="20.0" right="10.0" top="20.0" />
+         </padding>
+      </VBox>
+   </content>
+   <stylesheets>
+      <URL value="@../css-styles/basic.css" />
+      <URL value="@../css-styles/text.css" />
+   </stylesheets>
+   <padding>
+      <Insets right="10.0" />
+   </padding>
+   <userData>
+      <fx:reference source="controller" />
+   </userData>
+</DialogPane>
