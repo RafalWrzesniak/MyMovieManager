@@ -1,7 +1,6 @@
 package app;
 
 import FileOperations.AutoSave;
-import controllers.MainController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,6 +10,8 @@ import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 @Slf4j
 public class Main extends Application {
@@ -24,16 +25,15 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
+        Locale locale = new Locale("pl", "PL");
+//        Locale locale = new Locale("en", "EN");
+        ResourceBundle bundle = ResourceBundle.getBundle("bundles.messages", locale);
+
         primaryStage.setTitle("MyMovieManager");
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/favicon.ico")));
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml-views/main-view.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml-views/main-view.fxml"), bundle);
         Parent root = loader.load();
         Scene mainScene = new Scene(root);
-        MainController mainController = loader.getController();
-
-
-
-
         primaryStage.setScene(mainScene);
         primaryStage.show();
     }
