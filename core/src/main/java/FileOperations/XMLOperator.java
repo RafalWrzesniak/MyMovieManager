@@ -7,8 +7,12 @@ import MoviesAndActors.ContentType;
 import MoviesAndActors.Movie;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -61,16 +65,26 @@ public final class XMLOperator {
         if(doc == null) return;
         Element rootElement = doc.createElement(ContentList.class.getSimpleName());
         doc.appendChild(rootElement);
+
         rootElement.appendChild(doc.createTextNode("\n\t"));
         Element listName = doc.createElement("listName");
         listName.appendChild(doc.createTextNode(list.getListName()));
         rootElement.appendChild(listName);
+
+        rootElement.appendChild(doc.createTextNode("\n\t"));
+        Element displayName = doc.createElement("displayName");
+        displayName.appendChild(doc.createTextNode(list.getDisplayName()));
+        rootElement.appendChild(displayName);
+
         rootElement.appendChild(doc.createTextNode("\n\t"));
         Element typeElement = doc.createElement("type");
         typeElement.appendChild(doc.createTextNode(type));
         rootElement.appendChild(typeElement);
+
         rootElement.appendChild(doc.createTextNode("\n"));
         makeSimpleSave(doc, savedFile);
+        System.out.println(list.getListName());
+        System.out.println(list.getDisplayName());
         log.info("ContentList \"{}\" properly created and saved in \"{}\"", list, savedFile);
     }
 
@@ -133,6 +147,22 @@ public final class XMLOperator {
         else if(list.get(0) instanceof Movie) savedFile = Paths.get(Config.getSAVE_PATH_MOVIE().toString(), list.getListName().concat(".xml")).toFile();
         else return;
         log.info("Attempt to remove list \"{}\" ends with status: \"{}\"", savedFile.getName(), savedFile.delete());
+    }
+
+    public static <E extends ContentType<E>> void renameDisplayNameList(ContentList<E> list, String newName) {
+        File savedFile;
+        if(list == null || list.size() == 0) return;
+        if(list.get(0) instanceof Actor) savedFile = Paths.get(Config.getSAVE_PATH_ACTOR().toString(), list.getListName().concat(".xml")).toFile();
+        else if(list.get(0) instanceof Movie) savedFile = Paths.get(Config.getSAVE_PATH_MOVIE().toString(), list.getListName().concat(".xml")).toFile();
+        else return;
+
+        Document doc = createDocToRead(savedFile);
+        if(doc == null) return;
+        Element rootElement = doc.getDocumentElement();
+        Node listName = rootElement.getElementsByTagName("displayName").item(0);
+        listName.setTextContent(newName);
+        makeSimpleSave(doc, savedFile);
+        log.info("Display name of ContentList \"{}\" is now \"{}\"", list, newName);
     }
 
     public static void makeSimpleSave(Document doc, File toFile) {
@@ -292,6 +322,7 @@ public final class XMLOperator {
             return allMovieLists;
         }
 
+        @SneakyThrows
         private static ContentList<Actor> createActorContentList(File inputFile, ContentList<Actor> defaultAllActors) {
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
@@ -301,6 +332,7 @@ public final class XMLOperator {
 
             NodeList nodes = root.getElementsByTagName(Actor.class.getSimpleName().toLowerCase());
             ContentList<Actor> contentList = new ContentList<>(root.getElementsByTagName("listName").item(0).getTextContent());
+            contentList.setDisplayName(root.getElementsByTagName("displayName").item(0).getTextContent());
 
             for(int i = 0; i < nodes.getLength(); i++) {
                 String id = nodes.item(i).getTextContent();
@@ -310,6 +342,7 @@ public final class XMLOperator {
             return contentList;
         }
 
+        @SneakyThrows
         private static ContentList<Movie> createMovieContentList(File inputFile, ContentList<Movie> defaultAllMovies) {
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
@@ -319,6 +352,7 @@ public final class XMLOperator {
 
             NodeList nodes = root.getElementsByTagName(Movie.class.getSimpleName().toLowerCase());
             ContentList<Movie> contentList = new ContentList<>(root.getElementsByTagName("listName").item(0).getTextContent());
+            contentList.setDisplayName(root.getElementsByTagName("displayName").item(0).getTextContent());
 
             for(int i = 0; i < nodes.getLength(); i++) {
                 String id = nodes.item(i).getTextContent();
@@ -329,6 +363,7 @@ public final class XMLOperator {
         }
 
 
+        @SneakyThrows
         private static ContentList<Actor> createDefaultActorContentList() {
             File inputFile = Paths.get(Config.getSAVE_PATH_ACTOR().toString(), ContentList.ALL_ACTORS_DEFAULT.concat(".xml")).toFile();
             Element root = createRootElementFromXml(inputFile);
@@ -338,6 +373,7 @@ public final class XMLOperator {
             }
             NodeList nodes = root.getElementsByTagName(Actor.class.getSimpleName().toLowerCase());
             ContentList<Actor> contentList = new ContentList<>(root.getElementsByTagName("listName").item(0).getTextContent());
+            contentList.setDisplayName(root.getElementsByTagName("displayName").item(0).getTextContent());
             List<String> actorsIds = new ArrayList<>();
             for(int i = 0; i < nodes.getLength(); i++) {
                 actorsIds.add(nodes.item(i).getTextContent());
@@ -375,6 +411,7 @@ public final class XMLOperator {
             return contentList;
         }
 
+        @SneakyThrows
         private static ContentList<Movie> createDefaultMovieContentList(List<ContentList<Actor>> allActorsContentLists) {
             File inputFile = Paths.get(Config.getSAVE_PATH_MOVIE().toString(), ContentList.ALL_MOVIES_DEFAULT.concat(".xml")).toFile();
             Element root = createRootElementFromXml(inputFile);
@@ -395,6 +432,7 @@ public final class XMLOperator {
                 return null;
             }
             ContentList<Movie> contentList = new ContentList<>(root.getElementsByTagName("listName").item(0).getTextContent());
+            contentList.setDisplayName(root.getElementsByTagName("displayName").item(0).getTextContent());
             List<String> moviesIds = new ArrayList<>();
             for(int i = 0; i < nodes.getLength(); i++) {
                 moviesIds.add(nodes.item(i).getTextContent());

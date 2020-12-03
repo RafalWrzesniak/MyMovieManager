@@ -56,7 +56,7 @@ class ContentListTest {
     }
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws Config.ArgumentIssue {
         contentListActor = new ContentList<>("myActorListTest");
         contentListMovie = new ContentList<>("myMovieListTest");
         Config.setSAVE_PATH(Files.TMP_FILES.toFile(), false);
@@ -69,7 +69,7 @@ class ContentListTest {
 
 
     @Test
-    void getListName() {
+    void getListName() throws Config.ArgumentIssue {
         assertEquals("myActorListTest", contentListActor.getListName());
         assertEquals("someOtherList", new ContentList<Actor>("someOtherList").getListName());
     }
@@ -176,7 +176,7 @@ class ContentListTest {
     }
 
     @Test
-    void getContentListFromListByName() {
+    void getContentListFromListByName() throws Config.ArgumentIssue {
         List<ContentList<Movie>> listOfContentLists = List.of(contentListMovie, new ContentList<>("otherList"));
         assertEquals(contentListMovie, ContentList.getContentListFromListByName(listOfContentLists, "myMovieListTest"));
     }

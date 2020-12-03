@@ -76,7 +76,7 @@ class MovieMainFolderTest {
 
 
     @Test
-    void movieMainFolderTest() throws InterruptedException {
+    void movieMainFolderTest() throws InterruptedException, Config.ArgumentIssue {
         ContentList<Movie> allMovies = new ContentList<>("allTestMovies");
         allMovies.add(joker);
         ContentList<Actor> allActors = new ContentList<>("allTestActors");

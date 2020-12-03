@@ -75,7 +75,7 @@ class XMLOperatorTest {
     }
 
     @Test
-    void createAndDeleteListFile() throws IOException {
+    void createAndDeleteListFile() throws IOException, Config.ArgumentIssue {
         ContentList<Actor> testList = new ContentList<>("actorTestList");
         testList.add(actor);
         List<File> files = IO.listDirectory(Config.getSAVE_PATH_ACTOR().toFile());
@@ -93,7 +93,7 @@ class XMLOperatorTest {
     }
 
     @Test
-    void updateListFile() throws IOException {
+    void updateListFile() throws IOException, Config.ArgumentIssue {
         ContentList<Actor> testList = new ContentList<>("actorTestList2");
         testList.add(actor);
         List<File> files = IO.listDirectory(Config.getSAVE_PATH_ACTOR().toFile());

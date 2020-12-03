@@ -80,7 +80,7 @@ class ConnectionTest {
     }
 
     @Test
-    void returnEmptyListWhenWrongActorUrlsProvided() throws IOException {
+    void returnEmptyListWhenWrongActorUrlsProvided() throws IOException, Config.ArgumentIssue {
         ContentList<Actor> allActors = new ContentList<>("test0");
         Connection connection = new Connection(movieUrl);
         List<String> emptyList = new ArrayList<>();
@@ -91,7 +91,7 @@ class ConnectionTest {
     }
 
     @Test
-    void createFewActorsFromMethod() throws IOException {
+    void createFewActorsFromMethod() throws IOException, Config.ArgumentIssue {
         ContentList<Actor> allActors = new ContentList<>("test1");
         List<String> actorUrls = List.of(actorURL.toString(), "https://www.filmweb.pl/person/Tom+Hanks-124", actorURL.toString());
         Connection connection = new Connection(movieUrl);
@@ -112,7 +112,7 @@ class ConnectionTest {
     }
 
     @Test
-    void addCastToMovie() throws IOException {
+    void addCastToMovie() throws IOException, Config.ArgumentIssue {
         ContentList<Actor> allActors = new ContentList<>("test2");
         Connection connection = new Connection(movieUrl);
         Movie movie = connection.createMovieFromFilmwebLink();

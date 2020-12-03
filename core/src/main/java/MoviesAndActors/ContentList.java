@@ -23,23 +23,13 @@ public class ContentList<T extends ContentType<T>> {
 //    == fields ==
     private static final List<String> NAMES = new ArrayList<>();
     @Getter private final List<T> list = new ArrayList<>();
-    @Getter private final String listName;
+    @Getter private  String listName;
+    @Getter private String displayName;
 
 
 //    == constructors ==
     public ContentList(String listName) {
-        if(NAMES.contains(listName)) {
-            throw new NullPointerException(listName + " is already defined in the scope, change name of the list!");
-        }
-        String tmpListName;
-        try {
-            tmpListName = ContentType.checkForNullOrEmptyOrIllegalChar(listName, "listName");
-        } catch (Config.ArgumentIssue argumentIssue) {
-            log.warn("Couldn't create ContentList with name \"{}\"", listName);
-            tmpListName = "MyContentList#" + NAMES.size();
-        }
-        this.listName = tmpListName;
-        NAMES.add(listName);
+        setName(listName);
         log.info("New ContentList object created: \"{}\"", listName);
     }
 
@@ -58,6 +48,34 @@ public class ContentList<T extends ContentType<T>> {
 
 
 //    == methods ==
+    private void setName(String listName) {
+        if(NAMES.contains(listName)) {
+            throw new NullPointerException(listName + " is already defined in the scope, change name of the list!");
+        }
+
+        String tmpListName = null;
+        try {
+            tmpListName = ContentType.checkForNullOrEmptyOrIllegalChar(listName, "listName");
+        } catch (Config.ArgumentIssue argumentIssue) {
+            tmpListName = "MyContentList#" + NAMES.size();
+            log.warn("Couldn't create ContentList with name \"{}\". New listName is \"{}\"", listName, tmpListName);
+        } finally {
+            try {
+                setDisplayName(tmpListName);
+            }  catch (Config.ArgumentIssue e) {
+                log.warn("Couldn't set list name \"{}\"", tmpListName);
+            }
+        }
+        if(this.listName != null) NAMES.remove(this.listName);
+        this.listName = tmpListName;
+        NAMES.add(tmpListName);
+    }
+
+    public void setDisplayName(String newName) throws Config.ArgumentIssue {
+        this.displayName = ContentType.checkForNullOrEmptyOrIllegalChar(newName, "displayName");
+        XMLOperator.renameDisplayNameList(this, displayName);
+    }
+
     public boolean contains(T obj) {
         return indexOf(obj) >= 0;
     }

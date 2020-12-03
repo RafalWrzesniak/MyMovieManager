@@ -2,11 +2,14 @@ package MyMovieManager;
 
 import Configuration.Config;
 import FileOperations.IO;
+import FileOperations.XMLOperator;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.w3c.dom.Document;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -28,11 +31,16 @@ public class MovieMainFolder extends Thread {
 
 
 //    == constructors ==
+    @SneakyThrows
     public MovieMainFolder(ContentList<Movie> allMovies, ContentList<Actor> allActors) {
         this.allMovies = allMovies;
         this.allActors = allActors;
         this.moviesToWatch = new ContentList<>(ContentList.MOVIES_TO_WATCH);
         Path path = Paths.get(Config.getSAVE_PATH_MOVIE().toString(), moviesToWatch.getListName().concat(".xml"));
+        Document doc = XMLOperator.createDocToRead(path.toFile());
+        if(doc != null) {
+            moviesToWatch.setDisplayName(doc.getElementsByTagName("displayName").item(0).getTextContent());
+        }
         log.debug("Attempt to remove \"{}\" ends with status \"{}\"", path.toString(), path.toFile().delete());
     }
 
