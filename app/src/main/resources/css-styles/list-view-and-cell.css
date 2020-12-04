@@ -1,0 +1,48 @@
+@import "basic.css";
+
+.list-cell {
+    -fx-text-fill: almost_white;
+    -fx-font-size: 14;
+    -fx-padding: 15 5 15 10;
+    -fx-background-radius: 20, 20, 20, 20;
+    -fx-border-width: 2;
+    -fx-border-color: transparent;
+}
+.list-cell:even {
+    -fx-background-color: dark_blue2;
+}
+.list-cell:odd {
+    -fx-background-color: dark_blue;
+}
+.list-cell:empty {
+    -fx-background-color: background_color;
+ }
+
+.list-cell: filled: selected: focused, .list-cell: filled: selected {
+    -fx-font-weight: bold;
+    -fx-border-width: 3;
+    -fx-border-radius: 20, 20, 20, 20;
+    -fx-border-color: my_green;
+}
+.list-cell:filled:hover {
+    -fx-border-width: 2;
+    -fx-border-radius: 20, 20, 20, 20;
+    -fx-border-color: my_blue;
+}
+
+
+
+.list-view .scroll-bar:horizontal {
+    -fx-scale-x: 0;
+    -fx-scale-y: 0;
+}
+.list-view .scroll-bar:vertical {
+    -fx-background-color: background_color;
+}
+
+.list-view .scroll-bar:vertical .increment-arrow,
+.list-view .scroll-bar:vertical .decrement-arrow,
+.list-view .scroll-bar:vertical .increment-button,
+.list-view .scroll-bar:vertical .decrement-button {
+    -fx-padding: 0px;
+}

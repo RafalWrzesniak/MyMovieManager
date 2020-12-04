@@ -1,10 +1,8 @@
 @import "basic.css";
 
-
-.dialog-pane {
+.dialog-pane, .dialog-pane:header .header-panel {
       -fx-background-color: light_gray;
 }
-
 
 .dialog-pane .button {
    -fx-background-color: dark_blue;
@@ -28,7 +26,12 @@
    -fx-font-weight :bold;
  }
 
-
 .dialog-pane > .button-bar > .container {
       -fx-background-color: light_gray;
-  }
+}
+
+.dialogBorder {
+    -fx-border-color: rgba(105, 197, 233, 0.7);
+    -fx-border-width: 3;
+    -fx-border-radius: 3
+}

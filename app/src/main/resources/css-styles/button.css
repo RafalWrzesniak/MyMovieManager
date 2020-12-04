@@ -11,13 +11,13 @@
 }
 
 .button: hover {
-    -fx-border-color: my_green;
+    -fx-border-color: my_blue;
     -fx-border-width: 2;
     -fx-border-radius: 10px;
 }
 
 .button: pressed {
-    -fx-border-color: almost_white;
+    -fx-border-color: my_green;
     -fx-border-width: 2;
     -fx-border-radius: 10px;
 }
@@ -44,13 +44,19 @@
 }
 
 .menu-button: hover {
-    -fx-border-color: my_green;
+    -fx-border-color: my_blue;
     -fx-border-width: 2;
     -fx-border-radius: 10px;
 }
 
 .menu-button: pressed {
-     -fx-border-color: almost_white;
+     -fx-border-color: my_green;
      -fx-border-width: 2;
      -fx-border-radius: 10px;
  }
+
+.buttonPressed {
+     -fx-border-color: my_green;
+     -fx-border-width: 2;
+     -fx-border-radius: 10px;
+}
