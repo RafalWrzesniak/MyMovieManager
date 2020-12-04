@@ -7,12 +7,14 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import lombok.Getter;
 
 public class MovieDetail {
 
     @FXML private VBox vbox;
     @FXML private ImageView cover;
     @FXML private Label title, year, duration, director, description;
+    @Getter private static final double PREF_WIDTH = 250.0;
 
     public void setMovie(Movie movie) {
         title.setText(movie.getTitle());
