@@ -36,7 +36,8 @@ public final class IO {
      */
     public static List<File> listDirectory(File directory) {
         try {
-            List<File> files = new ArrayList<>(Arrays.asList(directory.listFiles()));
+            if(directory == null) return null;
+            List<File> files = new ArrayList<>(Arrays.asList(Objects.requireNonNull(directory.listFiles())));
             files.remove(new File(directory + "\\00DONE"));
             files.remove(new File(directory + "\\Thumbs.db"));
             files.removeIf(file -> file.getName().matches("^.+\\.ini$"));
@@ -48,6 +49,26 @@ public final class IO {
     }
 
     /**
+     * Lists provided directory recursively and returns all found directories inside
+     * @param directory
+     * Directory to list recursively
+     * @return
+     * List of found directories
+     */
+    public static List<File> listDirectoryRecursively(File directory) {
+        if(directory == null) return null;
+        List<File> list = new ArrayList<>();
+        for (File file : Objects.requireNonNull(listDirectory(directory))) {
+            if(file.isDirectory()) {
+                list.add(file);
+                list.addAll(listDirectoryRecursively(file));
+            }
+        }
+        return list;
+    }
+
+
+    /**
      * Creates list of files in directory and removes file extensions if present - see {@link #removeFileExtension}
      * @param directory
      * Directory to list
@@ -57,6 +78,7 @@ public final class IO {
      */
     public static List<String> getFileNamesInDirectory(File directory) {
         List<File> files = listDirectory(directory);
+        if(files == null) return null;
         List<String> fileNames = new ArrayList<>();
         for(File file : files) {
             String formattedName;
@@ -140,6 +162,7 @@ public final class IO {
             return null;
         }
         List<File> fileList = IO.listDirectory(inputDir);
+        if(fileList == null) return null;
         if(fileList.size() == 0) {
             log.warn("Couldn't create content from directory \"{}\" - directory is empty or does not exist", inputDir);
             return null;
