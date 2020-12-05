@@ -36,7 +36,7 @@ public final class IO {
      */
     public static List<File> listDirectory(File directory) {
         try {
-            if(directory == null) return null;
+            if(directory == null) return new ArrayList<>();
             List<File> files = new ArrayList<>(Arrays.asList(Objects.requireNonNull(directory.listFiles())));
             files.remove(new File(directory + "\\00DONE"));
             files.remove(new File(directory + "\\Thumbs.db"));
@@ -78,7 +78,6 @@ public final class IO {
      */
     public static List<String> getFileNamesInDirectory(File directory) {
         List<File> files = listDirectory(directory);
-        if(files == null) return null;
         List<String> fileNames = new ArrayList<>();
         for(File file : files) {
             String formattedName;
@@ -162,7 +161,6 @@ public final class IO {
             return null;
         }
         List<File> fileList = IO.listDirectory(inputDir);
-        if(fileList == null) return null;
         if(fileList.size() == 0) {
             log.warn("Couldn't create content from directory \"{}\" - directory is empty or does not exist", inputDir);
             return null;
