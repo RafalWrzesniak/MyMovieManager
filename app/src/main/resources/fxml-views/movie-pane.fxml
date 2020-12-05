@@ -47,7 +47,7 @@
    </children>
    <stylesheets>
       <URL value="@../css-styles/basic.css" />
-      <URL value="@../css-styles/text.css" />
+      <URL value="@../css-styles/text-and-textfield.css" />
       <URL value="@../css-styles/context-menu.css" />
    </stylesheets>
    <userData>
