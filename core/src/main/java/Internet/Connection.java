@@ -340,7 +340,8 @@ public final class Connection {
         if(Math.round(highestCorrelation*100) > 50) {
             log.info("For query \"{}\" there was found {}", desiredTitle, result);
         } else {
-            log.warn("For query \"{}\" there was found {}. Low correlation. Possibility of wrong movie assigning", desiredTitle, result);
+            log.warn("For query \"{}\" there was found {}. Low correlation. Possibility of wrong movie assigning. Aborting.", desiredTitle, result);
+            urlToReturn = null;
         }
         return urlToReturn != null ? new URL(urlToReturn) : null;
     }

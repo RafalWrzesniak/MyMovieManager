@@ -24,6 +24,7 @@ public class MovieMainFolder extends Thread {
 
 //    == fields ==
     @Getter private final ContentList<Movie> moviesToWatch;
+    @Getter private List<Movie> newMovies;
 
 //    == required fields ==
     private final ContentList<Movie> allMovies;
@@ -82,6 +83,7 @@ public class MovieMainFolder extends Thread {
             if(downloadAndProcessMovies.getDownloadedMovies().size() > 0) {
                 newStateMap.putAll(downloadAndProcessMovies.getMovieFileMap());
             }
+            newMovies = downloadAndProcessMovies.getDownloadedMovies();
         }
 
         if(!newStateMap.equals(lastRideMap)) {

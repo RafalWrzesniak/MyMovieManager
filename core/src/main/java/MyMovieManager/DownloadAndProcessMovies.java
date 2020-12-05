@@ -113,7 +113,7 @@ public final class DownloadAndProcessMovies extends Thread {
         Connection connection;
         Movie movie = null;
         try {
-            connection = new Connection(movieFile.getName());
+            connection = new Connection(IO.removeFileExtension(movieFile.getName()));
             movie = allMovies.getObjByUrlIfExists(connection.getMainMoviePage());
             if(movie != null) {
                 log.info("Movie \"{}\" already exists on the list \"{}\", new data won't be downloaded", movie, allMovies);
