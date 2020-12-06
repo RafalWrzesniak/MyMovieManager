@@ -9,7 +9,6 @@
 <?import javafx.scene.shape.Rectangle?>
 
 <StackPane fx:id="moviePane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="blurred-background" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MoviePane">
-   <children>
       <Rectangle fx:id="blue_background" height="200.0" style="-fx-fill: my_blue;" visible="false" width="151.0">
          <effect>
             <GaussianBlur radius="40.0" />
@@ -44,7 +43,6 @@
             <Insets bottom="4.0" left="5.0" right="5.0" top="4.0" />
          </padding>
       </Label>
-   </children>
    <stylesheets>
       <URL value="@../css-styles/basic.css" />
       <URL value="@../css-styles/text-and-textfield.css" />

@@ -9,10 +9,8 @@
 <DialogPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DialogController">
    <content>
       <VBox fx:id="contentVBox" spacing="15.0">
-         <children>
             <Label fx:id="label" prefHeight="40" maxHeight="40" minHeight="40" styleClass="white_text" text="Label" graphicTextGap="10" wrapText="true" />
             <TextField fx:id="textField" prefWidth="250.0" promptText="Enter your text here" />
-         </children>
       </VBox>
    </content>
    <padding>
