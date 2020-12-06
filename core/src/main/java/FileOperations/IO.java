@@ -37,7 +37,9 @@ public final class IO {
     public static List<File> listDirectory(File directory) {
         try {
             if(directory == null) return new ArrayList<>();
-            List<File> files = new ArrayList<>(Arrays.asList(Objects.requireNonNull(directory.listFiles())));
+            File[] listedFiles = directory.listFiles();
+            if(listedFiles == null) return new ArrayList<>();
+            List<File> files = new ArrayList<>(Arrays.asList(listedFiles));
             files.remove(new File(directory + "\\00DONE"));
             files.remove(new File(directory + "\\Thumbs.db"));
             files.removeIf(file -> file.getName().matches("^.+\\.ini$"));

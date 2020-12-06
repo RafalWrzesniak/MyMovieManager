@@ -77,7 +77,7 @@ public final class ExportImport {
         private void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
             if(fileToZip == null) return;
             List<File> files = IO.listDirectory(fileToZip);
-            if(files.size() == 0) files.add(fileToZip);
+//            if(files.size() == 0) files.add(fileToZip);
             for(File file : files) {
                 if(file.isDirectory()) {
                     zipFile(file, fileName.concat("\\").concat(file.getName()), zipOut);
@@ -196,7 +196,11 @@ public final class ExportImport {
                     Element localRoot = XMLOperator.createRootElementFromXml(xml);
                     assert localRoot != null;
                     rootElement.appendChild(doc.createTextNode("\n"));
-                    rootElement.appendChild(doc.adoptNode(localRoot.cloneNode(true)));
+                    try {
+                        rootElement.appendChild(doc.adoptNode(localRoot.cloneNode(true)));
+                    } catch (NullPointerException ignored) {};
+
+
                 }
                 return true;
             };
@@ -238,7 +242,7 @@ public final class ExportImport {
                     try {
                         Connection connection = new Connection(actor.getFilmweb());
                         Connection.downloadImage(connection.getImageUrl(false), actor.getImagePath());
-                    } catch (IOException ignored) { }
+                    } catch (IOException | NullPointerException ignored) { }
                 }
             });
 

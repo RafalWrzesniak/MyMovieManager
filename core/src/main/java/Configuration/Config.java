@@ -53,6 +53,11 @@ public final class Config {
         updateParamInCfg("MAIN_MOVIE_FOLDER", mainMovieFolder.toString());
     }
 
+    public static void setRECENTLY_WATCHED(Path recentlyWatched) {
+        MAIN_MOVIE_FOLDER = recentlyWatched;
+        updateParamInCfg("RECENTLY_WATCHED", recentlyWatched.toString());
+    }
+
 
     public static void setSAVE_PATH(File newDirectory, boolean moveFiles) {
         if(newDirectory != null) {
