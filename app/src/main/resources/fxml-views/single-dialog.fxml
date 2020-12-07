@@ -22,9 +22,4 @@
       <URL value="@../css-styles/dialog.css" />
       <URL value="@../css-styles/text-and-textfield.css" />
    </stylesheets>
-
-   <userData>
-      <fx:reference source="controller" />
-   </userData>
-
 </DialogPane>
