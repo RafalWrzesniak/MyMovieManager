@@ -1,32 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.String?>
-<?import java.net.URL?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ContextMenu?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.ToolBar?>
-<?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.effect.GaussianBlur?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Circle?>
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
 
-<BorderPane fx:id="main_view" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="750.0" prefWidth="1100.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
+<BorderPane fx:id="main_view" prefHeight="750.0" prefWidth="1170.0" styleClass="background-color" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
    <top>
       <GridPane>
          <columnConstraints>
@@ -36,18 +19,14 @@
          <rowConstraints>
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
          </rowConstraints>
-         <children>
-            <ToolBar prefHeight="60.0" prefWidth="499.0" styleClass="background-color" stylesheets="@../css-styles/context-menu.css">
-               <items>
+            <ToolBar prefHeight="60.0" prefWidth="500.0" styleClass="background-color" stylesheets="@../css-styles/context-menu.css">
                   <Button fx:id="addContentMovies" layoutX="10.0" layoutY="3.0" mnemonicParsing="false" onAction="#addContentList" prefHeight="50.0" prefWidth="50.0">
                      <tooltip>
                         <Tooltip text="%toolbar.add_content_list_movie" />
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../icons/add_content_list_movies.png" />
-                           </image>
+                           <Image url="@../icons/add_content_list_movies.png"/>
                         </ImageView>
                      </graphic>
                      <padding>
@@ -60,24 +39,34 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../icons/add_content_list_actors.png" />
-                           </image>
+                           <Image url="@../icons/add_content_list_actors.png"/>
                         </ImageView>
                      </graphic>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="refreshButton" layoutX="78.0" layoutY="3.0" mnemonicParsing="false" onAction="#refreshMainFolder" prefHeight="50.0" prefWidth="50.0">
+                  <Separator layoutX="282.0" layoutY="10.0" orientation="VERTICAL" />
+                  <Button layoutX="146.0" layoutY="3.0" mnemonicParsing="false" onAction="#setMainFolder" prefHeight="50.0" prefWidth="50.0">
+                     <tooltip>
+                        <Tooltip text="%dialog.chooser.set_main" />
+                     </tooltip>
+                     <graphic>
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                           <Image url="@../icons/main_folder.png"/>
+                        </ImageView>
+                     </graphic>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Button>
+                  <Button layoutX="78.0" layoutY="3.0" mnemonicParsing="false" onAction="#refreshMainFolder" prefHeight="50.0" prefWidth="50.0">
                      <tooltip>
                         <Tooltip text="%toolbar.refresh" />
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../icons/refresh.png" />
-                           </image>
+                           <Image url="@../icons/refresh.png"/>
                         </ImageView>
                      </graphic>
                      <padding>
@@ -91,9 +80,7 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../icons/add_movie_3_movies_icon.png" />
-                           </image>
+                           <Image url="@../icons/add_movie_3_movies_icon.png"/>
                         </ImageView>
                      </graphic>
                      <padding>
@@ -106,9 +93,7 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../icons/add_movie_folder_icon.png" />
-                           </image>
+                           <Image url="@../icons/add_movie_folder_icon.png"/>
                         </ImageView>
                      </graphic>
                      <padding>
@@ -121,9 +106,7 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../icons/add_movie_www_icon.png" />
-                           </image>
+                           <Image url="@../icons/add_movie_www_icon.png"/>
                         </ImageView>
                      </graphic>
                      <padding>
@@ -131,35 +114,30 @@
                      </padding>
                   </Button>
                   <Separator orientation="VERTICAL" />
+
                   <MenuButton mnemonicParsing="false" prefHeight="25.0" prefWidth="76.0">
                      <tooltip>
                         <Tooltip text="%toolbar.import" />
                      </tooltip>
                     <items>
-                      <MenuItem mnemonicParsing="false" text="%toolbar.import.zip">
+                      <MenuItem mnemonicParsing="false" fx:id="importZip" onAction="#importData" text="%toolbar.import.zip">
                            <graphic>
                               <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../icons/zip.png" />
-                                 </image>
+                                 <Image url="@../icons/zip.png"/>
                               </ImageView>
                            </graphic>
                         </MenuItem>
-                      <MenuItem mnemonicParsing="false" text="%toolbar.import.xml">
+                      <MenuItem mnemonicParsing="false"  fx:id="importXml" onAction="#importData" text="%toolbar.import.xml">
                            <graphic>
                               <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../icons/xml.png" />
-                                 </image>
+                                 <Image url="@../icons/xml.png"/>
                               </ImageView>
                            </graphic>
                         </MenuItem>
                     </items>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../icons/import.png" />
-                           </image>
+                           <Image url="@../icons/import.png"/>
                         </ImageView>
                      </graphic>
                   </MenuButton>
@@ -168,73 +146,58 @@
                         <Tooltip text="%toolbar.export" />
                      </tooltip>
                      <items>
-                        <MenuItem mnemonicParsing="false" text="%toolbar.export.zip">
+                        <MenuItem mnemonicParsing="false" fx:id="exportZip" onAction="#exportData" text="%toolbar.export.zip">
                            <graphic>
                               <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../icons/zip.png" />
-                                 </image>
+                                 <Image url="@../icons/zip.png"/>
                               </ImageView>
                            </graphic>
                         </MenuItem>
-                        <MenuItem mnemonicParsing="false" text="%toolbar.export.xml">
+                        <MenuItem mnemonicParsing="false" fx:id="exportXml" onAction="#exportData" text="%toolbar.export.xml">
                            <graphic>
                               <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../icons/xml.png" />
-                                 </image>
+                                 <Image url="@../icons/xml.png"/>
                               </ImageView>
                            </graphic>
                         </MenuItem>
                      </items>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../icons/export.png" />
-                           </image>
+                           <Image url="@../icons/export.png"/>
                         </ImageView>
                      </graphic>
                   </MenuButton>
-                  <Button layoutX="362.0" layoutY="3.0" mnemonicParsing="false" onAction="#openSettings" prefHeight="50.0" prefWidth="50.0">
+                  <Button fx:id="settings" layoutX="362.0" layoutY="3.0" mnemonicParsing="false" onAction="#openSettings" prefHeight="50.0" prefWidth="50.0">
                      <tooltip>
                         <Tooltip text="%toolbar.settings" />
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../icons/settings.png" />
-                           </image>
+                           <Image url="@../icons/settings.png"/>
                         </ImageView>
                      </graphic>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </Button>
-               </items>
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>
             </ToolBar>
+
             <HBox alignment="CENTER_RIGHT" fillHeight="false" spacing="10.0" GridPane.columnIndex="1">
-               <children>
                   <Label alignment="CENTER" prefHeight="40.0" style="-fx-font-size: 28; -fx-font-family: Gabriola;" styleClass="blue_text" text="My Movie Manager" textOverrun="CLIP" />
                   <StackPane prefHeight="50.0" prefWidth="50.0">
-                     <children>
                         <Circle radius="25.0" style="-fx-fill: my_blue;">
                            <effect>
                               <GaussianBlur />
                            </effect>
                         </Circle>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../icons/logo.png" />
-                           </image>
+                           <Image url="@../icons/logo.png"/>
                         </ImageView>
-                     </children>
                   </StackPane>
-               </children>
             </HBox>
-         </children>
          <BorderPane.margin>
             <Insets />
          </BorderPane.margin>
@@ -246,7 +209,6 @@
 
    <left>
       <VBox>
-         <children>
             <Label contentDisplay="BOTTOM" style="-fx-font-size: 14; -fx-text-fill: almost_white; -fx-font-weight: bold;" styleClass="blue_text" text="%list_view.movies">
                <VBox.margin>
                   <Insets bottom="10.0" top="10.0" />
@@ -269,13 +231,13 @@
                <contextMenu>
                   <ContextMenu fx:id="movieListViewContextMenu">
                     <items>
-                      <MenuItem onAction="#renameContentList" mnemonicParsing="false" text="%list_view.rename" />
+                      <MenuItem mnemonicParsing="false" onAction="#renameContentList" text="%list_view.rename" />
                     </items>
                      <items>
-                        <MenuItem onAction="#copyContentList" mnemonicParsing="false" text="%list_view.copy" />
+                        <MenuItem mnemonicParsing="false" onAction="#copyContentList" text="%list_view.copy" />
                      </items>
                      <items>
-                        <MenuItem onAction="#removeContentList" mnemonicParsing="false" text="%list_view.remove" />
+                        <MenuItem mnemonicParsing="false" onAction="#removeContentList" text="%list_view.remove" />
                      </items>
                   </ContextMenu>
                </contextMenu>
@@ -302,18 +264,17 @@
                <contextMenu>
                   <ContextMenu fx:id="actorListViewContextMenu">
                      <items>
-                        <MenuItem onAction="#renameContentList" mnemonicParsing="false" text="%list_view.rename" />
+                        <MenuItem mnemonicParsing="false" onAction="#renameContentList" text="%list_view.rename" />
                      </items>
                      <items>
-                        <MenuItem onAction="#copyContentList" mnemonicParsing="false" text="%list_view.copy" />
+                        <MenuItem mnemonicParsing="false" onAction="#copyContentList" text="%list_view.copy" />
                      </items>
                      <items>
-                        <MenuItem onAction="#removeContentList" mnemonicParsing="false" text="%list_view.remove" />
+                        <MenuItem mnemonicParsing="false" onAction="#removeContentList" text="%list_view.remove" />
                      </items>
                   </ContextMenu>
                </contextMenu>
             </ListView>
-         </children>
          <padding>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </padding>
@@ -323,13 +284,12 @@
       </VBox>
    </left>
    <center>
-      <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" minWidth="100.0" hbarPolicy="NEVER" style="-fx-background-color: transparent;" vbarPolicy="NEVER">
-         <content>
-            <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP">
-               <padding>
-                  <Insets left="15.0" top="15.0" />
-               </padding></FlowPane>
-         </content>
+      <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minWidth="100.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER">
+         <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP">
+            <padding>
+               <Insets left="15.0" top="15.0" />
+            </padding>
+         </FlowPane>
       </ScrollPane>
    </center>
    <right>
