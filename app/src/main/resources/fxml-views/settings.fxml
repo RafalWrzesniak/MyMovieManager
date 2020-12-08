@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
+<DialogPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.Settings">
+   <content>
+      <VBox spacing="10.0">
+
+         <Label maxHeight="40" minHeight="40" prefHeight="40" styleClass="white_text" text="%dialog.chooser.set_main" wrapText="true" />
+         <TextField fx:id="mainDir" onMouseClicked="#chooseDirectory" prefWidth="250.0" promptText="%settings.choose_file_prompt" editable="false">
+            <VBox.margin>
+               <Insets bottom="20.0" />
+            </VBox.margin>
+         </TextField>
+
+         <Label maxHeight="40" minHeight="40" prefHeight="40" styleClass="white_text" text="%settings.set_watched" wrapText="true" />
+         <TextField fx:id="watched" onMouseClicked="#chooseDirectory" prefWidth="250.0" promptText="%settings.choose_file_prompt" editable="false">
+            <VBox.margin>
+               <Insets bottom="20.0" />
+            </VBox.margin>
+         </TextField>
+
+         <Label maxHeight="40" minHeight="40" prefHeight="40" styleClass="white_text" text="%settings.set_save" wrapText="true" />
+         <TextField fx:id="save" onMouseClicked="#chooseDirectory" prefWidth="250.0" promptText="%settings.choose_file_prompt" editable="false">
+            <VBox.margin>
+               <Insets bottom="20.0" />
+            </VBox.margin>
+         </TextField>
+
+         <Button graphicTextGap="10" onAction="#switchLanguage" mnemonicParsing="false" styleClass="white_text" style="-fx-background-color: transparent; -fx-font-size: 16"  text="%settings.language">
+            <graphic>
+               <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                     <Image url="@../icons/language.png" />
+               </ImageView>
+            </graphic>
+         </Button>
+
+      </VBox>
+   </content>
+   <padding>
+      <Insets right="10.0" />
+   </padding>
+
+   <stylesheets>
+      <URL value="@../css-styles/basic.css" />
+      <URL value="@../css-styles/dialog.css" />
+      <URL value="@../css-styles/text-and-textfield.css" />
+   </stylesheets>
+</DialogPane>
