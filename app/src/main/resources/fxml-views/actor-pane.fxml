@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.GaussianBlur?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
+<?import java.lang.Double?>
+<?import java.net.URL?>
+<StackPane fx:id="actorPane" styleClass="blurred-background" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ActorPane">
+    <fx:define>
+        <Double fx:id="PANE_WIDTH" fx:value="100.0"/>
+        <Double fx:id="PANE_HEIGHT" fx:value="143.0"/>
+    </fx:define>
+
+      <Rectangle fx:id="blue_background" height="${PANE_HEIGHT}" style="-fx-fill: my_blue;" visible="false" width="${PANE_WIDTH}">
+         <effect>
+            <GaussianBlur radius="40.0" />
+         </effect>
+         <StackPane.margin>
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+         </StackPane.margin>
+      </Rectangle>
+
+      <Rectangle fx:id="green_background" height="${PANE_HEIGHT}" style="-fx-fill: my_green;" visible="false" width="${PANE_WIDTH}">
+         <effect>
+            <GaussianBlur radius="40.0" />
+         </effect>
+          <StackPane.margin>
+              <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+          </StackPane.margin>
+      </Rectangle>
+
+      <ImageView fx:id="cover" fitWidth="${PANE_WIDTH}" fitHeight="${PANE_HEIGHT}" onMouseClicked="#selectItem" onMouseEntered="#lightBackground" onMouseExited="#hideBackground" pickOnBounds="true">
+         <StackPane.margin>
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+         </StackPane.margin>
+      </ImageView>
+
+      <Label fx:id="name" alignment="CENTER" maxWidth="${PANE_WIDTH}" onMouseClicked="#selectItem" onMouseEntered="#lightBackground" onMouseExited="#hideBackground" style="-fx-background-color: rgba(33, 40, 50,  0.8); -fx-text-fill: almost_white; -fx-font-size: 13;" styleClass="blue_text" textAlignment="CENTER" wrapText="true" StackPane.alignment="BOTTOM_CENTER">
+         <StackPane.margin>
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+         </StackPane.margin>
+         <padding>
+            <Insets bottom="4.0" left="5.0" right="5.0" top="4.0" />
+         </padding>
+      </Label>
+
+   <stylesheets>
+      <URL value="@../css-styles/basic.css" />
+      <URL value="@../css-styles/text-and-textfield.css" />
+      <URL value="@../css-styles/context-menu.css" />
+   </stylesheets>
+</StackPane>
