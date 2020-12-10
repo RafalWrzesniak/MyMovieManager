@@ -24,7 +24,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Function;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -468,7 +467,6 @@ public final class XMLOperator {
                     }
                 }
             }
-
             return contentList;
         }
 
@@ -492,9 +490,7 @@ public final class XMLOperator {
                 }
             }
             log.info("New actor created successfully from file \"{}\"", inputFile);
-            Actor actor = new Actor(map);
-            AutoSave.NEW_OBJECTS.remove(actor);
-            return actor;
+            return new Actor(map);
         }
 
         private static Movie createMovieFromXml(File inputDir, ContentList<Actor> allActors) {
@@ -519,19 +515,7 @@ public final class XMLOperator {
                 map.put(fieldName, param);
             }
             log.info("New movie created successfully from file \"{}\"", inputFile);
-            Movie movie = new Movie(map, allActors);
-            AutoSave.NEW_OBJECTS.remove(movie);
-            Function<List<Actor>, Boolean> removeActorsFromListToSave = list -> {
-                for(Actor actor : list) {
-                    AutoSave.NEW_OBJECTS.remove(actor);
-                }
-                return true;
-            };
-
-            removeActorsFromListToSave.apply(movie.getCast());
-            removeActorsFromListToSave.apply(movie.getDirectors());
-            removeActorsFromListToSave.apply(movie.getWriters());
-            return movie;
+            return new Movie(map, allActors);
         }
 
     }

@@ -19,6 +19,7 @@ public class ContentList<T extends ContentType<T>> {
     public static final String ALL_ACTORS_DEFAULT = "allActors";
     public static final String ALL_MOVIES_DEFAULT = "allMovies";
     public static final String MOVIES_TO_WATCH = "moviesToWatch";
+    public static final String RECENTLY_WATCHED = "recentlyWatched";
 
 //    == fields ==
     private static final List<String> NAMES = new ArrayList<>();
@@ -222,10 +223,6 @@ public class ContentList<T extends ContentType<T>> {
         return null;
     }
 
-    public void printAll() {
-        System.out.println(list.toString());
-    }
-
     @Override
     public String toString() {
         String bold = "\033[1m";
@@ -234,6 +231,10 @@ public class ContentList<T extends ContentType<T>> {
                 "name='" + bold + listName + end + "', " +
                 "size='" + bold + list.size() + end + "'" +
                 '}';
+    }
+
+    public static void clearNames() {
+        NAMES.clear();
     }
 
 }

@@ -276,7 +276,9 @@ public final class Movie implements ContentType<Movie> {
     public void addActor(Actor actor) {
         if(actor == null) return;
         cast.add(actor);
+        if(iAmFromConstructor) actor.iAmFromConstructor = true;
         actor.addMovieActorPlayedIn(this);
+        if(iAmFromConstructor) actor.iAmFromConstructor = false;
         saveMe();
     }
     public void addActors(List<Actor> actors) {
@@ -290,7 +292,9 @@ public final class Movie implements ContentType<Movie> {
     public void addDirector(Actor director) {
         if(director == null) return;
         directors.add(director);
+        if(iAmFromConstructor) director.iAmFromConstructor = true;
         director.addMovieDirectedBy(this);
+        if(iAmFromConstructor) director.iAmFromConstructor = false;
         saveMe();
     }
     public void addDirectors(List<Actor> directors) {
@@ -304,7 +308,9 @@ public final class Movie implements ContentType<Movie> {
     public void addWriter(Actor writer) {
         if(writer == null) return;
         writers.add(writer);
+        if(iAmFromConstructor) writer.iAmFromConstructor = true;
         writer.addMovieWrittenBy(this);
+        if(iAmFromConstructor) writer.iAmFromConstructor = false;
         saveMe();
     }
     public void addWriters(List<Actor> writers) {

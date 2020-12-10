@@ -48,7 +48,7 @@ public final class Actor implements ContentType<Actor> {
 
 //    == static fields ==
     private static int classActorId = -1;
-    private boolean iAmFromConstructor;
+    boolean iAmFromConstructor;
 
 //    == constants ==
     public static final String NAME = "name", SURNAME = "surname", NATIONALITY = "nationality", BIRTHDAY = "birthday",
@@ -90,6 +90,7 @@ public final class Actor implements ContentType<Actor> {
         } else {
             this.id = id;
         }
+        iAmFromConstructor = false;
         log.info("New actor created: {}", this.toString());
     }
 
@@ -305,7 +306,7 @@ public final class Actor implements ContentType<Actor> {
         map.put(NAME, name);
         map.put(SURNAME, surname);
         map.put(NATIONALITY, nationality);
-        map.put(BIRTHDAY, getBirthday().toString());
+        map.put(BIRTHDAY, birthday != null ? getBirthday().toString() : null);
         if(deathDay != null) map.put(DEATH_DAY, deathDay.toString());
         map.put(ContentType.IMAGE_PATH, imagePath != null ? imagePath.toString() : null);
         map.put(ContentType.IMAGE_URL, imageUrl != null ? imageUrl.toString() : null);
@@ -364,5 +365,4 @@ public final class Actor implements ContentType<Actor> {
             }
         }
     }
-
 }

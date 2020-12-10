@@ -552,6 +552,7 @@ public final class Connection {
         str = str.replaceAll("&scaron;", "š");
         str = str.replaceAll("&yacute;", "ý");
         str = str.replaceAll("&aring;", "å");
+        str = str.replaceAll("&Aring;", "Å");
         return str;
     }
 }
