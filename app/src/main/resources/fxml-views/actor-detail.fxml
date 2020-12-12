@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="vBox" alignment="CENTER" minWidth="250" prefWidth="250.0" maxWidth="250.0" spacing="10.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ActorDetail">
+      <ImageView fx:id="contentImage" fitHeight="300.0" fitWidth="180.0" pickOnBounds="true" preserveRatio="true" />
+      <Label fx:id="name" style="-fx-font-weight: bold;" styleClass="blue_text" text="name ">
+         <tooltip>
+            <Tooltip text="%detail.name_and_surname" />
+         </tooltip>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </Label>
+      <Label fx:id="bornDate" layoutX="66.0" layoutY="288.0" styleClass="blue_text" text="11.08.1994 - 24.03.2015">
+         <tooltip>
+            <Tooltip text="%detail.born_age" />
+         </tooltip>
+      </Label>
+      <Label fx:id="died" layoutX="60.0" layoutY="318.0" styleClass="blue_text" text="Zmarł w wieku 26 lat">
+         <tooltip>
+            <Tooltip text="%detail.died" />
+         </tooltip>
+      </Label>
+      <Label fx:id="country" layoutX="60.0" layoutY="318.0" styleClass="blue_text" text="Polska">
+         <tooltip>
+            <Tooltip text="%detail.country" />
+         </tooltip>
+      </Label>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+   <stylesheets>
+      <URL value="@../css-styles/basic.css" />
+      <URL value="@../css-styles/text-and-textfield.css" />
+      <URL value="@../css-styles/list-view-and-cell.css" />
+   </stylesheets>
+</VBox>
