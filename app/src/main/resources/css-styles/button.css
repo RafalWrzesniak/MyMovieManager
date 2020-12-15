@@ -60,3 +60,33 @@
      -fx-border-width: 2;
      -fx-border-radius: 10px;
 }
+
+
+.returnButton {
+    -fx-font-family: Verdana;
+    -fx-font-size: 12;
+    -fx-text-fill: light_gray;
+    -fx-border-color: light_gray;
+}
+
+.returnButton: hover {
+    -fx-text-fill: almost_white;
+    -fx-border-color: almost_white;
+}
+
+
+.contentButton {
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+    -fx-border-width: 2;
+    -fx-background-color: dark_blue;
+    -fx-padding: 7 10 7 10;
+    -fx-font-family: Verdana;
+    -fx-font-size: 14;
+    -fx-text-fill: almost_white;
+    -fx-border-color: my_blue;
+}
+
+.contentButton: hover {
+    -fx-border-color: my_green;
+}
