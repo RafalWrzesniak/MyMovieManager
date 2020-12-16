@@ -11,8 +11,8 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent;" vbarPolicy="NEVER" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ActorDetail">
-    <VBox fx:id="vBox" alignment="CENTER" prefWidth="300.0" spacing="10.0" styleClass="background-color">
+<ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent;" vbarPolicy="NEVER" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ActorDetail">
+    <VBox fx:id="vBox" alignment="TOP_CENTER" prefWidth="300.0" spacing="10.0" styleClass="background-color">
         <Button fx:id="returnButton" onAction="#returnToEarlierElement" graphicTextGap="10.0" styleClass="returnButton" text="%detail.return" visible="false">
             <graphic>
                 <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
@@ -47,8 +47,9 @@
                 <Tooltip text="%detail.country" />
              </tooltip>
           </Label>
+
        <padding>
-          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+           <Insets bottom="15.0" left="5.0" right="5.0" top="10.0" />
        </padding>
        <stylesheets>
            <URL value="@../css-styles/basic.css" />

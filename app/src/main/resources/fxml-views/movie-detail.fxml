@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.Cursor?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.VBox?>
-<?import java.net.URL?>
 
-<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent;" vbarPolicy="AS_NEEDED" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MovieDetail">
-      <VBox fx:id="vBox" alignment="CENTER" prefWidth="300.0" spacing="10.0" styleClass="background-color">
-         <Button fx:id="returnButton" onAction="#returnToEarlierElement" graphicTextGap="10.0" styleClass="returnButton" text="%detail.return" visible="false">
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" maxWidth="300.0" style="-fx-background-color: transparent;" vbarPolicy="ALWAYS" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MovieDetail">
+   <VBox fx:id="vBox" alignment="TOP_CENTER" prefWidth="300.0" spacing="10.0" styleClass="background-color">
+         <Button fx:id="returnButton" graphicTextGap="10.0" onAction="#returnToEarlierElement" styleClass="returnButton" text="%detail.return" visible="false">
             <graphic>
                <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                   <Image url="@../icons/return.png" />
@@ -41,13 +41,14 @@
                <Tooltip text="%detail.premiere" />
             </tooltip>
          </Label>
-         <Label fx:id="description" style="-fx-font-size: 14; -fx-text-fill: almost_white;" styleClass="blue_text" text="Description" textAlignment="JUSTIFY" wrapText="true">
+         <Label fx:id="description" style="-fx-font-size: 14;" styleClass="white_text" text="Description" textAlignment="JUSTIFY" wrapText="true">
             <tooltip>
                <Tooltip text="%detail.description" />
             </tooltip>
          </Label>
+
          <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+             <Insets bottom="15.0" left="5.0" right="5.0" top="10.0" />
          </padding>
       </VBox>
    <stylesheets>

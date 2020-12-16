@@ -32,6 +32,7 @@ public final class XMLOperator {
 //    == public static methods ==
 
     public static <E extends ContentType<E>> void saveContentToXML(E content) {
+        // TODO zobacz czy poprawnie zapisuje aktorom filmy, gdy był 1 na początku
         if(!AutoSave.NEW_OBJECTS.contains(content)) return;
         Document doc = createDoc();
         assert doc != null;
