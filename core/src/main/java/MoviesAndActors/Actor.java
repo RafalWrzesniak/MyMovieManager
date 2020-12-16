@@ -32,9 +32,9 @@ public final class Actor implements ContentType<Actor> {
     @Getter private String surname;
     @Getter private String nationality;
     @Getter private LocalDate deathDay;
-    @Getter @Setter private LocalDate birthday;
-    @Getter @Setter private Path imagePath;
-    @Getter @Setter private URL imageUrl;
+    @Getter private LocalDate birthday;
+    @Getter private Path imagePath;
+    @Getter private URL imageUrl;
     @Getter @Setter(AccessLevel.PRIVATE) private URL filmweb;
     // actor
     @Getter private boolean isActor = false;
@@ -59,6 +59,7 @@ public final class Actor implements ContentType<Actor> {
 
     public static final Comparator<Actor> COMP_ID = Comparator.comparingInt(Actor::getId);
     public static final Comparator<Actor> COMP_AGE = Comparator.comparingInt(Actor::getAge);
+    public static final Comparator<Actor> COMP_LENGTH = Comparator.comparingInt(actor -> actor.getNameAndSurname().length());
 
 
 //    == constructors ==
@@ -147,6 +148,21 @@ public final class Actor implements ContentType<Actor> {
         } else {
             this.age = deathDay.minusYears(birthday.getYear()).getYear();
         }
+        saveMe();
+    }
+
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
+        saveMe();
+    }
+
+    public void setImagePath(Path imagePath) {
+        this.imagePath = imagePath;
+        saveMe();
+    }
+
+    public void setImageUrl(URL imageUrl) {
+        this.imageUrl = imageUrl;
         saveMe();
     }
 
