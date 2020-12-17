@@ -144,8 +144,7 @@ public final class Connection {
         }
     }
 
-
-    public Actor createActorFromFilmwebLink() throws IOException, NullPointerException {
+    public Map<String, String> grabActorDataFromFilmweb() throws IOException {
         Map<String, String> actorData = new HashMap<>();
         String foundLine = grepLineFromWebsite(LINE_WITH_ACTOR_DATA);
 
@@ -173,9 +172,15 @@ public final class Connection {
         actorData.put(Actor.FILMWEB, websiteUrl.toString());
         actorData.put(Actor.DEATH_DAY, deathDay);
         actorData.put(Actor.IMAGE_URL, imageUrl);
-
         log.info("Data properly grabbed from \"{}\"", websiteUrl);
-        return new Actor(actorData);
+        return actorData;
+    }
+
+
+    public Actor createActorFromFilmwebLink() throws NullPointerException, IOException {
+        Map<String, String> actorMap = grabActorDataFromFilmweb();
+        if(actorMap == null) return null;
+        return new Actor(actorMap);
     }
 
 
@@ -193,7 +198,7 @@ public final class Connection {
                     actor = createActorFromFilmwebLink();
                     if (allActors.add(actor)) {
                         File actorDir = IO.createContentDirectory(actor);
-                        assert actor != null;
+                        assert actorDir != null;
                         Path downloadedImagePath = Paths.get(actorDir.toString(), actor.getReprName().concat(".jpg"));
                         if (Connection.downloadImage(actor.getImageUrl(), downloadedImagePath)) {
                             actor.setImagePath(downloadedImagePath);

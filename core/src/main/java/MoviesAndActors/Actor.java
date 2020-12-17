@@ -141,7 +141,7 @@ public final class Actor implements ContentType<Actor> {
         } catch (Config.ArgumentIssue ignored) { }
     }
 
-    private void setAge() {
+    public void setAge() {
         if(birthday == null) return;
         if(deathDay == null) {
             this.age = LocalDate.now().minusYears(getBirthday().getYear()).getYear();
