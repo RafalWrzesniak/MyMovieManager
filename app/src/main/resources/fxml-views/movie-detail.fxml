@@ -7,18 +7,8 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" maxWidth="300.0" style="-fx-background-color: transparent;" vbarPolicy="ALWAYS" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MovieDetail">
+<ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" maxWidth="300.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MovieDetail">
    <VBox fx:id="vBox" alignment="TOP_CENTER" prefWidth="300.0" spacing="10.0" styleClass="background-color">
-         <Button fx:id="returnButton" graphicTextGap="10.0" onAction="#returnToEarlierElement" styleClass="returnButton" text="%detail.return" visible="false">
-            <graphic>
-               <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                  <Image url="@../icons/return.png" />
-               </ImageView>
-            </graphic>
-            <VBox.margin>
-               <Insets bottom="5.0" />
-            </VBox.margin>
-         </Button>
          <ImageView fx:id="contentImage" fitHeight="300.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true" />
          <Label fx:id="title" style="-fx-font-weight: bold;" styleClass="blue_text" text="Title" textAlignment="CENTER" wrapText="true">
             <tooltip>
@@ -46,10 +36,6 @@
                <Tooltip text="%detail.description" />
             </tooltip>
          </Label>
-
-         <padding>
-             <Insets bottom="15.0" left="5.0" right="5.0" top="10.0" />
-         </padding>
       </VBox>
    <stylesheets>
       <URL value="@../css-styles/basic.css" />
