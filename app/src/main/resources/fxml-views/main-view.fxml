@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 
-<BorderPane fx:id="main_view" prefHeight="750.0" prefWidth="1170.0" styleClass="background-color" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
+<BorderPane fx:id="main_view" prefHeight="750.0" prefWidth="1480.0" styleClass="background-color" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
    <top>
       <GridPane>
          <columnConstraints>
@@ -285,16 +285,20 @@
    </left>
    <center>
       <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minWidth="100.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER">
-         <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP">
-            <padding>
-               <Insets left="15.0" top="15.0" />
-            </padding>
-         </FlowPane>
+         <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP" />
       </ScrollPane>
    </center>
    <right>
       <StackPane fx:id="rightDetail" BorderPane.alignment="CENTER" />
    </right>
+   <bottom>
+      <StackPane alignment="CENTER_RIGHT" prefHeight="20" >
+         <Label text="created by Rafał" />
+         <StackPane.margin>
+            <Insets topRightBottomLeft="5"/>
+         </StackPane.margin>
+      </StackPane>
+   </bottom>
    <stylesheets>
       <URL value="@../css-styles/basic.css" />
       <URL value="@../css-styles/text-and-textfield.css" />

@@ -24,7 +24,7 @@
     -fx-border-color: light_gray;
     -fx-font-family: Verdana;
     -fx-font-size: 14;
-    -fx-text-fill: light_gray;
+    -fx-text-fill: almost_white;
 }
 
 .text-field: focused {
