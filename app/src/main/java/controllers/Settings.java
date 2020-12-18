@@ -1,5 +1,6 @@
 package controllers;
 
+import Configuration.Config;
 import app.Main;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -10,6 +11,7 @@ import javafx.scene.input.MouseEvent;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 public class Settings implements Initializable {
@@ -19,15 +21,14 @@ public class Settings implements Initializable {
     public Dialog<ButtonType> dialog;
     private ResourceBundle resourceBundle;
     private MainController mainController;
-    public static boolean reOpen;
 
 
-
-    //    == init ==
+//    == init ==
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.resourceBundle = resourceBundle;
     }
+
 
 //  == methods ==
     public void setMainController(MainController mainController) {
@@ -57,6 +58,18 @@ public class Settings implements Initializable {
         }
         mainController.reOpenSettings = true;
         dialog.close();
+    }
+
+    public void processResult() {
+        if (!mainDir.getText().isEmpty()) {
+            Config.setMAIN_MOVIE_FOLDER(Paths.get(mainDir.getText()));
+        }
+        if (!watched.getText().isEmpty()) {
+            Config.setRECENTLY_WATCHED(Paths.get(watched.getText()));
+        }
+        if (!save.getText().isEmpty()) {
+            Config.setSAVE_PATH(new File(save.getText()), true);
+        }
     }
 
 }
