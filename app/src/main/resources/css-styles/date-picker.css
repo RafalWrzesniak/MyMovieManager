@@ -1,0 +1,50 @@
+@import "basic.css";
+
+.date-picker-popup {
+     -fx-background-color: light_gray;
+     -fx-border-color: my_blue;
+}
+
+.date-picker-popup > .month-year-pane {
+    -fx-background-color: dark_blue2;
+     -fx-text-fill: almost_white;
+}
+
+.date-picker-popup > * > .date-cell {
+     -fx-text-fill: almost_white;
+     -fx-background-color: transparent;
+ }
+
+.date-picker-popup > .calendar-grid {
+    -fx-background-color: transparent;
+}
+
+
+.date-picker-popup > * > .day-cell:hover,
+.date-picker-popup > * > .selected,
+.date-picker-popup > * > .previous-month.selected,
+.date-picker-popup > * > .next-month.selected {
+    -fx-background-color: dark_blue2;
+}
+
+
+.date-picker > .arrow-button > .arrow {
+    -fx-background-color: my_blue, light_gray;
+}
+
+.date-picker-popup > * > .spinner > .label {
+     -fx-text-fill: almost_white;
+     -fx-alignment: CENTER;
+ }
+
+.date-picker-popup > * > .spinner > .button {
+   -fx-background-color: light_gray;
+   -fx-effect: none;
+   -fx-font-weight: normal;
+ }
+
+.date-picker-popup > * > .spinner > .button: hover {
+   -fx-background-color: background_color;
+   -fx-effect: none;
+   -fx-font-weight: normal;
+ }
