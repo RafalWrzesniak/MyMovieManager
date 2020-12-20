@@ -7,7 +7,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" maxWidth="300.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MovieDetail">
+<ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" maxWidth="300.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.movie.MovieDetail">
    <VBox fx:id="vBox" alignment="TOP_CENTER" prefWidth="300.0" spacing="10.0" styleClass="background-color">
          <ImageView fx:id="contentImage" fitHeight="300.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true" />
          <Label fx:id="title" style="-fx-font-weight: bold;" styleClass="blue_text" text="Title" textAlignment="CENTER" wrapText="true">
