@@ -11,19 +11,21 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ResourceBundle;
 
 public abstract class ContentDetail {
 
 //    == fields ==
-    @FXML protected VBox vBox;
+    @FXML public VBox vBox;
     @FXML protected ImageView contentImage;
     @FXML protected ScrollPane scrollPane;
     @Getter protected double PREF_WIDTH = 300.0;
-    protected Button returnButton;
-    protected MainController mainController;
+    @Getter @Setter protected MainController mainController;
     protected ContextMenu contextMenu;
+    @Getter protected Button returnButton;
+
 
 //    == init ==
     protected void init(ResourceBundle resourceBundle) {
@@ -99,7 +101,4 @@ public abstract class ContentDetail {
         return flowPane;
     }
 
-    void setMainController(MainController mainController) {
-        this.mainController = mainController;
-    }
 }

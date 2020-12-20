@@ -7,22 +7,23 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
+import lombok.Getter;
 
 public abstract class ContentPane {
 
 //    == fields ==
     protected static BooleanProperty clearBackSthWasClicked = new SimpleBooleanProperty(false);
     protected BooleanProperty iHaveImage = new SimpleBooleanProperty(false);
-    StackPane contentPane;
-    @FXML Rectangle blue_background;
-    @FXML Rectangle green_background;
+    protected StackPane contentPane;
+    @FXML protected Rectangle blue_background;
+    @FXML protected Rectangle green_background;
     @FXML protected ImageView cover;
-    protected MainController mainController;
+    @Getter protected MainController mainController;
     protected ContextMenu contextMenu;
 
 
     //    == methods ==
-    void setMainController(MainController mainController) {
+    public void setMainController(MainController mainController) {
         this.mainController = mainController;
         clearBackSthWasClicked.addListener((observableValue, aBoolean, t1) -> {
             if(t1) {
@@ -32,7 +33,7 @@ public abstract class ContentPane {
         });
     }
 
-    void selectItem() {
+    protected void selectItem() {
         clearBackSthWasClicked.setValue(true);
         green_background.setVisible(true);
         contextMenu.hide();
