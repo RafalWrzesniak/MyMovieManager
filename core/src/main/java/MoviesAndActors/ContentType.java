@@ -3,6 +3,7 @@ package MoviesAndActors;
 import Configuration.Config;
 
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +22,8 @@ public interface ContentType<T> extends Comparable<T> {
     String getReprName();
     URL getFilmweb();
     void saveMe();
+    void setImagePath(Path newImagePath);
+    Path getImagePath();
     int getId();
 
 //    == default methods ==
