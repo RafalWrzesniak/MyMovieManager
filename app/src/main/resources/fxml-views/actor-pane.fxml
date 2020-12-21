@@ -32,13 +32,13 @@
           </StackPane.margin>
       </Rectangle>
 
-      <ImageView fx:id="cover" fitWidth="${PANE_WIDTH}" fitHeight="${PANE_HEIGHT}" onMouseClicked="#selectItem" onMouseEntered="#lightBackground" onMouseExited="#hideBackground" pickOnBounds="true">
+      <ImageView fx:id="cover" fitWidth="${PANE_WIDTH}" fitHeight="${PANE_HEIGHT}" onMouseClicked="#selectItemClicked" onMouseEntered="#lightBackground" onMouseExited="#hideBackground" pickOnBounds="true">
          <StackPane.margin>
             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
          </StackPane.margin>
       </ImageView>
 
-      <Label fx:id="name" alignment="CENTER" maxWidth="${PANE_WIDTH}" onMouseClicked="#selectItem" onMouseEntered="#lightBackground" onMouseExited="#hideBackground" style="-fx-background-color: rgba(33, 40, 50,  0.8); -fx-text-fill: almost_white; -fx-font-size: 13;" styleClass="blue_text" textAlignment="CENTER" wrapText="true" StackPane.alignment="BOTTOM_CENTER">
+      <Label fx:id="name" alignment="CENTER" maxWidth="${PANE_WIDTH}" onMouseClicked="#selectItemClicked" onMouseEntered="#lightBackground" onMouseExited="#hideBackground" style="-fx-background-color: rgba(33, 40, 50,  0.8); -fx-text-fill: almost_white; -fx-font-size: 13;" styleClass="blue_text" textAlignment="CENTER" wrapText="true" StackPane.alignment="BOTTOM_CENTER">
          <StackPane.margin>
             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
          </StackPane.margin>

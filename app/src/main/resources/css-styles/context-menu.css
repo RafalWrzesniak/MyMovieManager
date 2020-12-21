@@ -24,3 +24,16 @@
      -fx-background-insets: 0, 1, 2;
      -fx-background-radius: 0 6 6 6, 0 5 5 5, 0 4 4 4;
  }
+
+.menu > .right-container > .arrow {
+     -fx-background-color: almost_white;
+}
+
+.menu:focused > .right-container > .arrow {
+    -fx-background-color: my_blue;
+}
+
+.context-menu .separator:horizontal .line {
+    -fx-border-color: dark_blue;
+    -fx-border-insets: 5;
+}
