@@ -82,8 +82,6 @@ public final class XMLOperator {
 
         rootElement.appendChild(doc.createTextNode("\n"));
         makeSimpleSave(doc, savedFile);
-        System.out.println(list.getListName());
-        System.out.println(list.getDisplayName());
         log.info("ContentList \"{}\" properly created and saved in \"{}\"", list, savedFile);
     }
 
