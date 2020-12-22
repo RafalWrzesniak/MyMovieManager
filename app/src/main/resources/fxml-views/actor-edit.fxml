@@ -10,33 +10,32 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<DialogPane prefHeight="300.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.actor.ActorEdit">
+<DialogPane prefWidth="480.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.actor.ActorEdit">
    <content>
-      <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" spacing="20.0">
+      <VBox alignment="TOP_CENTER" spacing="20.0">
             <TextField fx:id="setName" promptText="%dialog.set_name" />
-            <TextField fx:id="setSurname" layoutX="20.0" layoutY="20.0" promptText="%dialog.set_surname" />
-            <TextField fx:id="setNationality" layoutX="20.0" layoutY="70.0" promptText="%dialog.set_nationality" />
+            <TextField fx:id="setSurname" promptText="%dialog.set_surname" />
+            <TextField fx:id="setNationality" promptText="%dialog.set_nationality" />
             <HBox spacing="20.0">
                   <DatePicker fx:id="setBirthday" promptText="%dialog.setBirthday" />
-                  <DatePicker fx:id="setDeathDay" layoutX="10.0" layoutY="10.0" promptText="%dialog.setDeathDay" />
+                  <DatePicker fx:id="setDeathDay" promptText="%dialog.setDeathDay" />
             </HBox>
-          <padding>
-              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-          </padding>
       </VBox>
    </content>
 
    <graphic>
-      <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
-            <ImageView fx:id="image" fitWidth="120.0" pickOnBounds="true" preserveRatio="true"/>
-            <Button fx:id="changeImage" mnemonicParsing="false" style="-fx-font-size: 12;" text="%context_menu.change_photo" />
+      <VBox alignment="TOP_CENTER" spacing="10.0">
+          <ImageView fx:id="image" fitHeight="180" preserveRatio="true"/>
+          <Button fx:id="changeImage" mnemonicParsing="false" style="-fx-font-size: 12;" text="%context_menu.change_photo" />
           <padding>
-              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              <Insets top="10.0" />
           </padding>
       </VBox>
    </graphic>
 
-
+    <padding>
+        <Insets top="10.0" left="10.0" right="10.0" />
+    </padding>
    <stylesheets>
       <URL value="@../css-styles/basic.css" />
       <URL value="@../css-styles/dialog.css" />
