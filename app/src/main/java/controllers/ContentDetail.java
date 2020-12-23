@@ -1,6 +1,7 @@
 package controllers;
 
 import app.Main;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -37,7 +38,7 @@ public abstract class ContentDetail {
         scrollPane.setPadding(new Insets(10, 18, 15, 5));
         scrollPane.setOnMouseClicked(e -> {
             if(e.getButton().equals(MouseButton.PRIMARY)) {
-                contextMenu.hide();
+                if(contextMenu != null) contextMenu.hide();
             }
         });
 
@@ -92,12 +93,15 @@ public abstract class ContentDetail {
         Label label = new Label(textLabel);
         label.setTextAlignment(TextAlignment.LEFT);
         label.getStyleClass().add("white_text");
-        vBox.getChildren().add(label);
 
         FlowPane flowPane = new FlowPane();
         flowPane.setHgap(10);
         flowPane.setVgap(15);
-        vBox.getChildren().add(flowPane);
+
+        Platform.runLater(() -> {
+            vBox.getChildren().add(label);
+            vBox.getChildren().add(flowPane);
+        });
         return flowPane;
     }
 

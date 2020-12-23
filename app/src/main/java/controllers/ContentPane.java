@@ -5,6 +5,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import lombok.Getter;
@@ -32,6 +34,15 @@ public abstract class ContentPane {
             }
         });
     }
+
+    @FXML
+    public void selectItemClicked(MouseEvent mouseEvent) {
+        selectItem();
+        if(mouseEvent.getButton().equals(MouseButton.SECONDARY)) {
+            contextMenu.show(contentPane, mouseEvent.getScreenX(), mouseEvent.getScreenY());
+        }
+    }
+
 
     protected void selectItem() {
         clearBackSthWasClicked.setValue(true);

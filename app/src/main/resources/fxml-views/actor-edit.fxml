@@ -39,6 +39,7 @@
    <stylesheets>
       <URL value="@../css-styles/basic.css" />
       <URL value="@../css-styles/dialog.css" />
+      <URL value="@../css-styles/date-picker.css" />
       <URL value="@../css-styles/text-and-textfield.css" />
    </stylesheets>
 </DialogPane>

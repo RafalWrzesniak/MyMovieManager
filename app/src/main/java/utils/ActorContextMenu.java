@@ -127,7 +127,7 @@ public final class ActorContextMenu {
             e.printStackTrace();
             return;
         }
-        dialog.getDialogPane().getStyleClass().add("/css-styles/date-picker.css");
+
         ActorEdit actorEdit = loader.getController();
         actorEdit.setActor(actor);
         actorEdit.changeImage.setOnAction(event -> {
