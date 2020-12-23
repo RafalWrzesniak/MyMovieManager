@@ -383,6 +383,14 @@ public final class Movie implements ContentType<Movie> {
 
 //  == public methods ==
 
+    public void clearGenres() {
+        genres.clear();
+    }
+
+    public void clearProduction() {
+        production.clear();
+    }
+
     public boolean isRateHigherThen(double rate) {
         if(rate > 0 && rate <= 10) {
             return this.getRate() > rate;
