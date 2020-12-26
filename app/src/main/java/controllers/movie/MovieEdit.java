@@ -9,25 +9,26 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import lombok.Getter;
 
 import java.time.LocalDate;
 
 public class MovieEdit {
 
-    //    == fields ==
+//    == fields ==
     @FXML public Button changeCover;
     @FXML public ImageView cover;
     @FXML public TextField setTitle, setTitleOrg, setLength, setRate, setRateCount, setGenre, setProduction;
     @FXML public TextArea setDescription;
     @FXML public DatePicker setPremiere;
+    @Getter private BooleanBinding valid;
     private Movie movie;
-    public BooleanBinding valid;
     private final SimpleBooleanProperty observableBooleanLength = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty observableBooleanRate = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty observableBooleanPremiere = new SimpleBooleanProperty(true);
 
 
-    //    == init ==
+//    == init ==
     public void initialize() {
         valid = observableBooleanLength.and(observableBooleanRate).and(observableBooleanPremiere);
         setTitle.textProperty().addListener(maxLen(setTitle, 50));
@@ -43,7 +44,7 @@ public class MovieEdit {
 
 
 
-    //    == methods ==
+//    == methods ==
     public void setMovie(Movie movie) {
         this.movie = movie;
         setTitle.setText(movie.getTitle());
@@ -116,7 +117,10 @@ public class MovieEdit {
 
     private ChangeListener<? super String> dateListener() {
         return (ChangeListener<String>) (observableValue, old, text) -> {
-            if(text.length() > 10 || !text.matches("[\\d.]*")) setPremiere.getEditor().setText(old);
+            if(text.length() > 10 || !text.matches("[\\d.]*")) {
+                setPremiere.getEditor().setText(old);
+                return;
+            }
 
             if(!text.matches("\\d{2}\\.\\d{2}\\.(20|19)\\d{2}")) {
                 setPremiere.getEditor().setStyle("-fx-text-fill: red");

@@ -13,6 +13,7 @@ import controllers.actor.ActorEdit;
 import controllers.actor.ActorKind;
 import controllers.actor.ActorPane;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -130,6 +131,7 @@ public final class ActorContextMenu {
 
         ActorEdit actorEdit = loader.getController();
         actorEdit.setActor(actor);
+        dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(Bindings.not(actorEdit.getValid()));
         actorEdit.changeImage.setOnAction(event -> {
             changePhoto();
             actorEdit.image.setImage(new Image(actor.getImagePath().toUri().toString()));

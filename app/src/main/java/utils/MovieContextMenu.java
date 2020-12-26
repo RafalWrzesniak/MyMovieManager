@@ -91,7 +91,7 @@ public final class MovieContextMenu {
         }
         MovieEdit movieEdit = loader.getController();
         movieEdit.setMovie(movie);
-        dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(Bindings.not(movieEdit.valid));
+        dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(Bindings.not(movieEdit.getValid()));
         movieEdit.changeCover.setOnAction(event -> {
             changeCover();
             movieEdit.cover.setImage(new Image(movie.getImagePath().toUri().toString()));
