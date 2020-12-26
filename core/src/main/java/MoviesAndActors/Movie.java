@@ -51,10 +51,11 @@ public final class Movie implements ContentType<Movie> {
     public static final List<String> FIELD_NAMES = List.of(ContentType.ID, TITLE, TITLE_ORG, PREMIERE, DURATION,
             RATE, RATE_COUNT, CAST, DIRECTORS, WRITERS, GENRES, PRODUCTION, DESCRIPTION, IMAGE_PATH, IMAGE_URL, FILMWEB);
 
-    public static final Comparator<Movie> COMP_ID = Comparator.comparingInt(Movie::getId);
+    public static final Comparator<Movie> COMP_ALPHABETICAL = Comparator.comparing(Movie::getTitle);
     public static final Comparator<Movie> COMP_DURATION = Comparator.comparingInt(Movie::getDuration);
     public static final Comparator<Movie> COMP_PREMIERE = Comparator.comparing(Movie::getPremiere);
     public static final Comparator<Movie> COMP_RATE = Comparator.comparingDouble(Movie::getRate);
+    public static final Comparator<Movie> COMP_POPULARITY = Comparator.comparingDouble(Movie::getRateCount);
 
 
 //    == constructors ==
