@@ -1,15 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.net.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.effect.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
+<?import java.lang.String?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.effect.GaussianBlur?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 
-<BorderPane fx:id="main_view" prefHeight="750.0" prefWidth="1480.0" styleClass="background-color" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
+<BorderPane fx:id="main_view" prefHeight="750.0" prefWidth="1480.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
    <top>
       <GridPane>
          <columnConstraints>
@@ -26,7 +44,7 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <Image url="@../icons/add_content_list_movies.png"/>
+                           <Image url="@../icons/add_content_list_movies.png" />
                         </ImageView>
                      </graphic>
                      <padding>
@@ -39,7 +57,7 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <Image url="@../icons/add_content_list_actors.png"/>
+                           <Image url="@../icons/add_content_list_actors.png" />
                         </ImageView>
                      </graphic>
                      <padding>
@@ -53,7 +71,7 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <Image url="@../icons/main_folder.png"/>
+                           <Image url="@../icons/main_folder.png" />
                         </ImageView>
                      </graphic>
                      <padding>
@@ -66,7 +84,7 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <Image url="@../icons/refresh.png"/>
+                           <Image url="@../icons/refresh.png" />
                         </ImageView>
                      </graphic>
                      <padding>
@@ -80,7 +98,7 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <Image url="@../icons/add_movie_3_movies_icon.png"/>
+                           <Image url="@../icons/add_movie_3_movies_icon.png" />
                         </ImageView>
                      </graphic>
                      <padding>
@@ -93,7 +111,7 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <Image url="@../icons/add_movie_folder_icon.png"/>
+                           <Image url="@../icons/add_movie_folder_icon.png" />
                         </ImageView>
                      </graphic>
                      <padding>
@@ -106,7 +124,7 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <Image url="@../icons/add_movie_www_icon.png"/>
+                           <Image url="@../icons/add_movie_www_icon.png" />
                         </ImageView>
                      </graphic>
                      <padding>
@@ -120,24 +138,24 @@
                         <Tooltip text="%toolbar.import" />
                      </tooltip>
                     <items>
-                      <MenuItem mnemonicParsing="false" fx:id="importZip" onAction="#importData" text="%toolbar.import.zip">
+                      <MenuItem fx:id="importZip" mnemonicParsing="false" onAction="#importData" text="%toolbar.import.zip">
                            <graphic>
                               <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                 <Image url="@../icons/zip.png"/>
+                                 <Image url="@../icons/zip.png" />
                               </ImageView>
                            </graphic>
                         </MenuItem>
-                      <MenuItem mnemonicParsing="false"  fx:id="importXml" onAction="#importData" text="%toolbar.import.xml">
+                      <MenuItem fx:id="importXml" mnemonicParsing="false" onAction="#importData" text="%toolbar.import.xml">
                            <graphic>
                               <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                 <Image url="@../icons/xml.png"/>
+                                 <Image url="@../icons/xml.png" />
                               </ImageView>
                            </graphic>
                         </MenuItem>
                     </items>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <Image url="@../icons/import.png"/>
+                           <Image url="@../icons/import.png" />
                         </ImageView>
                      </graphic>
                   </MenuButton>
@@ -146,24 +164,24 @@
                         <Tooltip text="%toolbar.export" />
                      </tooltip>
                      <items>
-                        <MenuItem mnemonicParsing="false" fx:id="exportZip" onAction="#exportData" text="%toolbar.export.zip">
+                        <MenuItem fx:id="exportZip" mnemonicParsing="false" onAction="#exportData" text="%toolbar.export.zip">
                            <graphic>
                               <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                 <Image url="@../icons/zip.png"/>
+                                 <Image url="@../icons/zip.png" />
                               </ImageView>
                            </graphic>
                         </MenuItem>
-                        <MenuItem mnemonicParsing="false" fx:id="exportXml" onAction="#exportData" text="%toolbar.export.xml">
+                        <MenuItem fx:id="exportXml" mnemonicParsing="false" onAction="#exportData" text="%toolbar.export.xml">
                            <graphic>
                               <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                 <Image url="@../icons/xml.png"/>
+                                 <Image url="@../icons/xml.png" />
                               </ImageView>
                            </graphic>
                         </MenuItem>
                      </items>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <Image url="@../icons/export.png"/>
+                           <Image url="@../icons/export.png" />
                         </ImageView>
                      </graphic>
                   </MenuButton>
@@ -173,7 +191,7 @@
                      </tooltip>
                      <graphic>
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <Image url="@../icons/settings.png"/>
+                           <Image url="@../icons/settings.png" />
                         </ImageView>
                      </graphic>
                      <padding>
@@ -194,7 +212,7 @@
                            </effect>
                         </Circle>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                           <Image url="@../icons/logo.png"/>
+                           <Image url="@../icons/logo.png" />
                         </ImageView>
                   </StackPane>
             </HBox>
@@ -284,18 +302,54 @@
       </VBox>
    </left>
    <center>
-      <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minWidth="100.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER">
-         <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP" />
-      </ScrollPane>
+      <VBox>
+         <children>
+            <HBox alignment="CENTER_LEFT">
+               <children>
+                  <TextField alignment="CENTER_RIGHT" prefWidth="250.0" promptText="%main_view.search" />
+                  <ImageView fitHeight="30.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../icons/search.png" />
+                     </image>
+                     <HBox.margin>
+                        <Insets left="5.0" />
+                     </HBox.margin>
+                  </ImageView>
+                  <MenuButton fx:id="sort" mnemonicParsing="false" prefHeight="30.0" text="%main_view.sort.type">
+                    <items>
+                        <MenuItem fx:id="movieAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" />
+                        <MenuItem fx:id="movieShortest" mnemonicParsing="false" text="%main_view.sort.shortest" />
+                        <MenuItem fx:id="movieLongest" mnemonicParsing="false" text="%main_view.sort.longest" />
+                        <MenuItem fx:id="movieNewest" mnemonicParsing="false" text="%main_view.sort.newest" />
+                        <MenuItem fx:id="movieOldest" mnemonicParsing="false" text="%main_view.sort.oldest" />
+                        <MenuItem fx:id="moviePopular" mnemonicParsing="false" text="%main_view.sort.popularity" />
+                        <MenuItem fx:id="movieRate" mnemonicParsing="false" text="%main_view.sort.rate" />
+                        <MenuItem fx:id="actorAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" />
+                        <MenuItem fx:id="actorAge" mnemonicParsing="false" text="%main_view.sort.age" />
+                    </items>
+                     <HBox.margin>
+                        <Insets left="15.0" />
+                     </HBox.margin>
+                  </MenuButton>
+               </children>
+               <VBox.margin>
+                  <Insets top="13.0" left="30.0" />
+               </VBox.margin>
+            </HBox>
+            <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minWidth="100.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER">
+               <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP" />
+            </ScrollPane>
+         </children>
+      </VBox>
    </center>
    <right>
       <StackPane fx:id="rightDetail" BorderPane.alignment="CENTER" />
    </right>
    <bottom>
-      <StackPane alignment="CENTER_RIGHT" prefHeight="20" >
+      <StackPane alignment="CENTER_RIGHT" prefHeight="20">
          <Label text="created by Rafał" />
          <StackPane.margin>
-            <Insets topRightBottomLeft="5"/>
+            <Insets topRightBottomLeft="5" />
          </StackPane.margin>
       </StackPane>
    </bottom>
