@@ -57,9 +57,8 @@ public final class Actor implements ContentType<Actor> {
     public static final List<String> FIELD_NAMES = List.of(ID, NAME, SURNAME, NATIONALITY, BIRTHDAY,
             DEATH_DAY, IMAGE_PATH, IMAGE_URL, FILMWEB, PLAYED_IN_MOVIES, DIRECTED_MOVIES, WROTE_MOVIES);
 
-    public static final Comparator<Actor> COMP_ID = Comparator.comparingInt(Actor::getId);
+    public static final Comparator<Actor> COMP_ALPHA = Comparator.comparing(Actor::getNameAndSurname);
     public static final Comparator<Actor> COMP_AGE = Comparator.comparingInt(Actor::getAge);
-    public static final Comparator<Actor> COMP_LENGTH = Comparator.comparingInt(actor -> actor.getNameAndSurname().length());
 
 
 //    == constructors ==
