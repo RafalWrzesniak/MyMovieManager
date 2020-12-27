@@ -335,13 +335,20 @@ public final class Actor implements ContentType<Actor> {
 
     @Override
     public boolean searchFor(String strToFind) {
-        String[] strSplit = strToFind.toLowerCase().split(" ");
-        for (String searchingStr : strSplit) {
-            if (this.getNameAndSurname().toLowerCase().contains(searchingStr) ||
-                    this.getNationality().toLowerCase().contains(searchingStr)) {
+        strToFind = strToFind.toLowerCase();
+        if(this.getNameAndSurname().toLowerCase().contains(strToFind) ||
+                this.getNationality().toLowerCase().contains(strToFind)) {
+            return true;
+        }
+        List<Movie> allActorMovies = new ArrayList<>(playedInMovies);
+        allActorMovies.addAll(directedMovies);
+        allActorMovies.addAll(wroteMovies);
+        for(Movie movie : allActorMovies) {
+            if(movie.getTitle().toLowerCase().contains(strToFind)) {
                 return true;
             }
         }
+
         try {
             return filmweb.toString().equals(strToFind);
         } catch (NullPointerException ignore) {}

@@ -479,26 +479,27 @@ public final class Movie implements ContentType<Movie> {
 
     @Override
     public boolean searchFor(String strToFind) {
-        String[] strSplit = strToFind.toLowerCase().split(" ");
-        for (String searchingStr : strSplit) {
-            if (title.toLowerCase().contains(searchingStr)) return true;
-            try {
-                if(description.toLowerCase().contains(searchingStr)) return true;
-            } catch (NullPointerException ignore) {}
-            try {
-                if(titleOrg.toLowerCase().contains(searchingStr)) return true;
-            } catch (NullPointerException ignore) {}
-            for(String genre : genres) {
-                if(genre.toLowerCase().contains(searchingStr)) return true;
-            }
-            for(String prod : production) {
-                if(prod.toLowerCase().contains(searchingStr)) return true;
-            }
-            try {
-                return filmweb.toString().equals(searchingStr);
-            } catch (NullPointerException ignore) {}
-
+        String searchingStr = strToFind.toLowerCase();
+        if (title.toLowerCase().contains(searchingStr)) return true;
+        try {
+            if(description.toLowerCase().contains(searchingStr)) return true;
+        } catch (NullPointerException ignore) {}
+        try {
+            if(titleOrg.toLowerCase().contains(searchingStr)) return true;
+        } catch (NullPointerException ignore) {}
+        for(String genre : genres) {
+            if(genre.toLowerCase().contains(searchingStr)) return true;
         }
+        for(String prod : production) {
+            if(prod.toLowerCase().contains(searchingStr)) return true;
+        }
+        for(Actor actor : cast) {
+            if(actor.getNameAndSurname().toLowerCase().contains(searchingStr)) return true;
+        }
+        try {
+            return filmweb.toString().equals(searchingStr);
+        } catch (NullPointerException ignore) {}
+
         return false;
     }
 
