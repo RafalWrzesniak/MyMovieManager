@@ -223,7 +223,7 @@ public final class Connection {
         return actorList;
     }
 
-    public Movie createMovieFromFilmwebLink() throws IOException, NullPointerException {
+    public Map<String, List<String>> grabMovieDataFromFilmweb() throws IOException {
         Map<String, List<String>> movieData = new HashMap<>();
         String foundLine = grepLineFromWebsite(LINE_WITH_MOVIE_DATA);
         if(!foundLine.contains(LINE_WITH_MOVIE_DATA2)){
@@ -243,6 +243,12 @@ public final class Connection {
         movieData.put(Movie.FILMWEB, Collections.singletonList(mainMoviePage.toString()));
 
         log.info("Data properly grabbed from \"{}\"", websiteUrl);
+        return movieData;
+    }
+
+    public Movie createMovieFromFilmwebLink() throws NullPointerException, IOException {
+        Map<String, List<String>> movieData;
+        movieData = grabMovieDataFromFilmweb();
         Movie movie = new Movie(movieData);
         if(movie.getPremiere() == null) throw new NullPointerException("Couldn't find proper data of " + movie.getTitle());
         return movie;
