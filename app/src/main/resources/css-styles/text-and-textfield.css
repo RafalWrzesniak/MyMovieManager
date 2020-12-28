@@ -45,3 +45,15 @@
     -fx-font-size: 12;
     -fx-text-fill: some_gray;
 }
+
+.cancelSearch {
+     -fx-font-family: Verdana;
+     -fx-font-size: 16;
+     -fx-text-fill: some_gray;
+ }
+
+.cancelSearch: hover {
+       -fx-font-family: Verdana;
+       -fx-font-size: 16;
+       -fx-text-fill: almost_white;
+  }
