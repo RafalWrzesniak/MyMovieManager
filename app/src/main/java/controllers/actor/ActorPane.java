@@ -41,7 +41,6 @@ public class ActorPane extends ContentPane implements Initializable, ActorKind {
     public void setActor(Actor actor) {
         this.actor = actor;
         this.contextMenu = new ActorContextMenu(actor, resourceBundle, this).getContextMenu();
-        actorPane.setOnContextMenuRequested(e -> contextMenu.show(actorPane, e.getScreenX(), e.getScreenY()));
         if(actor.getImagePath() == null || !actor.getImagePath().toFile().exists()) {
             actor.setImagePath(Files.NO_ACTOR_IMAGE);
         } else if(!actor.getImagePath().equals(Files.NO_ACTOR_IMAGE)) {
@@ -54,7 +53,7 @@ public class ActorPane extends ContentPane implements Initializable, ActorKind {
         }
     }
 
-    @FXML
+
     @Override
     public void selectItem() {
         super.selectItem();
@@ -70,7 +69,8 @@ public class ActorPane extends ContentPane implements Initializable, ActorKind {
         actorDetailController.setOwner(this);
         actorDetailController.setActor(actor);
         actorDetailController.setMainController(mainController);
-        mainController.rightDetail.getChildren().clear();
-        mainController.rightDetail.getChildren().add(actorDetails);
+        mainController.getRightDetail().getChildren().clear();
+        mainController.getRightDetail().getChildren().add(actorDetails);
     }
+
 }

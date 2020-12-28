@@ -74,9 +74,9 @@ public abstract class ContentDetail {
 
 //    == methods ==
     protected void returnToEarlierElement() {
-        int lastIndex = mainController.rightDetail.getChildren().size() - 1;
-        mainController.rightDetail.getChildren().remove(lastIndex);
-        mainController.rightDetail.getChildren().get(lastIndex-1).setVisible(true);
+        int lastIndex = mainController.getRightDetail().getChildren().size() - 1;
+        mainController.getRightDetail().getChildren().remove(lastIndex);
+        mainController.getRightDetail().getChildren().get(lastIndex-1).setVisible(true);
     }
 
     protected Label textLabel(String text) {

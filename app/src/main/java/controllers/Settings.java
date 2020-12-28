@@ -56,7 +56,6 @@ public class Settings implements Initializable {
         } else if(resourceBundle.getLocale().getDisplayLanguage().equals(Main.localeEn.getDisplayLanguage())) {
             Main.loadView(Main.localePl, Main.primaryStage);
         }
-        mainController.reOpenSettings = true;
         dialog.close();
     }
 

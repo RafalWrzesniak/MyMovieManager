@@ -9,12 +9,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import lombok.extern.slf4j.Slf4j;
+import utils.MovieContextMenu;
 import utils.PaneNames;
 
 import java.io.IOException;
@@ -35,27 +34,18 @@ public class MoviePane extends ContentPane implements Initializable, MovieKind {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.resourceBundle = resourceBundle;
         contentPane = moviePane;
-        createContextMenu();
-        title.visibleProperty().bind(Bindings.or(
-                Bindings.not(iHaveImage),
-                Bindings.or(blue_background.visibleProperty(),
-                            green_background.visibleProperty())
-        ));
+        title.visibleProperty().bind(
+                Bindings.or(
+                        Bindings.not(iHaveImage),
+                        Bindings.or(
+                                blue_background.visibleProperty(),
+                                green_background.visibleProperty()
+                        )
+                )
+        );
     }
 
 //    == methods ==
-    private void createContextMenu() {
-        contextMenu = new ContextMenu();
-        //        TODO context menu
-        final MenuItem item1 = new MenuItem("Otwórz");
-        final MenuItem item2 = new MenuItem("Oznacz jako obejrzane");
-        final MenuItem item3 = new MenuItem("Zmień okładkę");
-        final MenuItem item4 = new MenuItem("Dodaj do listy");
-        final MenuItem item5 = new MenuItem("Usuń");
-        item1.setOnAction(actionEvent -> System.out.println("item1 pressed"));
-        contextMenu.getItems().addAll(item1, item2, item3, item4, item5);
-        moviePane.setOnContextMenuRequested(e -> contextMenu.show(moviePane, e.getScreenX(), e.getScreenY()));
-    }
 
     @Override
     public void setMovie(Movie movie) {
@@ -68,9 +58,10 @@ public class MoviePane extends ContentPane implements Initializable, MovieKind {
         cover.setImage(new Image(movie.getImagePath().toUri().toString()));
         duration.setText(movie.getDurationShortFormatted());
         title.setText(movie.getTitle());
+        this.contextMenu = new MovieContextMenu(movie, resourceBundle, this).getContextMenu();
     }
 
-    @FXML
+
     @Override
     public void selectItem() {
         super.selectItem();
@@ -83,10 +74,11 @@ public class MoviePane extends ContentPane implements Initializable, MovieKind {
             return;
         }
         MovieDetail movieDetailController = loader.getController();
+        movieDetailController.setOwner(this);
         movieDetailController.setMovie(movie);
         movieDetailController.setMainController(mainController);
-        mainController.rightDetail.getChildren().clear();
-        mainController.rightDetail.getChildren().add(movieDetails);
+        mainController.getRightDetail().getChildren().clear();
+        mainController.getRightDetail().getChildren().add(movieDetails);
     }
 
 

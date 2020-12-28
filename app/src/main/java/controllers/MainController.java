@@ -12,6 +12,8 @@ import MoviesAndActors.Movie;
 import MyMovieManager.DownloadAndProcessMovies;
 import MyMovieManager.MovieMainFolder;
 import app.Main;
+import controllers.actor.ActorPane;
+import controllers.movie.MoviePane;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,8 +33,10 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import utils.PaneNames;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,36 +55,37 @@ import java.util.ResourceBundle;
 @Slf4j
 public class MainController implements Initializable {
 
-//  == constants ==
-    public static final String ACTOR_PANE = "actor-pane", ACTOR_DETAIL = "actor-detail", MOVIE_PANE = "movie-pane",
-        MOVIE_DETAIL = "movie-detail", SETTINGS = "settings", SINGLE_DIALOG = "single-dialog";
+//    == static fields ==
+    public static final ObservableList<ContentList<Movie>> observableContentMovies = FXCollections.observableList(new ArrayList<>());
+    public static final ObservableList<ContentList<Actor>> observableContentActors = FXCollections.observableList(new ArrayList<>());
+    public static ContentList<Movie> recentlyWatched;
+    public static ContentList<Movie> moviesToWatch;
+    public static ContentList<Actor> allActors;
+    public static ContentList<Movie> allMovies;
+    public static Rectangle recForDialogs;
 
 //    == fields ==
-    private static final ObservableList<ContentList<Movie>> observableContentMovies = FXCollections.observableList(new ArrayList<>());
-    private static final ObservableList<ContentList<Actor>> observableContentActors = FXCollections.observableList(new ArrayList<>());
-//    private ContentList<? extends ContentType<?>> currentlyDisplayedList;
-    private static ContentList<Actor> allActors;
-    private static ContentList<Movie> allMovies;
-    private static ContentList<Movie> moviesToWatch;
-
-
-    public ContentList<? extends ContentType<?>> currentlyDisplayedList;
-    public Label clearSearch;
-    private int lastTakenIndex;
-    public boolean reOpenSettings;
     private ResourceBundle resourceBundle;
-    @FXML public TextField searchField;
+    private Comparator<?> chosenSorter;
+    private int lastTakenIndex;
+
+    @FXML private Button settings;
+    @FXML private MenuButton sort;
+    @FXML private Label clearSearch;
     @FXML private BorderPane main_view;
     @FXML private ScrollPane scrollPane;
+    @FXML private TextField searchField;
     @FXML private FlowPane flowPaneContentList;
-    @FXML StackPane rightDetail;
-    @FXML private Button addContentMovies, addContentActors, addFolderWithMovies, addSingleMovie;
-    @FXML public Button settings;
-    @FXML public ContextMenu movieListViewContextMenu, actorListViewContextMenu;
     @FXML private MenuItem importZip, importXml, exportZip, exportXml;
+    @FXML private ContextMenu movieListViewContextMenu, actorListViewContextMenu;
+    @FXML private Button addContentMovies, addContentActors, addFolderWithMovies, addSingleMovie;
+    @FXML private MenuItem movieAlpha, movieShortest, movieLongest, movieNewest, movieOldest, movieRate, moviePopular,
+                           actorAlpha, actorYoungest, actorOldest;
 
-    @FXML private ListView<ContentList<Movie>> movieListView;
-    @FXML private ListView<ContentList<Actor>> actorListView;
+    @FXML @Getter private StackPane rightDetail;
+    @FXML @Getter private ListView<ContentList<Movie>> movieListView;
+    @FXML @Getter private ListView<ContentList<Actor>> actorListView;
+    @Getter private ContentList<? extends ContentType<?>> currentlyDisplayedList;
 
 
 //    == init ==
@@ -140,7 +145,7 @@ public class MainController implements Initializable {
     @FXML
     public void addContentList(ActionEvent actionEvent) {
         log.info("Create new ContentList called from \"{}\"", actionEvent.getSource());
-        FXMLLoader loader = createLoader(SINGLE_DIALOG, resourceBundle);
+        FXMLLoader loader = Main.createLoader(PaneNames.SINGLE_DIALOG, resourceBundle);
         Dialog<ButtonType> dialog;
         try {
             dialog = createDialog(actionEvent, loader);
@@ -188,7 +193,7 @@ public class MainController implements Initializable {
             } catch (InterruptedException e) {
                 log.warn("Unexpected interrupted exception while downloading new movies \"{}\"", e.getMessage());
             }
-            Platform.runLater(() -> populateFlowPaneContentList(moviesToWatch));
+            Platform.runLater(() -> populateFlowPaneContentList(moviesToWatch, true));
         }).start();
     }
 
@@ -198,7 +203,7 @@ public class MainController implements Initializable {
         ((Button) actionEvent.getSource()).getStyleClass().add("buttonPressed");
 
         if(actionEvent.getSource().equals(addSingleMovie)) {
-            File chosenFile = chooseFileDialog(resourceBundle.getString("dialog.chooser.find_movie_file"), "movie");
+            File chosenFile = Main.chooseFileDialog(resourceBundle.getString("dialog.chooser.find_movie_file"), "movie");
             ((Button) actionEvent.getSource()).getStyleClass().remove("buttonPressed");
             if(chosenFile != null) {
                 DownloadAndProcessMovies.handleMovieFromFile(chosenFile, allMovies, allActors);
@@ -220,7 +225,7 @@ public class MainController implements Initializable {
     @FXML
     public void addMovieToAppFromWeb(ActionEvent actionEvent) {
         log.info("Adding movies from " + actionEvent.getSource());
-        FXMLLoader loader = createLoader(SINGLE_DIALOG, resourceBundle);
+        FXMLLoader loader = Main.createLoader(PaneNames.SINGLE_DIALOG, resourceBundle);
         Dialog<ButtonType> dialog;
         try {
             dialog = createDialog(actionEvent, loader);
@@ -257,7 +262,7 @@ public class MainController implements Initializable {
         MenuItem callingItem = (MenuItem) actionEvent.getSource();
         log.info("Import data called from " + callingItem);
         String saveFormat = callingItem.getId().toLowerCase().substring(6); // importXml || importZip
-        File chosenFile = chooseFileDialog(resourceBundle.getString("toolbar.import." + saveFormat), saveFormat);
+        File chosenFile = Main.chooseFileDialog(resourceBundle.getString("toolbar.import." + saveFormat), saveFormat);
         if(chosenFile == null) return;
         String warningInfo = MessageFormat.format(resourceBundle.getString("dialog.warning.import_warning"), chosenFile.getName());
         Dialog<ButtonType> dialog = createConfirmDialog(warningInfo);
@@ -271,7 +276,7 @@ public class MainController implements Initializable {
                 initReadMainFolder();
                 addReadDataToObservableList(readData);
                 movieListView.getSelectionModel().select(moviesToWatch);
-                populateFlowPaneContentList(moviesToWatch);
+                populateFlowPaneContentList(moviesToWatch, true);
             } else if(callingItem.equals(importXml)) {
                 ExportImport.ImportDataFromXml importDataFromXml = new ExportImport.ImportDataFromXml(chosenFile);
                 importDataFromXml.start();
@@ -312,11 +317,11 @@ public class MainController implements Initializable {
     public void openSettings() {
         log.info("Opening settings dialog");
         settings.getStyleClass().add("buttonPressed");
-        FXMLLoader loader = createLoader(SETTINGS, resourceBundle);
+        FXMLLoader loader = Main.createLoader(PaneNames.SETTINGS, resourceBundle);
         Bounds boundsInScreen = settings.localToScreen(settings.getBoundsInLocal());
         Dialog<ButtonType> dialog;
         try {
-            dialog = createDialog(loader);
+            dialog = Main.createDialog(loader, main_view.getScene().getWindow());
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -326,19 +331,10 @@ public class MainController implements Initializable {
         Settings controller = loader.getController();
         controller.setMainController(this);
         controller.setDialog(dialog);
-
         Optional<ButtonType> result = dialog.showAndWait();
 
         if(result.isPresent() && result.get() == ButtonType.OK) {
-            if (!controller.mainDir.getText().isEmpty()) {
-                Config.setMAIN_MOVIE_FOLDER(Paths.get(controller.mainDir.getText()));
-            }
-            if (!controller.watched.getText().isEmpty()) {
-                Config.setRECENTLY_WATCHED(Paths.get(controller.watched.getText()));
-            }
-            if (!controller.save.getText().isEmpty()) {
-                Config.setSAVE_PATH(new File(controller.save.getText()), true);
-            }
+            controller.processResult();
         }
         settings.getStyleClass().remove("buttonPressed");
     }
@@ -349,7 +345,7 @@ public class MainController implements Initializable {
     @FXML
     public void renameContentList(ActionEvent actionEvent) {
         log.info("Rename ContentList called from \"{}\"", actionEvent.getSource());
-        FXMLLoader loader = createLoader(SINGLE_DIALOG, resourceBundle);
+        FXMLLoader loader = Main.createLoader(PaneNames.SINGLE_DIALOG, resourceBundle);
         Dialog<ButtonType> dialog;
         try {
             dialog = createDialog(actionEvent, loader);
@@ -380,7 +376,7 @@ public class MainController implements Initializable {
     @FXML
     public void copyContentList(ActionEvent actionEvent) {
         log.info("Copy new ContentList called from \"{}\"", actionEvent.getSource());
-        FXMLLoader loader = createLoader(SINGLE_DIALOG, resourceBundle);
+        FXMLLoader loader = Main.createLoader(PaneNames.SINGLE_DIALOG, resourceBundle);
         Dialog<ButtonType> dialog;
         try {
             dialog = createDialog(actionEvent, loader);
@@ -445,6 +441,7 @@ public class MainController implements Initializable {
             observableContentActors.remove(getSelectedList());
         }
     }
+
 
 //    == methods ==
     @SneakyThrows
@@ -552,7 +549,7 @@ public class MainController implements Initializable {
 
 
     private Dialog<ButtonType> createDialog(ActionEvent actionEvent, FXMLLoader loader) throws IOException {
-        Dialog<ButtonType> dialog = createDialog(loader);
+        Dialog<ButtonType> dialog = Main.createDialog(loader, main_view.getScene().getWindow());
         double showingX, showingY;
         try {
             Button callingButton = (Button) actionEvent.getSource();
@@ -583,42 +580,21 @@ public class MainController implements Initializable {
         return dialog;
     }
 
-    private Dialog<ButtonType> createConfirmDialog(String dialogInfo) throws IOException {
-        FXMLLoader loader = createLoader(SINGLE_DIALOG, resourceBundle);
-        Dialog<ButtonType> dialog = createDialog(loader);
+    private  Dialog<ButtonType> createConfirmDialog(String dialogInfo) throws IOException {
+        FXMLLoader loader = Main.createLoader(PaneNames.SINGLE_DIALOG, resourceBundle);
+        Dialog<ButtonType> dialog = Main.createDialog(loader, main_view.getScene().getWindow());
         dialog.getDialogPane().setMaxWidth(600);
         dialog.setX(main_view.getScene().getWindow().getX() + main_view.getScene().getWidth()/2 - dialog.getDialogPane().getMaxWidth()/2);
         dialog.setY(main_view.getScene().getWindow().getY() + main_view.getScene().getHeight()/2);
         dialog.setOnShown(alertEvent -> dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(false));
 
-        DialogController controller = loader.load();
+        DialogController controller = loader.getController();
         controller.contentVBox.getChildren().remove(controller.textField);
         ((Label) controller.contentVBox.getChildren().get(0)).setMaxHeight(60);
         ((Label) controller.contentVBox.getChildren().get(0)).setMinHeight(60);
         controller.setTexts(dialogInfo, "");
         controller.showWarning(dialogInfo);
         return dialog;
-    }
-
-    private File chooseFileDialog(String title, String fileType) {
-        log.debug("Choose file dialog is now open");
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(title);
-        switch (fileType) {
-            case "movie":
-                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Movie files", "*.avi", "*.mkv", "*.mp4", "*.m4v"));
-                break;
-            case "zip":
-                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP archive files", "*.zip"));
-                break;
-            case "xml":
-                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML file", "*.xml"));
-                break;
-        }
-        fileChooser.setInitialDirectory(Config.getMAIN_MOVIE_FOLDER().toFile());
-        File chosenFile =  fileChooser.showOpenDialog(main_view.getScene().getWindow());
-        log.debug("Chosen file is \"{}\"", chosenFile);
-        return chosenFile;
     }
 
     public File chooseDirectoryDialog(String title) {
@@ -632,7 +608,7 @@ public class MainController implements Initializable {
         return chosenDir;
     }
 
-    private ContentList<?> getSelectedList() {
+    public ContentList<?> getSelectedList() {
         ContentList<?> contentList = movieListView.getSelectionModel().getSelectedItem();
         if(contentList != null) {
             return contentList;
@@ -644,7 +620,7 @@ public class MainController implements Initializable {
     private void selectItemListener(ListView<?> listViewToDeselect) {
         if (getSelectedList() != null) {
             listViewToDeselect.getSelectionModel().clearSelection();
-            populateFlowPaneContentList(getSelectedList());
+            populateFlowPaneContentList(getSelectedList(), true);
         }
     }
 
@@ -671,7 +647,7 @@ public class MainController implements Initializable {
         return new Callback<>() {
             @Override
             public ListCell<ContentList<Movie>> call(ListView<ContentList<Movie>> object) {
-                return new ListCell<>() {
+                ListCell<ContentList<Movie>> cell = new ListCell<>() {
                     @Override
                     protected void updateItem(ContentList<Movie> contentList, boolean empty) {
                         super.updateItem(contentList, empty);
@@ -692,7 +668,7 @@ public class MainController implements Initializable {
         return new Callback<>() {
             @Override
             public ListCell<ContentList<Actor>> call(ListView<ContentList<Actor>> object) {
-                return new ListCell<>() {
+                ListCell<ContentList<Actor>> cell = new ListCell<>() {
                     @Override
                     protected void updateItem(ContentList<Actor> contentList, boolean empty) {
                         super.updateItem(contentList, empty);
