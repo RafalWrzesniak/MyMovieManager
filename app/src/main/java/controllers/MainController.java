@@ -63,8 +63,13 @@ public class MainController implements Initializable {
     private static ContentList<Movie> allMovies;
     private static ContentList<Movie> moviesToWatch;
 
+
+    public ContentList<? extends ContentType<?>> currentlyDisplayedList;
+    public Label clearSearch;
+    private int lastTakenIndex;
     public boolean reOpenSettings;
     private ResourceBundle resourceBundle;
+    @FXML public TextField searchField;
     @FXML private BorderPane main_view;
     @FXML private ScrollPane scrollPane;
     @FXML private FlowPane flowPaneContentList;

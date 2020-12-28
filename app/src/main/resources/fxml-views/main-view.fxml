@@ -3,6 +3,7 @@
 <?import java.lang.String?>
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
@@ -26,6 +27,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane fx:id="main_view" prefHeight="750.0" prefWidth="1480.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
    <top>
@@ -303,18 +305,27 @@
    </left>
    <center>
       <VBox>
-         <children>
             <HBox alignment="CENTER_LEFT">
-               <children>
-                  <TextField alignment="CENTER_RIGHT" prefWidth="250.0" promptText="%main_view.search" />
-                  <ImageView fitHeight="30.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../icons/search.png" />
-                     </image>
-                     <HBox.margin>
+            <StackPane alignment="CENTER_LEFT">
+                  <TextField fx:id="searchField" alignment="CENTER_RIGHT" prefWidth="250.0" promptText="%main_view.search" />
+                  <Label fx:id="clearSearch" text="x" styleClass="cancelSearch">
+                     <StackPane.margin>
                         <Insets left="5.0" />
-                     </HBox.margin>
-                  </ImageView>
+                     </StackPane.margin>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Label>
+            </StackPane>
+                <ImageView fitHeight="30.0" pickOnBounds="true" preserveRatio="true">
+                    <HBox.margin>
+                        <Insets left="5.0" />
+                    </HBox.margin>
+                    <Image url="@../icons/search.png" />
+                </ImageView>
                   <MenuButton fx:id="sort" mnemonicParsing="false" prefHeight="30.0" text="%main_view.sort.type">
                     <items>
                         <MenuItem fx:id="movieAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" />
@@ -325,21 +336,20 @@
                         <MenuItem fx:id="moviePopular" mnemonicParsing="false" text="%main_view.sort.popularity" />
                         <MenuItem fx:id="movieRate" mnemonicParsing="false" text="%main_view.sort.rate" />
                         <MenuItem fx:id="actorAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" />
-                        <MenuItem fx:id="actorAge" mnemonicParsing="false" text="%main_view.sort.age" />
+                        <MenuItem fx:id="actorYoungest" mnemonicParsing="false" text="%main_view.sort.youngest" />
+                        <MenuItem fx:id="actorOldest" mnemonicParsing="false" text="%main_view.sort.oldestActor" />
                     </items>
                      <HBox.margin>
                         <Insets left="15.0" />
                      </HBox.margin>
                   </MenuButton>
-               </children>
                <VBox.margin>
-                  <Insets top="13.0" left="30.0" />
+                  <Insets left="30.0" top="13.0" />
                </VBox.margin>
             </HBox>
             <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minWidth="100.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER">
                <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP" />
             </ScrollPane>
-         </children>
       </VBox>
    </center>
    <right>
