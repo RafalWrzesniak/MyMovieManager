@@ -304,52 +304,52 @@
       </VBox>
    </left>
    <center>
-      <VBox>
-            <HBox alignment="CENTER_LEFT">
-            <StackPane alignment="CENTER_LEFT">
-                  <TextField fx:id="searchField" alignment="CENTER_RIGHT" prefWidth="250.0" promptText="%main_view.search" />
-                  <Label fx:id="clearSearch" text="x" styleClass="cancelSearch">
-                     <StackPane.margin>
-                        <Insets left="5.0" />
-                     </StackPane.margin>
-                     <cursor>
-                        <Cursor fx:constant="HAND" />
-                     </cursor>
-                     <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </padding>
-                  </Label>
-            </StackPane>
-                <ImageView fitHeight="30.0" pickOnBounds="true" preserveRatio="true">
-                    <HBox.margin>
-                        <Insets left="5.0" />
-                    </HBox.margin>
-                    <Image url="@../icons/search.png" />
-                </ImageView>
-                  <MenuButton fx:id="sort" mnemonicParsing="false" prefHeight="30.0" text="%main_view.sort.type">
-                    <items>
-                        <MenuItem fx:id="movieAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" />
-                        <MenuItem fx:id="movieShortest" mnemonicParsing="false" text="%main_view.sort.shortest" />
-                        <MenuItem fx:id="movieLongest" mnemonicParsing="false" text="%main_view.sort.longest" />
-                        <MenuItem fx:id="movieNewest" mnemonicParsing="false" text="%main_view.sort.newest" />
-                        <MenuItem fx:id="movieOldest" mnemonicParsing="false" text="%main_view.sort.oldest" />
-                        <MenuItem fx:id="moviePopular" mnemonicParsing="false" text="%main_view.sort.popularity" />
-                        <MenuItem fx:id="movieRate" mnemonicParsing="false" text="%main_view.sort.rate" />
-                        <MenuItem fx:id="actorAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" />
-                        <MenuItem fx:id="actorYoungest" mnemonicParsing="false" text="%main_view.sort.youngest" />
-                        <MenuItem fx:id="actorOldest" mnemonicParsing="false" text="%main_view.sort.oldestActor" />
-                    </items>
-                     <HBox.margin>
-                        <Insets left="15.0" />
-                     </HBox.margin>
-                  </MenuButton>
-               <VBox.margin>
-                  <Insets left="30.0" top="13.0" />
-               </VBox.margin>
-            </HBox>
-            <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minWidth="100.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER">
-               <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP" />
-            </ScrollPane>
+      <VBox fx:id="allCenter">
+        <HBox alignment="CENTER_LEFT">
+        <StackPane alignment="CENTER_LEFT">
+              <TextField fx:id="searchField" alignment="CENTER_RIGHT" prefWidth="250.0" promptText="%main_view.search" />
+              <Label fx:id="clearSearch" text="x" styleClass="cancelSearch">
+                 <StackPane.margin>
+                    <Insets left="5.0" />
+                 </StackPane.margin>
+                 <cursor>
+                    <Cursor fx:constant="HAND" />
+                 </cursor>
+                 <padding>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                 </padding>
+              </Label>
+        </StackPane>
+            <ImageView fitHeight="30.0" pickOnBounds="true" preserveRatio="true">
+                <HBox.margin>
+                    <Insets left="5.0" />
+                </HBox.margin>
+                <Image url="@../icons/search.png" />
+            </ImageView>
+              <MenuButton fx:id="sort" mnemonicParsing="false" prefHeight="30.0" text="%main_view.sort.type">
+                <items>
+                    <MenuItem fx:id="movieAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" />
+                    <MenuItem fx:id="movieShortest" mnemonicParsing="false" text="%main_view.sort.shortest" />
+                    <MenuItem fx:id="movieLongest" mnemonicParsing="false" text="%main_view.sort.longest" />
+                    <MenuItem fx:id="movieNewest" mnemonicParsing="false" text="%main_view.sort.newest" />
+                    <MenuItem fx:id="movieOldest" mnemonicParsing="false" text="%main_view.sort.oldest" />
+                    <MenuItem fx:id="moviePopular" mnemonicParsing="false" text="%main_view.sort.popularity" />
+                    <MenuItem fx:id="movieRate" mnemonicParsing="false" text="%main_view.sort.rate" />
+                    <MenuItem fx:id="actorAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" />
+                    <MenuItem fx:id="actorYoungest" mnemonicParsing="false" text="%main_view.sort.youngest" />
+                    <MenuItem fx:id="actorOldest" mnemonicParsing="false" text="%main_view.sort.oldestActor" />
+                </items>
+                 <HBox.margin>
+                    <Insets left="15.0" />
+                 </HBox.margin>
+              </MenuButton>
+           <VBox.margin>
+              <Insets left="30.0" top="13.0" />
+           </VBox.margin>
+        </HBox>
+        <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minWidth="100.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER">
+           <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP" />
+        </ScrollPane>
       </VBox>
    </center>
    <right>
