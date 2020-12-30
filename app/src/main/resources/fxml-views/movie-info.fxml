@@ -68,7 +68,7 @@
             </VBox>
             <VBox alignment="CENTER" spacing="20.0">
                <VBox alignment="CENTER">
-                  <Label alignment="CENTER" styleClass="blue_text" text="%movie.direction" />
+                  <Label fx:id="directorsLabel" alignment="CENTER" styleClass="blue_text" text="%movie.direction" />
                   <HBox fx:id="directors" />
                </VBox>
             </VBox>
@@ -94,7 +94,7 @@
             <FlowPane fx:id="cast" />
          </VBox>
          <VBox>
-            <Label styleClass="blue_text" text="%movie.scenario" />
+            <Label fx:id="writersLabel" styleClass="blue_text" text="%movie.scenario" />
             <ScrollPane prefHeight="200" styleClass="background-color">
                <HBox fx:id="writers" alignment="CENTER" />
             </ScrollPane>
