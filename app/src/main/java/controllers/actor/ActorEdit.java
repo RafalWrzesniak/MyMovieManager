@@ -27,7 +27,7 @@ public class ActorEdit {
     private Actor actor;
     @Getter private BooleanBinding valid;
     private final SimpleBooleanProperty birthdayValid = new SimpleBooleanProperty();
-    private final SimpleBooleanProperty deathDayValid = new SimpleBooleanProperty();
+    private final SimpleBooleanProperty deathDayValid = new SimpleBooleanProperty(true);
 
 
 //    == init ==
