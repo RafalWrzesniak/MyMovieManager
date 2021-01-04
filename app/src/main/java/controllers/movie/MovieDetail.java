@@ -5,6 +5,7 @@ import MoviesAndActors.Movie;
 import app.Main;
 import controllers.ContentDetail;
 import controllers.actor.ActorDetail;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -12,10 +13,13 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.FlowPane;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import utils.MovieContextMenu;
 import utils.PaneNames;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -31,6 +35,7 @@ public class MovieDetail extends ContentDetail implements Initializable, MovieKi
     @FXML private Label title, year, duration, description;
     private ResourceBundle resourceBundle;
     private Movie movie;
+    @Getter @Setter private MoviePane owner;
 
 //    == init ==
     @Override
@@ -54,11 +59,22 @@ public class MovieDetail extends ContentDetail implements Initializable, MovieKi
     @Override
     public void setMovie(Movie movie) {
         this.movie = movie;
-        title.setText(movie.getTitle());
-        year.setText(movie.getPremiere().format(Main.DTF));
-        duration.setText(movie.getDurationFormatted());
-        description.setText(movie.getDescription());
-        contentImage.setImage(new Image(movie.getImagePath().toUri().toString()));
+        if(owner != null) owner.setMovie(movie);
+        this.contextMenu = new MovieContextMenu(movie, resourceBundle, this).getContextMenu();
+        vBox.setOnContextMenuRequested(e -> {
+            if(contextMenu.isShowing()) {
+                contextMenu.hide();
+            } else {
+                contextMenu.show(vBox, e.getScreenX(), e.getScreenY());
+            }
+        });
+        Platform.runLater(() -> {
+            title.setText(movie.getTitle());
+            year.setText(movie.getPremiere().format(Main.DTF));
+            duration.setText(movie.getDurationFormatted());
+            description.setText(movie.getDescription());
+            contentImage.setImage(new Image(movie.getImagePath().toUri().toString()));
+        });
 
         FlowPane flowPane;
         List<Actor> actorList;
@@ -95,9 +111,9 @@ public class MovieDetail extends ContentDetail implements Initializable, MovieKi
         actorDetailController.setMainController(mainController);
         actorDetailController.vBox.getChildren().add(0, actorDetailController.getReturnButton());
 
-        int lastIndex = mainController.rightDetail.getChildren().size() - 1;
-        mainController.rightDetail.getChildren().get(lastIndex).setVisible(false);
-        mainController.rightDetail.getChildren().add(actorDetails);
+        int lastIndex = mainController.getRightDetail().getChildren().size() - 1;
+        mainController.getRightDetail().getChildren().get(lastIndex).setVisible(false);
+        mainController.getRightDetail().getChildren().add(actorDetails);
     }
 
 }

@@ -46,6 +46,8 @@ public final class Actor implements ContentType<Actor> {
     @Getter private boolean isWriter = false;
     private final List<Movie> wroteMovies = new ArrayList<>();
 
+    public static final Set<String> COUNTRIES = new HashSet<>();
+
 //    == static fields ==
     private static int classActorId = -1;
     boolean iAmFromConstructor;
@@ -136,6 +138,7 @@ public final class Actor implements ContentType<Actor> {
     public void setNationality(String nationality) {
         try {
             this.nationality = ContentType.checkForNullOrEmptyOrIllegalChar(nationality, Actor.NATIONALITY);
+            if(!nationality.equals("-")) COUNTRIES.add(nationality);
             saveMe();
         } catch (Config.ArgumentIssue ignored) { }
     }
@@ -157,11 +160,6 @@ public final class Actor implements ContentType<Actor> {
 
     public void setImagePath(Path imagePath) {
         this.imagePath = imagePath;
-        saveMe();
-    }
-
-    public void setImageUrl(URL imageUrl) {
-        this.imageUrl = imageUrl;
         saveMe();
     }
 

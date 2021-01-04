@@ -41,6 +41,8 @@ public final class Movie implements ContentType<Movie> {
     private final Set<String> genres = new HashSet<>();
     private final Set<String> production = new HashSet<>();
 
+    public static final Set<String> ALL_PRODUCTIONS = new HashSet<>();
+    public static final Set<String> ALL_GENRES = new HashSet<>();
     private static int classMovieId = -1;
     private boolean iAmFromConstructor;
 
@@ -249,6 +251,7 @@ public final class Movie implements ContentType<Movie> {
     public void addProduction(String production) {
         try{
             this.production.add(ContentType.checkForNullOrEmptyOrIllegalChar(production, Movie.PRODUCTION));
+            if(!production.equals("-")) ALL_PRODUCTIONS.add(production);
             saveMe();
         } catch(Config.ArgumentIssue ignored) {}
     }
@@ -261,6 +264,7 @@ public final class Movie implements ContentType<Movie> {
     public void addGenre(String genre) {
         try {
             genres.add(ContentType.checkForNullOrEmptyOrIllegalChar(genre, Movie.GENRES));
+            if(!genre.equals("-")) ALL_GENRES.add(genre);
             saveMe();
         } catch(Config.ArgumentIssue ignored) {}
     }

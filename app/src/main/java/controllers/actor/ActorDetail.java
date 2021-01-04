@@ -5,6 +5,7 @@ import MoviesAndActors.Movie;
 import app.Main;
 import controllers.ContentDetail;
 import controllers.movie.MovieDetail;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -58,7 +59,7 @@ public class ActorDetail extends ContentDetail implements Initializable, ActorKi
     @Override
     public void setActor(Actor actor) {
         this.actor = actor;
-        owner.setActor(actor);
+        if(owner != null) owner.setActor(actor);
         this.contextMenu = new ActorContextMenu(actor, resourceBundle, this).getContextMenu();
         vBox.setOnContextMenuRequested(e -> {
             if(contextMenu.isShowing()) {
@@ -67,16 +68,19 @@ public class ActorDetail extends ContentDetail implements Initializable, ActorKi
                 contextMenu.show(vBox, e.getScreenX(), e.getScreenY());
             }
         });
-        contentImage.setImage(new Image(actor.getImagePath().toUri().toString()));
-        name.setText(actor.getNameAndSurname());
-        if(actor.getDeathDay() == null) {
-            bornDate.setText(actor.getBirthday().format(Main.DTF) + ", " + actor.getAge() + resourceBundle.getString("detail.age"));
-            vBox.getChildren().remove(died);
-        } else {
-            bornDate.setText(actor.getBirthday().format(Main.DTF) + " - " + actor.getDeathDay().format(Main.DTF));
-            died.setText(resourceBundle.getString("detail.died") + actor.getAge());
-        }
-        country.setText(actor.getNationality());
+        Platform.runLater(() -> {
+            contentImage.setImage(new Image(actor.getImagePath().toUri().toString()));
+            name.setText(actor.getNameAndSurname());
+            if(actor.getDeathDay() == null) {
+                bornDate.setText(actor.getBirthday().format(Main.DTF) + ", " + actor.getAge() + resourceBundle.getString("detail.age"));
+                vBox.getChildren().remove(died);
+            } else {
+                bornDate.setText(actor.getBirthday().format(Main.DTF) + " - " + actor.getDeathDay().format(Main.DTF));
+                died.setText(resourceBundle.getString("detail.died") + actor.getAge());
+            }
+            country.setText(actor.getNationality());
+        });
+
 
         FlowPane flowPane;
         List<Movie> movieList;
@@ -126,9 +130,9 @@ public class ActorDetail extends ContentDetail implements Initializable, ActorKi
         movieDetailController.setMainController(mainController);
         movieDetailController.vBox.getChildren().add(0, movieDetailController.getReturnButton());
 
-        int lastIndex = mainController.rightDetail.getChildren().size() - 1;
-        mainController.rightDetail.getChildren().get(lastIndex).setVisible(false);
-        mainController.rightDetail.getChildren().add(movieDetails);
+        int lastIndex = mainController.getRightDetail().getChildren().size() - 1;
+        mainController.getRightDetail().getChildren().get(lastIndex).setVisible(false);
+        mainController.getRightDetail().getChildren().add(movieDetails);
     }
 
 }
