@@ -518,7 +518,6 @@ public final class Movie implements ContentType<Movie> {
                 '}';
     }
 
-
     public void printPretty() {
         System.out.println("Title      : " + title);
         System.out.println("TitleOrg   : " + titleOrg);
@@ -541,7 +540,6 @@ public final class Movie implements ContentType<Movie> {
         if(movie == null) {
             throw new IllegalArgumentException("Cannot compare to null!");
         }
-//        return filmweb.toString().compareTo(movie.getFilmweb().toString());
         return title.toLowerCase().compareTo(movie.getTitle().toLowerCase());
     }
 
