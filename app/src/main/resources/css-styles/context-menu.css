@@ -37,3 +37,21 @@
     -fx-border-color: dark_blue;
     -fx-border-insets: 5;
 }
+
+.check-box {
+    -fx-text-fill: almost_white;
+}
+
+.check-box .box {
+    -fx-background-color: transparent;
+    -fx-border-color: my_blue;
+    -fx-border-radius:3px;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: my_blue;
+}
+
+.check-box:selected .box {
+    -fx-border-color: my_green;
+}
