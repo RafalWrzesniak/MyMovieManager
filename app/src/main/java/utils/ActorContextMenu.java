@@ -66,7 +66,7 @@ public final class ActorContextMenu {
         final MenuItem removeFromList = new MenuItem(resourceBundle.getString("context_menu.remove_from_list"));
         removeFromList.setOnAction(event -> {
             owner.getMainController().getActorListView().getSelectionModel().getSelectedItem().remove(actor);
-            owner.getMainController().populateFlowPaneContentList(owner.getMainController().getCurrentlyDisplayedList(), true);
+            owner.getMainController().displayPanesByPopulating();
             owner.getMainController().getActorListView().refresh();
         });
 
