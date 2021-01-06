@@ -11,9 +11,11 @@ public final class PaneNames {
     public static final String ACTOR_PANE = "actor-pane";
     public static final String ACTOR_EDIT = "actor-edit";
     public static final String ACTOR_DETAIL = "actor-detail";
+    public static final String ACTOR_FILTER = "actor-filter";
     public static final String MOVIE_PANE = "movie-pane";
     public static final String MOVIE_EDIT = "movie-edit";
     public static final String MOVIE_INFO = "movie-info";
+    public static final String MOVIE_FILTER = "movie-filter";
     public static final String MOVIE_DETAIL = "movie-detail";
     public static final String MAIN_VIEW = "main-view";
     public static final String SETTINGS = "settings";
