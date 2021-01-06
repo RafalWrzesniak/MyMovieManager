@@ -2,6 +2,7 @@ package utils;
 
 import Configuration.Config;
 import FileOperations.IO;
+import Internet.Connection;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
 import app.Main;
@@ -21,12 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.nio.file.*;
+import java.util.*;
 
 @Slf4j
 public final class MovieContextMenu {
@@ -35,7 +32,7 @@ public final class MovieContextMenu {
     private final ContextMenu contextMenu;
     private final ResourceBundle resourceBundle;
     private final MovieKind owner;
-    private final Movie movie;
+    private Movie movie;
 
     public MovieContextMenu(Movie movie, ResourceBundle resourceBundle, MovieKind owner) {
         if(movie == null || resourceBundle == null || owner == null) {
@@ -47,13 +44,16 @@ public final class MovieContextMenu {
         contextMenu = new ContextMenu();
 
         final MenuItem openItem = new MenuItem(resourceBundle.getString("context_menu.open"));
-
+        openItem.setOnAction(event -> owner.getMainController().openMovieInfo(movie, resourceBundle));
 
         final MenuItem markAsWatchedItem = new MenuItem(resourceBundle.getString("context_menu.mark_as_watched"));
         markAsWatchedItem.setOnAction(event -> markAsWatched());
 
         final MenuItem editItem = new MenuItem(resourceBundle.getString("context_menu.edit"));
         editItem.setOnAction(event -> editMovie());
+
+        final MenuItem reDownload = new MenuItem(resourceBundle.getString("context_menu.re_download"));
+        reDownload.setOnAction(event -> downloadAgain());
 
 
         final MenuItem changeCoverItem = new MenuItem(resourceBundle.getString("context_menu.change_cover"));
@@ -66,7 +66,7 @@ public final class MovieContextMenu {
         removeItem.setOnAction(event -> handleRemovingFromList());
 
 
-        contextMenu.getItems().addAll(openItem, editItem, changeCoverItem, addToListItem, removeItem);
+        contextMenu.getItems().addAll(openItem, editItem, reDownload, changeCoverItem, addToListItem, removeItem);
         contextMenu.setOnShowing(event -> {
             ContentList<Movie> selectedList = owner.getMainController().getMovieListView().getSelectionModel().getSelectedItem();
             if(selectedList.equals(MainController.moviesToWatch)) {
@@ -77,6 +77,36 @@ public final class MovieContextMenu {
             }
 
         });
+    }
+
+    private void downloadAgain() {
+        log.info("Downloading data again for \"{}\"", movie);
+        Thread download = new Thread(() -> {
+            Connection connection;
+            Movie downloadedMovie;
+            try {
+                connection = new Connection(movie.getFilmweb());
+                Map<String, List<String>> map = connection.grabMovieDataFromFilmweb();
+                map.put(Movie.ID, Collections.singletonList(String.valueOf(movie.getId())));
+                downloadedMovie = new Movie(map);
+                connection.addCastToMovie(downloadedMovie, MainController.allActors);
+
+                if(downloadedMovie.getImagePath() == null || downloadedMovie.getImagePath().equals(Configuration.Files.NO_MOVIE_COVER))  {
+                    Path downloadedImagePath = Paths.get(IO.createContentDirectory(downloadedMovie).toString(), downloadedMovie.getReprName().concat(".jpg"));
+                    if (Connection.downloadImage(downloadedMovie.getImageUrl(), downloadedImagePath)) {
+                        downloadedMovie.setImagePath(downloadedImagePath);
+                    }
+                }
+                movie = downloadedMovie;
+                owner.setMovie(movie);
+                owner.getMainController().getActorListView().refresh();
+                if(owner instanceof MoviePane) Platform.runLater(((MoviePane) owner)::selectItem);
+                if(owner instanceof MovieDetail && ((MovieDetail) owner).getOwner() != null) Platform.runLater(((MovieDetail) owner).getOwner()::selectItem);
+            } catch (IOException e) {
+                log.warn("Invalid URL - no such movie \"{}\"", movie);
+            }
+        });
+        download.start();
     }
 
     private void editMovie() {
@@ -130,7 +160,7 @@ public final class MovieContextMenu {
 
     private void handleRemovingFromList() {
         owner.getMainController().getMovieListView().getSelectionModel().getSelectedItem().remove(movie);
-        owner.getMainController().populateFlowPaneContentList(owner.getMainController().currentlyDisplayedList, true);
+        owner.getMainController().displayPanesByPopulating();
         owner.getMainController().getMovieListView().refresh();
         if(owner.getMainController().getMovieListView().getSelectionModel().getSelectedItem().equals(MainController.moviesToWatch)) {
             final File[] movieFile = new File[1];
