@@ -160,7 +160,7 @@ public final class MovieContextMenu {
 
     private void handleRemovingFromList() {
         owner.getMainController().getMovieListView().getSelectionModel().getSelectedItem().remove(movie);
-        owner.getMainController().displayPanesByPopulating();
+        owner.getMainController().displayPanesByPopulating(true);
         owner.getMainController().getMovieListView().refresh();
         if(owner.getMainController().getMovieListView().getSelectionModel().getSelectedItem().equals(MainController.moviesToWatch)) {
             final File[] movieFile = new File[1];
