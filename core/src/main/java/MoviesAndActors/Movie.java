@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @EqualsAndHashCode(of = "filmweb")
-public final class Movie implements ContentType<Movie> {
+public final class Movie implements ContentType, Comparable<Movie> {
 
 //   == fields ==
     @Getter private int id;

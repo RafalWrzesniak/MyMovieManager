@@ -137,7 +137,7 @@ public final class IO {
      * Empty {@link File} (directory). {@link Config#getSAVE_PATH_ACTOR()} ()} or {@link Config#getSAVE_PATH_MOVIE()} ()}
      * and then \\actor or \\movie and in the end content id. For example: C:\ProjectPath\savedData\actor42
      */
-    public static <E extends ContentType<E>> File createContentDirectory(E content) {
+    public static <E extends ContentType> File createContentDirectory(E content) {
         File outDir;
         if (content instanceof Actor) {
             outDir = new File(Config.getSAVE_PATH_ACTOR() + "\\actor" + content.getId());

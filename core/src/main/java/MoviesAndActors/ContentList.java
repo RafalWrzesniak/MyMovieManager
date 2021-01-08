@@ -8,12 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
-public class ContentList<T extends ContentType<T>> {
+public class ContentList<T extends ContentType> {
 
 //    == constants ==
     public static final String ALL_ACTORS_DEFAULT = "allActors";
@@ -36,7 +34,7 @@ public class ContentList<T extends ContentType<T>> {
 
 
 //    == static methods ==
-    public static <E extends ContentType<E>> ContentList<E> getContentListFromListByName(List<ContentList<E>> contentLists, String listName) {
+    public static <E extends ContentType> ContentList<E> getContentListFromListByName(List<ContentList<E>> contentLists, String listName) {
         if(contentLists == null) return null;
         ContentList<E> desiredContentList = null;
         for(ContentList<E> contentList : contentLists) {
@@ -197,22 +195,6 @@ public class ContentList<T extends ContentType<T>> {
     }
 
 
-    public void sort(Comparator<T> comparator) {
-        list.sort(comparator);
-    }
-
-    public void sort(Comparator<T> comparator, boolean reverseOrder) {
-        if(reverseOrder) {
-            list.sort(Collections.reverseOrder(comparator));
-        } else {
-            list.sort(comparator);
-        }
-
-    }
-
-    public void sort() {
-        Collections.sort(list);
-    }
 
     public T getObjByUrlIfExists(URL link) {
         for(T obj : list) {

@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @EqualsAndHashCode(of = "filmweb")
-public final class Actor implements ContentType<Actor> {
+public final class Actor implements ContentType, Comparable<Actor> {
 
 //    == fields ==
     @Getter private final int id;

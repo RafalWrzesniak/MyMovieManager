@@ -12,7 +12,7 @@ import java.util.List;
 public final class AutoSave extends Thread {
 
 //    == fields ==
-    public static final List<ContentType<?>> NEW_OBJECTS = new ArrayList<>();
+    public static final List<ContentType> NEW_OBJECTS = new ArrayList<>();
 
 
 //  == methods ==

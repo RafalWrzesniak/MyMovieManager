@@ -31,7 +31,7 @@ public final class XMLOperator {
 
 //    == public static methods ==
 
-    public static <E extends ContentType<E>> void saveContentToXML(E content) {
+    public static <E extends ContentType> void saveContentToXML(E content) {
         if(!AutoSave.NEW_OBJECTS.contains(content)) return;
         Document doc = createDoc();
         assert doc != null;
@@ -46,7 +46,7 @@ public final class XMLOperator {
         log.debug("Content \"{}\" properly saved in \"{}\"", content.toString(), targetFile);
     }
 
-    public static <E extends ContentType<E>> void createListFile(ContentList<E> list) {
+    public static <E extends ContentType> void createListFile(ContentList<E> list) {
         File savedFile;
         if(list == null || list.size() == 0) throw new IllegalArgumentException("List argument cannot be null or empty!");
         String type;
@@ -85,7 +85,7 @@ public final class XMLOperator {
         log.info("ContentList \"{}\" properly created and saved in \"{}\"", list, savedFile);
     }
 
-    public static <E extends ContentType<E>> void updateSavedContentListWith(ContentList<E> list, E content) {
+    public static <E extends ContentType> void updateSavedContentListWith(ContentList<E> list, E content) {
         File savedFile;
         if(list == null || list.size() == 0) return;
         if(list.get(0) instanceof Actor) savedFile = Paths.get(Config.getSAVE_PATH_ACTOR().toString(), list.getListName().concat(".xml")).toFile();
@@ -107,7 +107,7 @@ public final class XMLOperator {
         makeSimpleSave(doc, savedFile);
     }
 
-    public static <E extends ContentType<E>> void removeFromContentList(ContentList<E> list, int idToRemove) {
+    public static <E extends ContentType> void removeFromContentList(ContentList<E> list, int idToRemove) {
         File savedFile;
         if(list == null || list.size() == 0) return;
         String tagName;
@@ -137,7 +137,7 @@ public final class XMLOperator {
     }
 
 
-    public static <E extends ContentType<E>> void removeContentList(ContentList<E> list) {
+    public static <E extends ContentType> void removeContentList(ContentList<E> list) {
         File savedFile;
         if(list == null || list.size() == 0) return;
         if(list.get(0) instanceof Actor) savedFile = Paths.get(Config.getSAVE_PATH_ACTOR().toString(), list.getListName().concat(".xml")).toFile();
@@ -146,7 +146,7 @@ public final class XMLOperator {
         log.info("Attempt to remove list \"{}\" ends with status: \"{}\"", savedFile.getName(), savedFile.delete());
     }
 
-    public static <E extends ContentType<E>> void renameDisplayNameList(ContentList<E> list, String newName) {
+    public static <E extends ContentType> void renameDisplayNameList(ContentList<E> list, String newName) {
         File savedFile;
         if(list == null || list.size() == 0) return;
         if(list.get(0) instanceof Actor) savedFile = Paths.get(Config.getSAVE_PATH_ACTOR().toString(), list.getListName().concat(".xml")).toFile();
@@ -201,7 +201,7 @@ public final class XMLOperator {
 
 //    == package-private static methods ==
 
-    static <E extends ContentType<E>> void createXmlStructure(E content, Document doc) {
+    static <E extends ContentType> void createXmlStructure(E content, Document doc) {
         String tagName;
         if(content instanceof Actor) tagName = Actor.class.getSimpleName();
         else if(content instanceof Movie) tagName = Movie.class.getSimpleName();
