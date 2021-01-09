@@ -109,7 +109,7 @@ public class Main extends Application {
         return dialog;
     }
 
-    public static <T extends ContentType<T>> Dialog<ButtonType> createChangePhotoDialog(FXMLLoader loader, Window window, ResourceBundle resourceBundle, T content) {
+    public static <T extends ContentType> Dialog<ButtonType> createChangePhotoDialog(FXMLLoader loader, Window window, ResourceBundle resourceBundle, T content) {
         Dialog<ButtonType> dialog;
         try {
             dialog = Main.createDialog(loader, window);
@@ -166,7 +166,7 @@ public class Main extends Application {
         return dialog;
     }
 
-    public static <T extends ContentType<T>> void processChangePhotoResult(DialogController dialogController, T content) {
+    public static <T extends ContentType> void processChangePhotoResult(DialogController dialogController, T content) {
         Path downloadedImagePath;
         if(content instanceof Actor) {
             Actor actor = (Actor) content;

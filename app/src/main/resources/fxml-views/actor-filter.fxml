@@ -10,7 +10,7 @@
 <?import org.controlsfx.control.RangeSlider?>
 
 <?import javafx.scene.layout.VBox?>
-<HBox fx:id="filterHBox" alignment="CENTER" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.Filter">
+<HBox fx:id="filterHBox" alignment="CENTER" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SortFilter">
 
    <MenuButton mnemonicParsing="false" text="%main_view.filter.actor.country" >
       <items>

@@ -72,7 +72,7 @@ public class MovieEdit {
         }
         if(!setLength.getText().isEmpty() && !setLength.getText().equals(movie.getDurationShortFormatted())) {
             String len = setLength.getText();
-            int duration = Integer.parseInt(len.substring(0, len.indexOf(":")))*60 + Integer.parseInt(len.substring(len.indexOf(":")));
+            int duration = Integer.parseInt(len.substring(0, len.indexOf(":")))*60 + Integer.parseInt(len.substring(len.indexOf(":")+1));
             movie.setDuration(duration);
         }
         if(!setRate.getText().isEmpty() && !setRate.getText().equals(movie.getRate().toString())) {
@@ -94,7 +94,7 @@ public class MovieEdit {
                 movie.clearGenres();
                 for (String genre : genres) {
                     if(!movie.getGenres().contains(genre)) {
-                        movie.addGenre(genre);
+                        movie.addGenre(genre.replaceAll(" ", ""));
                     }
                 }
             }
@@ -106,7 +106,7 @@ public class MovieEdit {
                 movie.clearProduction();
                 for (String prod : prods) {
                     if(!movie.getProduction().contains(prod)) {
-                        movie.addProduction(prod);
+                        movie.addProduction(prod.replaceAll(" ", ""));
                     }
                 }
             }
