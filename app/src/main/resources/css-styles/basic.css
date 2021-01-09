@@ -51,8 +51,7 @@
 
 
 .range-slider .track {
-    -fx-control-inner-background: dark_blue2;
-    -fx-background-color: light_gray;
+    -fx-background-color: some_gray;
     -fx-text-fill: almost_white;
  }
 

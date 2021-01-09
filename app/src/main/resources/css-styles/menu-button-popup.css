@@ -1,11 +1,18 @@
 @import "basic.css";
 
 .context-menu {
-     -fx-background-color: dark_blue;
+     -fx-background-color: light_gray;
      -fx-background-insets: 0, 1, 2;
      -fx-background-radius: 0 6 6 6, 0 5 5 5, 0 4 4 4;
  }
 
 .menu-item:focused .label {
+    -fx-background-color: light_gray;
     -fx-text-fill: almost_white;
+}
+
+.context-menu .menu-item:focused {
+    -fx-text-inner-color: my_blue;
+    -fx-text-fill: my_blue;
+    -fx-background-color: light_gray;
 }
