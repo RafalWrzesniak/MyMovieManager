@@ -8,6 +8,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import lombok.Setter;
 
 import java.io.File;
 import java.net.URL;
@@ -18,10 +19,9 @@ public class Settings implements Initializable {
 
 //    == fields ==
     @FXML public TextField mainDir, watched, save;
-    public Dialog<ButtonType> dialog;
+    @Setter public Dialog<ButtonType> dialog;
+    @Setter private MainController mainController;
     private ResourceBundle resourceBundle;
-    private MainController mainController;
-
 
 //    == init ==
     @Override
@@ -30,27 +30,17 @@ public class Settings implements Initializable {
     }
 
 
-//  == methods ==
-    public void setMainController(MainController mainController) {
-        this.mainController = mainController;
-    }
-
-    public void setDialog(Dialog<ButtonType> dialog) {
-        this.dialog = dialog;
-    }
-
-
+//    == methods ==
     @FXML
-    public void chooseDirectory(MouseEvent mouseEvent) {
+    private void chooseDirectory(MouseEvent mouseEvent) {
         File chosenDir = mainController.chooseDirectoryDialog(resourceBundle.getString("settings.choose_file_prompt"));
         if(chosenDir != null) {
             ((TextField) mouseEvent.getSource()).setText(chosenDir.toString());
         }
     }
 
-
     @FXML
-    public void switchLanguage() {
+    private void switchLanguage() {
         if(resourceBundle.getLocale().getDisplayLanguage().equals(Main.localePl.getDisplayLanguage())) {
             Main.loadView(Main.localeEn, Main.primaryStage);
         } else if(resourceBundle.getLocale().getDisplayLanguage().equals(Main.localeEn.getDisplayLanguage())) {
