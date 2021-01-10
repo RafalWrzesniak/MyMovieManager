@@ -1,33 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.String?>
-<?import java.net.URL?>
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.Cursor?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ContextMenu?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToolBar?>
-<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.effect.GaussianBlur?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Circle?>
-
+<?import java.lang.String?>
+<?import java.net.*?>
 <BorderPane fx:id="main_view" prefHeight="750.0" prefWidth="1480.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
    <top>
       <GridPane>
@@ -306,9 +287,9 @@
        <StackPane fx:id="allCenter">
           <VBox>
             <HBox alignment="CENTER_LEFT">
-            <StackPane alignment="CENTER_LEFT">
-                  <TextField fx:id="searchField" alignment="CENTER_RIGHT" prefWidth="250.0" promptText="%main_view.search" />
-                  <Label fx:id="clearSearch" text="x" styleClass="cancelSearch">
+                <StackPane alignment="CENTER_LEFT">
+                  <TextField fx:id="searchField" alignment="CENTER_RIGHT" prefWidth="160.0" promptText="%main_view.search" />
+                  <Label fx:id="clearSearch" styleClass="cancelSearch" text="X">
                      <StackPane.margin>
                         <Insets left="5.0" />
                      </StackPane.margin>
@@ -319,30 +300,99 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </Label>
-            </StackPane>
+                </StackPane>
                 <ImageView fitHeight="30.0" pickOnBounds="true" preserveRatio="true">
                     <HBox.margin>
                         <Insets left="5.0" />
                     </HBox.margin>
                     <Image url="@../icons/search.png" />
                 </ImageView>
-                  <MenuButton fx:id="sort" mnemonicParsing="false" prefHeight="30.0" text="%main_view.sort.type">
+
+                <MenuButton fx:id="sort" mnemonicParsing="false" prefHeight="30.0" text="%main_view.sort.type">
+                    <graphic>
+                        <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                            <Image url="@../icons/sort.png" />
+                        </ImageView>
+                    </graphic>
+
                     <items>
-                        <MenuItem fx:id="movieAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" />
-                        <MenuItem fx:id="movieShortest" mnemonicParsing="false" text="%main_view.sort.shortest" />
-                        <MenuItem fx:id="movieLongest" mnemonicParsing="false" text="%main_view.sort.longest" />
-                        <MenuItem fx:id="movieNewest" mnemonicParsing="false" text="%main_view.sort.newest" />
-                        <MenuItem fx:id="movieOldest" mnemonicParsing="false" text="%main_view.sort.oldest" />
-                        <MenuItem fx:id="moviePopular" mnemonicParsing="false" text="%main_view.sort.popularity" />
-                        <MenuItem fx:id="movieRate" mnemonicParsing="false" text="%main_view.sort.rate" />
-                        <MenuItem fx:id="actorAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" />
-                        <MenuItem fx:id="actorYoungest" mnemonicParsing="false" text="%main_view.sort.youngest" />
-                        <MenuItem fx:id="actorOldest" mnemonicParsing="false" text="%main_view.sort.oldestActor" />
+                        <MenuItem fx:id="movieAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" >
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-alpha.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="movieShortest" mnemonicParsing="false" text="%main_view.sort.shortest" >
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-shortest.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="movieLongest" mnemonicParsing="false" text="%main_view.sort.longest" >
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-longest.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="movieNewest" mnemonicParsing="false" text="%main_view.sort.newest" >
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-newest.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="movieOldest" mnemonicParsing="false" text="%main_view.sort.oldest" >
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-oldest.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="moviePopular" mnemonicParsing="false" text="%main_view.sort.popularity" >
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-popularity.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="movieByRate" mnemonicParsing="false" text="%main_view.sort.rate" >
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-rate.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="actorAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" >
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-alpha.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="actorYoungest" mnemonicParsing="false" text="%main_view.sort.youngest" >
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-newest.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="actorOldest" mnemonicParsing="false" text="%main_view.sort.oldestActor" >
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-oldest.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
                     </items>
-                     <HBox.margin>
-                        <Insets left="15.0" />
-                     </HBox.margin>
-                  </MenuButton>
+                    <HBox.margin>
+                        <Insets left="20.0" />
+                    </HBox.margin>
+                </MenuButton>
+               <StackPane fx:id="filterPane" />
+
                <VBox.margin>
                   <Insets left="30.0" top="13.0" />
                </VBox.margin>
