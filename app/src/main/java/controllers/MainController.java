@@ -687,5 +687,130 @@ public class MainController implements Initializable {
     }
 
 
+    @SneakyThrows
+    private <T extends ContentType> void createSortAndFilter(ContentList<T> contentList) {
+        SortFilter<T> filter;
+        FXMLLoader filterLoader;
+        if(contentList.get(0) instanceof Actor) {
+            filterLoader = Main.createLoader(PaneNames.ACTOR_FILTER, resourceBundle);
+        } else if(contentList.get(0) instanceof Movie) {
+            filterLoader = Main.createLoader(PaneNames.MOVIE_FILTER, resourceBundle);
+        } else return;
+
+        filterLoader.load();
+        filter = filterLoader.getController();
+        filter.setMainController(this);
+        filter.setContentList(contentList);
+
+        sortAndFilter = filter;
+        filterPane.getChildren().clear();
+        filterPane.getChildren().add(filter.filterHBox);
+    }
+
+    public void openMovieInfo(Movie movie, ResourceBundle resourceBundle) {
+        FXMLLoader loader;
+        Parent parentPane;
+        loader = Main.createLoader(PaneNames.MOVIE_INFO, resourceBundle);
+        try {
+            parentPane = loader.load();
+        } catch (IOException e) {
+            log.warn("Couldn't load MovieInfo pane for \"{}\"", movie);
+            return;
+        }
+        MovieInfo movieInfo = loader.getController();
+        movieInfo.setMovie(movie);
+        movieInfo.setMainController(this);
+
+        allCenter.getChildren().forEach(child -> child.setVisible(false));
+        allCenter.getChildren().add(parentPane);
+        StackPane tempStackPane = new StackPane();
+        tempStackPane.getChildren().addAll(rightDetail.getChildren());
+        rightDetail.getChildren().clear();
+
+        movieInfo.returnButton.setOnAction(actionEvent -> {
+            removeMovieInfo();
+            rightDetail.getChildren().clear();
+            rightDetail.getChildren().addAll(tempStackPane.getChildren());
+        });
+    }
+
+    public Parent openActorPane(Actor actor) {
+        return openActorPane(actor, Main.createLoader(PaneNames.ACTOR_PANE, resourceBundle));
+    }
+
+    public Parent openActorPane(Actor actor, FXMLLoader loader) {
+        Parent parentPane;
+        try {
+            parentPane = loader.load();
+        } catch (IOException e) {
+            log.warn("Couldn't load actor pane for \"{}\"", actor);
+            return null;
+        }
+        ActorPane actorPaneController = loader.getController();
+        actorPaneController.setActor(actor);
+        actorPaneController.setMainController(this);
+        return parentPane;
+    }
+
+    public void openActorDetail(Actor actor, ActorPane owner, boolean withReturnButton) {
+        FXMLLoader loader = Main.createLoader(PaneNames.ACTOR_DETAIL, resourceBundle);
+        Parent actorDetails;
+        try {
+            actorDetails = loader.load();
+        } catch (IOException e) {
+            log.warn("Failed to load fxml view in ActorDetail");
+            return;
+        }
+        ActorDetail actorDetailController = loader.getController();
+        actorDetailController.setOwner(owner);
+        actorDetailController.setActor(actor);
+        actorDetailController.setMainController(this);
+        if(withReturnButton) {
+            actorDetailController.vBox.getChildren().add(0, actorDetailController.getReturnButton());
+            int lastIndex = rightDetail.getChildren().size() - 1;
+            rightDetail.getChildren().get(lastIndex).setVisible(false);
+        } else {
+            rightDetail.getChildren().clear();
+        }
+        rightDetail.getChildren().add(actorDetails);
+    }
+
+    public void openMovieDetail(Movie movie, MoviePane owner, boolean withReturnButton) {
+        FXMLLoader loader = Main.createLoader(PaneNames.MOVIE_DETAIL, resourceBundle);
+        Parent movieDetails;
+        try {
+            movieDetails = loader.load();
+        } catch (IOException e) {
+            log.warn("Failed to load fxml view in MovieDetail");
+            return;
+        }
+        MovieDetail movieDetailController = loader.getController();
+        movieDetailController.setOwner(owner);
+        movieDetailController.setMovie(movie);
+        movieDetailController.setMainController(this);
+        if(withReturnButton) {
+            int lastIndex = rightDetail.getChildren().size() - 1;
+            rightDetail.getChildren().get(lastIndex).setVisible(false);
+        } else {
+            rightDetail.getChildren().clear();
+        }
+        rightDetail.getChildren().add(movieDetails);
+    }
+
+
+
+    private void removeMovieInfo() {
+        ObservableList<Node> children = allCenter.getChildren();
+        int i = 0;
+        while (i < children.size()) {
+            Node child = children.get(i);
+            child.setVisible(true);
+            if (child.getId() != null && child.getId().equals(MovieInfo.ID)) {
+                allCenter.getChildren().remove(child);
+            }
+            i++;
+        }
+    }
+
 }
 

@@ -4,12 +4,9 @@ import MoviesAndActors.Actor;
 import MoviesAndActors.Movie;
 import app.Main;
 import controllers.ContentDetail;
-import controllers.actor.ActorDetail;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.FlowPane;
@@ -17,7 +14,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import utils.MovieContextMenu;
-import utils.PaneNames;
 
 import java.awt.*;
 import java.io.IOException;
@@ -84,7 +80,7 @@ public class MovieDetail extends ContentDetail implements Initializable, MovieKi
             Collections.sort(actorList);
             for(Actor actor : actorList) {
                 Label actorLabel = textLabel(actor.getNameAndSurname());
-                actorLabel.setOnMouseClicked(event -> openActorDetail(actor));
+                actorLabel.setOnMouseClicked(event -> mainController.openActorDetail(actor, null, true));
                 flowPane.getChildren().add(actorLabel);
             }
         }
@@ -92,28 +88,9 @@ public class MovieDetail extends ContentDetail implements Initializable, MovieKi
         actorList = movie.getCast().subList(0, 4);
         for(Actor actor : actorList) {
             Label actorLabel = textLabel(actor.getNameAndSurname());
-            actorLabel.setOnMouseClicked(event -> openActorDetail(actor));
+            actorLabel.setOnMouseClicked(event -> mainController.openActorDetail(actor, null, true));
             flowPane.getChildren().add(actorLabel);
         }
-    }
-
-    private void openActorDetail(Actor actor) {
-        FXMLLoader loader = Main.createLoader(PaneNames.ACTOR_DETAIL, resourceBundle);
-        Parent actorDetails;
-        try {
-            actorDetails = loader.load();
-        } catch (IOException e) {
-            log.warn("Failed to load fxml view in ActorDetail");
-            return;
-        }
-        ActorDetail actorDetailController = loader.getController();
-        actorDetailController.setActor(actor);
-        actorDetailController.setMainController(mainController);
-        actorDetailController.vBox.getChildren().add(0, actorDetailController.getReturnButton());
-
-        int lastIndex = mainController.getRightDetail().getChildren().size() - 1;
-        mainController.getRightDetail().getChildren().get(lastIndex).setVisible(false);
-        mainController.getRightDetail().getChildren().add(actorDetails);
     }
 
 }

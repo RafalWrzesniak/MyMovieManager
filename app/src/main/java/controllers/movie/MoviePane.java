@@ -2,21 +2,16 @@ package controllers.movie;
 
 import Configuration.Files;
 import MoviesAndActors.Movie;
-import app.Main;
 import controllers.ContentPane;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import lombok.extern.slf4j.Slf4j;
 import utils.MovieContextMenu;
-import utils.PaneNames;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -65,20 +60,7 @@ public class MoviePane extends ContentPane implements Initializable, MovieKind {
     @Override
     public void selectItem() {
         super.selectItem();
-        FXMLLoader loader = Main.createLoader(PaneNames.MOVIE_DETAIL, resourceBundle);
-        Parent movieDetails;
-        try {
-            movieDetails = loader.load();
-        } catch (IOException e) {
-            log.warn("Failed to load fxml view in MovieDetail");
-            return;
-        }
-        MovieDetail movieDetailController = loader.getController();
-        movieDetailController.setOwner(this);
-        movieDetailController.setMovie(movie);
-        movieDetailController.setMainController(mainController);
-        mainController.getRightDetail().getChildren().clear();
-        mainController.getRightDetail().getChildren().add(movieDetails);
+        mainController.openMovieDetail(movie, this, false);
     }
 
 

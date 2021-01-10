@@ -4,12 +4,9 @@ import MoviesAndActors.Actor;
 import MoviesAndActors.Movie;
 import app.Main;
 import controllers.ContentDetail;
-import controllers.movie.MovieDetail;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.FlowPane;
@@ -17,7 +14,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import utils.ActorContextMenu;
-import utils.PaneNames;
 
 import java.awt.*;
 import java.io.IOException;
@@ -31,7 +27,7 @@ import java.util.ResourceBundle;
 public class ActorDetail extends ContentDetail implements Initializable, ActorKind {
 
 //    == fields ==
-    @FXML public Label name, bornDate, died, country;
+    @FXML private Label name, bornDate, died, country;
     private Actor actor;
     private ResourceBundle resourceBundle;
     @Getter @Setter private ActorPane owner;
@@ -90,7 +86,7 @@ public class ActorDetail extends ContentDetail implements Initializable, ActorKi
             Collections.sort(movieList);
             for(Movie movie : movieList) {
                 Label movieLabel = textLabel(movie.getTitle());
-                movieLabel.setOnMouseClicked(event -> openMovieDetail(movie));
+                movieLabel.setOnMouseClicked(event -> mainController.openMovieDetail(movie, null, true));
                 flowPane.getChildren().add(movieLabel);
             }
         }
@@ -100,7 +96,7 @@ public class ActorDetail extends ContentDetail implements Initializable, ActorKi
             Collections.sort(movieList);
             for(Movie movie : movieList) {
                 Label movieLabel = textLabel(movie.getTitle());
-                movieLabel.setOnMouseClicked(event -> openMovieDetail(movie));
+                movieLabel.setOnMouseClicked(event -> mainController.openMovieDetail(movie, null, true));
                 flowPane.getChildren().add(movieLabel);
             }
         }
@@ -110,29 +106,10 @@ public class ActorDetail extends ContentDetail implements Initializable, ActorKi
             Collections.sort(movieList);
             for(Movie movie : movieList) {
                 Label movieLabel = textLabel(movie.getTitle());
-                movieLabel.setOnMouseClicked(event -> openMovieDetail(movie));
+                movieLabel.setOnMouseClicked(event -> mainController.openMovieDetail(movie, null, true));
                 flowPane.getChildren().add(movieLabel);
             }
         }
-    }
-
-    private void openMovieDetail(Movie movie) {
-        FXMLLoader loader = Main.createLoader(PaneNames.MOVIE_DETAIL, resourceBundle);
-        Parent movieDetails;
-        try {
-            movieDetails = loader.load();
-        } catch (IOException e) {
-            log.warn("Failed to load fxml view in MovieDetail");
-            return;
-        }
-        MovieDetail movieDetailController = loader.getController();
-        movieDetailController.setMovie(movie);
-        movieDetailController.setMainController(mainController);
-        movieDetailController.vBox.getChildren().add(0, movieDetailController.getReturnButton());
-
-        int lastIndex = mainController.getRightDetail().getChildren().size() - 1;
-        mainController.getRightDetail().getChildren().get(lastIndex).setVisible(false);
-        mainController.getRightDetail().getChildren().add(movieDetails);
     }
 
 }
