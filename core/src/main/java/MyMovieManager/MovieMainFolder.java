@@ -54,7 +54,7 @@ public class MovieMainFolder extends Thread {
 //    == methods ==
     @Override
     public void run() {
-        setName("MovieMainFolder");
+        setName("MovieMain");
         if(allMovies == null || allActors == null || moviesToWatch == null) {
             log.warn("Passed arguments cannot be null, MainMovieFolder was not updated");
             return;

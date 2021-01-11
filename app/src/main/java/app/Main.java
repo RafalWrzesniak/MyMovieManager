@@ -55,6 +55,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        Thread.currentThread().setName("JavaFX");
         Main.primaryStage = primaryStage;
         primaryStage.setTitle("MyMovieManager");
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/favicon.ico")));
