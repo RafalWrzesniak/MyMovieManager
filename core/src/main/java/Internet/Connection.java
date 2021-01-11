@@ -150,12 +150,12 @@ public final class Connection {
 
         String fullName = Objects.requireNonNull(
                 extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine))
-                .replaceAll(" [iIvVxX]+", "")
+                .replaceAll(" [iIvVxX]+$", "")
                 .replaceAll(" (Jr\\.)|(Sr\\.)", "");
         if(!fullName.contains(" ")) {
             fullName = Objects.requireNonNull(
                     extractItemFromFilmwebLine("additionalName", foundLine))
-                    .replaceAll(" [iIvVxX]+", "")
+                    .replaceAll(" [iIvVxX]+$", "")
                     .replaceAll(" (Jr\\.)|(Sr\\.)", "");
             if(!fullName.contains(" ")) return null;
         }
