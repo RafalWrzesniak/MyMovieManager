@@ -12,7 +12,10 @@ import MoviesAndActors.Movie;
 import MyMovieManager.DownloadAndProcessMovies;
 import MyMovieManager.MovieMainFolder;
 import app.Main;
+import controllers.actor.ActorDetail;
 import controllers.actor.ActorPane;
+import controllers.movie.MovieDetail;
+import controllers.movie.MovieInfo;
 import controllers.movie.MoviePane;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -22,16 +25,17 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -42,14 +46,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -66,57 +67,66 @@ public class MainController implements Initializable {
 
 //    == fields ==
     private ResourceBundle resourceBundle;
-    private Comparator<?> chosenSorter;
     private int lastTakenIndex;
+    private SortFilter<?> sortAndFilter;
 
-    @FXML private Button settings;
-    @FXML private MenuButton sort;
+
     @FXML private Label clearSearch;
+    @FXML public StackPane filterPane;
     @FXML private BorderPane main_view;
     @FXML private ScrollPane scrollPane;
     @FXML private TextField searchField;
     @FXML private FlowPane flowPaneContentList;
     @FXML private MenuItem importZip, importXml, exportZip, exportXml;
     @FXML private ContextMenu movieListViewContextMenu, actorListViewContextMenu;
-    @FXML private Button addContentMovies, addContentActors, addFolderWithMovies, addSingleMovie;
-    @FXML private MenuItem movieAlpha, movieShortest, movieLongest, movieNewest, movieOldest, movieRate, moviePopular,
-                           actorAlpha, actorYoungest, actorOldest;
+    @FXML private Button addContentMovies, addContentActors, addFolderWithMovies, addSingleMovie, settings;
+    @FXML private MenuItem movieShortest, movieLongest, movieNewest, movieOldest, movieByRate, moviePopular,
+            actorYoungest, actorOldest;
+    @FXML @Getter private MenuItem movieAlpha, actorAlpha;
 
+
+    @Getter @FXML private MenuButton sort;
+    @FXML @Getter private StackPane allCenter;
     @FXML @Getter private StackPane rightDetail;
     @FXML @Getter private ListView<ContentList<Movie>> movieListView;
     @FXML @Getter private ListView<ContentList<Actor>> actorListView;
-    @Getter private ContentList<? extends ContentType<?>> currentlyDisplayedList;
+    @Getter private Map<String, Comparator<Movie>> sortMovieMap;
+    @Getter private Map<String, Comparator<Actor>> sortActorMap;
+
 
 
 //    == init ==
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.resourceBundle = resources;
+        sortActorMap = Map.of(
+                actorAlpha.getId(), Actor.COMP_ALPHA,
+                actorYoungest.getId(), Actor.COMP_AGE,
+                actorOldest.getId(), Actor.COMP_AGE.reversed());
+        sortMovieMap = Map.of(
+                movieOldest.getId(), Movie.COMP_PREMIERE,
+                movieShortest.getId(), Movie.COMP_DURATION,
+                movieAlpha.getId(), Movie.COMP_ALPHABETICAL,
+                movieByRate.getId(), Movie.COMP_RATE.reversed(),
+                movieNewest.getId(), Movie.COMP_PREMIERE.reversed(),
+                movieLongest.getId(), Movie.COMP_DURATION.reversed(),
+                moviePopular.getId(), Movie.COMP_POPULARITY.reversed());
+
 
         AutoSave.NEW_OBJECTS.clear();
         Main.autoSave = new AutoSave();
         Main.autoSave.start();
-        if(observableContentMovies.isEmpty()) {
+        if (observableContentMovies.isEmpty()) {
             // load all data
             XMLOperator.ReadAllDataFromFiles readData = initReadData();
             initReadMainFolder();
             // add read data to observable lists
             addReadDataToObservableList(readData);
         }
-
         System.out.println(allMovies);
         System.out.println(allActors);
         System.out.println(moviesToWatch);
 
-        // control speed of scroll pane
-        scrollPane.getContent().setOnScroll(scrollEvent -> {
-            final double SPEED = 0.005;
-            double deltaY = scrollEvent.getDeltaY() * SPEED;
-            scrollPane.setVvalue(scrollPane.getVvalue() - deltaY);
-        });
-
-        // flow pane click listener
-        flowPaneContentList.addEventFilter(MouseEvent.MOUSE_CLICKED, this::handleClickingOnMovies);
 
         // Left menu list view
         // set items
@@ -193,7 +203,7 @@ public class MainController implements Initializable {
             } catch (InterruptedException e) {
                 log.warn("Unexpected interrupted exception while downloading new movies \"{}\"", e.getMessage());
             }
-            Platform.runLater(() -> populateFlowPaneContentList(moviesToWatch, true));
+            Platform.runLater(() -> selectItemListener(actorListView));
         }).start();
     }
 
@@ -276,7 +286,7 @@ public class MainController implements Initializable {
                 initReadMainFolder();
                 addReadDataToObservableList(readData);
                 movieListView.getSelectionModel().select(moviesToWatch);
-                populateFlowPaneContentList(moviesToWatch, true);
+                selectItemListener(actorListView);
             } else if(callingItem.equals(importXml)) {
                 ExportImport.ImportDataFromXml importDataFromXml = new ExportImport.ImportDataFromXml(chosenFile);
                 importDataFromXml.start();
@@ -439,6 +449,8 @@ public class MainController implements Initializable {
             XMLOperator.removeContentList(getSelectedList());
             observableContentMovies.remove(getSelectedList());
             observableContentActors.remove(getSelectedList());
+            selectItemListener(actorListView);
+            displayPanesByPopulating(true);
         }
     }
 
@@ -452,6 +464,11 @@ public class MainController implements Initializable {
         readData.join();
         allActors = readData.getAllActors();
         allMovies = readData.getAllMovies();
+        readData.getAllMoviesLists().forEach(list -> {
+            if(list.getListName().equals(ContentList.RECENTLY_WATCHED)) {
+                recentlyWatched = list;
+            }
+        });
         return readData;
     }
 
@@ -475,8 +492,7 @@ public class MainController implements Initializable {
         observableContentActors.addAll(FXCollections.observableArrayList(readData.getAllActorsLists()));
     }
 
-    private <T extends ContentType<T>> void populateFlowPaneContentList(ContentList<T> contentList) {
-        if(contentList == null) return;
+
 
         flowPaneContentList.getChildren().clear();
         for(int i =0; i < contentList.size(); i++) {
@@ -620,7 +636,8 @@ public class MainController implements Initializable {
     private void selectItemListener(ListView<?> listViewToDeselect) {
         if (getSelectedList() != null) {
             listViewToDeselect.getSelectionModel().clearSelection();
-            populateFlowPaneContentList(getSelectedList(), true);
+            searchField.setText("");
+            createSortAndFilter(getSelectedList());
         }
     }
 
@@ -700,9 +717,9 @@ public class MainController implements Initializable {
         filterLoader.load();
         filter = filterLoader.getController();
         filter.setMainController(this);
+        sortAndFilter = filter;
         filter.setContentList(contentList);
 
-        sortAndFilter = filter;
         filterPane.getChildren().clear();
         filterPane.getChildren().add(filter.filterHBox);
     }
