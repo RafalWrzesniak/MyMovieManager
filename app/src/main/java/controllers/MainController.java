@@ -148,6 +148,9 @@ public class MainController implements Initializable {
 //        populateFlowPaneContentList(moviesToWatch);
     }
 
+        // sorting
+        sort.showingProperty().addListener(SortFilter.borderButtonListener(sort));
+    }
 
 
 //    == fxml handling ==
