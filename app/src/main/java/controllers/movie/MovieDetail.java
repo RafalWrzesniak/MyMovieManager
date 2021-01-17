@@ -85,7 +85,7 @@ public class MovieDetail extends ContentDetail implements Initializable, MovieKi
             }
         }
         flowPane = createFlowPaneOf(resourceBundle.getString("detail.as_actor"));
-        actorList = movie.getCast().subList(0, 4);
+        actorList = movie.getCast().subList(0, Math.min(4, movie.getCast().size()));
         for(Actor actor : actorList) {
             Label actorLabel = textLabel(actor.getNameAndSurname());
             actorLabel.setOnMouseClicked(event -> mainController.openActorDetail(actor, null, true));
