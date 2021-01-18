@@ -91,7 +91,10 @@ public class MovieMainFolder extends Thread {
         }
 
         for(Map.Entry<File, Integer> entry : newStateMap.entrySet()) {
-            moviesToWatch.add(allMovies.getById(entry.getValue()));
+            if(moviesToWatch.getById(entry.getValue()) == null) {
+                moviesToWatch.add(allMovies.getById(entry.getValue()));
+            }
+
         }
         newStateMap.clear();
         log.info("\"{}\" has now \"{}\" movies", ContentList.MOVIES_TO_WATCH, moviesToWatch.size());
