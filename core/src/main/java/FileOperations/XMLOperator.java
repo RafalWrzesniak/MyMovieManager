@@ -311,7 +311,7 @@ public final class XMLOperator {
             ContentList<Movie> defaultAllMovies = createDefaultMovieContentList(allActorsContentLists);
             allMovieLists.add(defaultAllMovies);
             for(File file : Objects.requireNonNull(IO.listDirectory(Config.getSAVE_PATH_MOVIE().toFile()))) {
-                if(file.toString().endsWith(".xml") && !file.getName().matches(ContentList.ALL_MOVIES_DEFAULT.concat(".xml")) && !file.getName().matches(ContentList.MOVIES_TO_WATCH.concat(".xml"))) {
+                if(file.toString().endsWith(".xml") && !file.getName().matches(ContentList.ALL_MOVIES_DEFAULT.concat(".xml"))) {
                     allMovieLists.add(createMovieContentList(file, defaultAllMovies));
                     log.info("ContentList<Movie> \"{}\" successfully read from file \"{}\"", file.getName().replaceAll("\\.xml$", "") ,file);
                 }
