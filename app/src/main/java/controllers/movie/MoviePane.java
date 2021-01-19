@@ -3,11 +3,12 @@ package controllers.movie;
 import Configuration.Files;
 import MoviesAndActors.Movie;
 import controllers.ContentPane;
-import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import lombok.extern.slf4j.Slf4j;
 import utils.MovieContextMenu;
@@ -29,15 +30,15 @@ public class MoviePane extends ContentPane implements Initializable, MovieKind {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.resourceBundle = resourceBundle;
         contentPane = moviePane;
-        title.visibleProperty().bind(
-                Bindings.or(
-                        Bindings.not(iHaveImage),
-                        Bindings.or(
-                                blue_background.visibleProperty(),
-                                green_background.visibleProperty()
-                        )
-                )
-        );
+//        title.visibleProperty().bind(
+//                Bindings.or(
+//                        Bindings.not(iHaveImage),
+//                        Bindings.or(
+//                                blue_background.visibleProperty(),
+//                                green_background.visibleProperty()
+//                        )
+//                )
+//        );
     }
 
 //    == methods ==
@@ -63,5 +64,11 @@ public class MoviePane extends ContentPane implements Initializable, MovieKind {
         mainController.openMovieDetail(movie, this, false);
     }
 
-
+    @Override
+    public void selectItemClicked(MouseEvent mouseEvent) {
+        super.selectItemClicked(mouseEvent);
+        if(mouseEvent.getButton().equals(MouseButton.PRIMARY) && mouseEvent.getClickCount() >= 2) {
+            mainController.openMovieInfo(movie, resourceBundle);
+        }
+    }
 }
