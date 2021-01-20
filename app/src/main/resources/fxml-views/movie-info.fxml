@@ -91,12 +91,20 @@
                <Insets top="10.0" />
             </VBox.margin>
             <Label styleClass="blue_text" text="%movie.cast" />
-            <FlowPane fx:id="cast" />
+            <FlowPane fx:id="cast" prefWrapLength="0.0">
+               <padding>
+                  <Insets left="15.0" />
+               </padding>
+            </FlowPane>
          </VBox>
          <VBox>
             <Label fx:id="writersLabel" styleClass="blue_text" text="%movie.scenario" />
             <ScrollPane prefHeight="200" styleClass="background-color">
-               <HBox fx:id="writers" alignment="CENTER" />
+               <HBox fx:id="writers" alignment="CENTER">
+                  <padding>
+                     <Insets left="15.0" />
+                  </padding>
+               </HBox>
             </ScrollPane>
             <VBox.margin>
                <Insets top="10.0" />

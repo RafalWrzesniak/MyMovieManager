@@ -10,7 +10,7 @@
 <HBox fx:id="filterHBox" alignment="CENTER" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SortFilter" >
 
-   <MenuButton fx:id="genresMenu" mnemonicParsing="false" text="%movie.genre" >
+   <MenuButton fx:id="genresMenu" ellipsisString="" mnemonicParsing="false" text="%movie.genre" >
       <graphic>
          <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
             <Image url="@../icons/filter-genre.png" />
@@ -28,20 +28,20 @@
       </HBox.margin>
    </MenuButton>
 
-   <HBox spacing="10" alignment="BOTTOM_CENTER">
-      <Label fx:id="moviePremiereLow" style="-fx-font-size: 14;" styleClass="white_text" prefWidth="40" alignment="CENTER_RIGHT"/>
+   <HBox spacing="10" alignment="BOTTOM_CENTER" minWidth="230">
+      <Label fx:id="moviePremiereLow" style="-fx-font-size: 14;" ellipsisString="" styleClass="white_text" prefWidth="40" alignment="CENTER_RIGHT"/>
       <VBox alignment="TOP_CENTER" prefHeight="40.0">
-         <Label style="-fx-font-size: 14;" styleClass="white_text" text="%movie.premiere">
+         <Label style="-fx-font-size: 14;" styleClass="white_text" ellipsisString="" text="%movie.premiere">
             <VBox.margin>
                <Insets bottom="10" />
             </VBox.margin>
          </Label>
          <RangeSlider fx:id="moviePremiere" prefWidth="130" min="1950" max="2020" styleClass="slider" showTickLabels="false"/>
       </VBox>
-      <Label fx:id="moviePremiereHigh" style="-fx-font-size: 14;" styleClass="white_text" />
+      <Label fx:id="moviePremiereHigh" ellipsisString="" style="-fx-font-size: 14;" styleClass="white_text" />
    </HBox>
 
-   <MenuButton fx:id="filtersMenu" mnemonicParsing="false" text="%main_view.filter.more_filters" >
+   <MenuButton fx:id="filtersMenu" ellipsisString="" mnemonicParsing="false" text="%main_view.filter.more_filters" >
       <graphic>
          <ImageView fitHeight="23.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
             <Image url="@../icons/filter.png" />
