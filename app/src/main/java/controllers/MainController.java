@@ -11,6 +11,7 @@ import MoviesAndActors.ContentType;
 import MoviesAndActors.Movie;
 import MyMovieManager.DownloadAndProcessMovies;
 import MyMovieManager.MovieMainFolder;
+import MyMovieManager.TaskManager;
 import app.Main;
 import controllers.actor.ActorDetail;
 import controllers.actor.ActorPane;
@@ -28,9 +29,16 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -42,6 +50,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import utils.PaneNames;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -50,6 +59,9 @@ import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -70,13 +82,13 @@ public class MainController implements Initializable {
     private int lastTakenIndex;
     private SortFilter<?> sortAndFilter;
 
-
-    @FXML private Label clearSearch;
-    @FXML public StackPane filterPane;
+    @FXML private HBox progressHBox;
+    @FXML private StackPane filterPane;
     @FXML private BorderPane main_view;
     @FXML private ScrollPane scrollPane;
     @FXML private TextField searchField;
     @FXML private FlowPane flowPaneContentList;
+    @FXML private Label clearSearch, progressLabel;
     @FXML private MenuItem importZip, importXml, exportZip, exportXml;
     @FXML private ContextMenu movieListViewContextMenu, actorListViewContextMenu;
     @FXML private Button addContentMovies, addContentActors, addFolderWithMovies, addSingleMovie, settings;
@@ -831,6 +843,30 @@ public class MainController implements Initializable {
             i++;
         }
     }
+
+
+    public void runTaskProgressBarChecking() {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        TaskManager taskManager = TaskManager.getInstance();
+
+        Platform.runLater(() -> executor.scheduleAtFixedRate(() -> {
+            int initTaskNumber = taskManager.getTasksNumber();
+            if(initTaskNumber > 0) {
+                Platform.runLater(() -> {
+                    progressHBox.setVisible(true);
+                    progressLabel.setText(MessageFormat.format(resourceBundle.getString("main_view.task"), initTaskNumber, taskManager.getCurrentTask()));
+                });
+            } else if(progressHBox.isVisible()) {
+                Platform.runLater(() -> progressHBox.setVisible(false));
+            }
+        }, 0, 500, TimeUnit.MILLISECONDS));
+
+        Platform.runLater(() -> main_view.getScene().getWindow().setOnHiding(windowEvent -> executor.shutdown()));
+
+    }
+
+
+
 
 }
 

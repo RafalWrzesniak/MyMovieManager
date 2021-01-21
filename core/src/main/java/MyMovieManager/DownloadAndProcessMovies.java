@@ -27,6 +27,7 @@ public final class DownloadAndProcessMovies extends Thread {
 //    == fields ==
     @Getter private List<Movie> downloadedMovies;
     @Getter private Map<File, Integer> movieFileMap;
+    private static final TaskManager taskManager = TaskManager.getInstance();
 
 //    == required fields ==
     private final List<File> movieFileList;
@@ -36,12 +37,13 @@ public final class DownloadAndProcessMovies extends Thread {
 //    == methods ==
     @Override
     public void run() {
-        setName("DownloadAndProcess");
+        setName("DAP");
         log.info("Thread \"{}\" started", getName());
         movieFileMap = new HashMap<>();
         downloadedMovies = new ArrayList<>();
         List<Thread> threads = new ArrayList<>();
         int numberOfThreads = movieFileList.size() > 20 ? 5 : 3;
+        taskManager.addTask(movieFileList);
         for(int i = 0; i < numberOfThreads; i++) {
             Thread downloadAndProcess = new Thread(() -> {
                 while (movieFileList.size() != 0) {
@@ -78,10 +80,11 @@ public final class DownloadAndProcessMovies extends Thread {
     }
 
 
-    public static Movie handleMovieFromUrl(URL movieUrl, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
+    public static void handleMovieFromUrl(URL movieUrl, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
+        taskManager.addTask(movieUrl);
         long startTime = System.nanoTime();
         Connection connection;
-        Movie movie = null;
+        Movie movie;
         try {
             connection = new Connection(movieUrl);
             movie = connection.createMovieFromFilmwebLink();
@@ -105,10 +108,11 @@ public final class DownloadAndProcessMovies extends Thread {
         } catch (IOException | NullPointerException e) {
             log.warn("Unexpected error while downloading from \"{}\" - \"{}\"", movieUrl, e.getMessage());
         }
-        return movie;
+        taskManager.removeTask(movieUrl);
     }
 
     public static Movie handleMovieFromFile(File movieFile, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
+        taskManager.addTask(movieFile);
         long startTime = System.nanoTime();
         Connection connection;
         Movie movie = null;
@@ -142,6 +146,7 @@ public final class DownloadAndProcessMovies extends Thread {
         } catch (IOException | NullPointerException e) {
             log.warn("Unexpected error while downloading \"{}\" - \"{}\"", movieFile.getName(), e);
         }
+        taskManager.removeTask(movieFile);
         return movie;
     }
 
