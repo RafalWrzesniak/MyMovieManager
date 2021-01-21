@@ -15,7 +15,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -76,7 +75,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
         setNationality(actorMap.get(NATIONALITY));
         try { this.imagePath = Paths.get(actorMap.get(IMAGE_PATH)); } catch (NullPointerException ignored) { }
         try { this.imageUrl = new URL(actorMap.get(IMAGE_URL)); } catch (MalformedURLException | NullPointerException ignored) { }
-        this.birthday = convertBdStringToLocalDate(actorMap.get(Actor.BIRTHDAY));
+        this.birthday = ContentType.convertStrToLocalDate(actorMap.get(Actor.BIRTHDAY));
         if(actorMap.get(Actor.DEATH_DAY) != null) {
             setDeathDay(LocalDate.parse(actorMap.get(Actor.DEATH_DAY)));
         }
@@ -91,7 +90,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
             this.id = id;
         }
         iAmFromConstructor = false;
-        log.info("New actor created: {}", this.toString());
+        log.debug("New actor created: {}", this.toString());
     }
 
 
@@ -209,18 +208,6 @@ public final class Actor implements ContentType, Comparable<Actor> {
             }
         }
         if(classActorId == -1) classActorId = 0;
-    }
-
-    private static LocalDate convertBdStringToLocalDate(String string) {
-        if(string == null || string.isEmpty()) {
-            throw new IllegalArgumentException("Birthday argument cannot be null or empty!");
-        } else if(string.equals("-")) return null;
-        if(string.matches("^\\d{4}$")) {
-            return LocalDate.of(Integer.parseInt(string), 1, 1);
-        } else if(string.matches("^\\d{4}-\\d{2}$")) {
-            return LocalDate.of(Integer.parseInt(string.substring(0, 4)), Integer.parseInt(string.substring(5)), 1);
-        }
-        return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
     }
 
 

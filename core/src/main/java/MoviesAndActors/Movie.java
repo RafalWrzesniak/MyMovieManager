@@ -13,7 +13,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -69,7 +68,7 @@ public final class Movie implements ContentType, Comparable<Movie> {
         addDirectors(allActors.convertStrIdsToObjects(movieMap.get(Movie.DIRECTORS)));
         addWriters(allActors.convertStrIdsToObjects(movieMap.get(Movie.WRITERS)));
         iAmFromConstructor = false;
-        log.info("New movie \"{}\" created", this.toString());
+        log.debug("New movie \"{}\" created", this.toString());
     }
 
     // constructor to use when creating instance from WEB
@@ -104,15 +103,6 @@ public final class Movie implements ContentType, Comparable<Movie> {
         }
         if(classMovieId == -1) classMovieId = 0;
     }
-
-    private static LocalDate convertStrToLocalDate(String string) {
-        if(string == null || string.isEmpty()) {
-            throw new IllegalArgumentException("Argument cannot be null or empty!");
-        }
-        return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
-    }
-
-
 
 //    == setters ==
 
@@ -156,7 +146,7 @@ public final class Movie implements ContentType, Comparable<Movie> {
             setRate(Double.parseDouble(movieMap.get(Movie.RATE).get(0)));
         }
         // LocalDate
-        setPremiere(convertStrToLocalDate(movieMap.get(Movie.PREMIERE).get(0)));
+        setPremiere(ContentType.convertStrToLocalDate(movieMap.get(Movie.PREMIERE).get(0)));
         // Path
         if(movieMap.get(Movie.IMAGE_PATH).get(0) != null) {
             setImagePath(Paths.get(movieMap.get(Movie.IMAGE_PATH).get(0)));

@@ -4,6 +4,8 @@ import Configuration.Config;
 
 import java.net.URL;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,7 +18,8 @@ public interface ContentType  {
     String FILMWEB = "filmweb";
     String IMAGE_URL = "imageUrl";
 
-//    == methods ==
+
+    //    == methods ==
     Map<String, String> getAllFieldsAsStrings();
     boolean searchFor(String strToFind);
     String getReprName();
@@ -27,6 +30,18 @@ public interface ContentType  {
     int getId();
 
 //    == default methods ==
+    static LocalDate convertStrToLocalDate(String string) {
+        if(string == null || string.isEmpty()) {
+            throw new IllegalArgumentException("Birthday argument cannot be null or empty!");
+        } else if(string.equals("-")) return null;
+        if(string.matches("^\\d{4}$")) {
+            return LocalDate.of(Integer.parseInt(string), 1, 1);
+        } else if(string.matches("^\\d{4}-\\d{2}$")) {
+            return LocalDate.of(Integer.parseInt(string.substring(0, 4)), Integer.parseInt(string.substring(5)), 1);
+        }
+        return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
+    }
+
     static String checkForNullOrEmptyOrIllegalChar(String stringToCheck, String argName) throws Config.ArgumentIssue {
         if(stringToCheck == null) {
             throw new Config.ArgumentIssue(String.format("%s argument cannot be null!", argName));
