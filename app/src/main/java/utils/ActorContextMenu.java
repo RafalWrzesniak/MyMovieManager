@@ -28,15 +28,24 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Slf4j
-public final class ActorContextMenu {
+public class ActorContextMenu {
 
 //    == fields ==
-    @Getter private final ContextMenu contextMenu;
-    private final ResourceBundle resourceBundle;
-    private final ActorKind owner;
+    @Getter protected final ContextMenu contextMenu;
+    protected final ResourceBundle resourceBundle;
+    protected final ActorKind owner;
     private Actor actor;
 
 //    == constructor ==
+    protected ActorContextMenu(ResourceBundle resourceBundle, ActorKind owner) {
+        if(resourceBundle == null) {
+            throw new IllegalArgumentException("Args cannot be null!");
+        }
+        this.resourceBundle = resourceBundle;
+        this.owner = owner;
+        contextMenu = new ContextMenu();
+    }
+
     public ActorContextMenu(Actor actor, ResourceBundle resourceBundle, ActorKind owner) {
         if(actor == null || resourceBundle == null || owner == null) {
             throw new IllegalArgumentException("Args cannot be null!");
@@ -46,7 +55,7 @@ public final class ActorContextMenu {
         this.resourceBundle = resourceBundle;
         contextMenu = new ContextMenu();
         final MenuItem reDownload = new MenuItem(resourceBundle.getString("context_menu.re_download"));
-        reDownload.setOnAction(event -> reDownload());
+        reDownload.setOnAction(event -> reDownload(actor));
         final MenuItem editItem = new MenuItem(resourceBundle.getString("context_menu.edit"));
         editItem.setOnAction(event -> edit());
         final MenuItem changePhotoItem = new MenuItem(resourceBundle.getString("context_menu.change_photo"));
@@ -83,8 +92,9 @@ public final class ActorContextMenu {
 
 
     //    == methods ==
-    private void reDownload() {
+    protected void reDownload(Actor actorToDownload) {
         log.info("Downloading data again for \"{}\"", actor);
+        final Actor actor = actorToDownload;
         Thread download = new Thread(() -> {
             Connection connection;
             Actor downloadedActor;
@@ -101,17 +111,17 @@ public final class ActorContextMenu {
             actor.getAllMoviesActorPlayedIn().forEach(downloadedActor::addMovieActorPlayedIn);
             actor.getAllMoviesDirectedBy().forEach(downloadedActor::addMovieDirectedBy);
             actor.getAllMoviesWrittenBy().forEach(downloadedActor::addMovieWrittenBy);
-            actor = downloadedActor;
-            actor.saveMe();
+            this.actor = downloadedActor;
+            downloadedActor.saveMe();
 
-            if(actor.getImagePath() == null || actor.getImagePath().equals(Files.NO_ACTOR_IMAGE))  {
-                Path downloadedImagePath = Paths.get(IO.createContentDirectory(actor).toString(), actor.getReprName().concat(".jpg"));
-                if (Connection.downloadImage(actor.getImageUrl(), downloadedImagePath)) {
-                    actor.setImagePath(downloadedImagePath);
+            if(downloadedActor.getImagePath() == null || downloadedActor.getImagePath().equals(Files.NO_ACTOR_IMAGE))  {
+                Path downloadedImagePath = Paths.get(IO.createContentDirectory(downloadedActor).toString(), downloadedActor.getReprName().concat(".jpg"));
+                if (Connection.downloadImage(downloadedActor.getImageUrl(), downloadedImagePath)) {
+                    downloadedActor.setImagePath(downloadedImagePath);
                 }
             }
 
-            owner.setActor(actor);
+            owner.setActor(downloadedActor);
             if(owner instanceof ActorPane) Platform.runLater(((ActorPane) owner)::selectItem);
             if(owner instanceof ActorDetail && ((ActorDetail) owner).getOwner() != null) Platform.runLater(((ActorDetail) owner).getOwner()::selectItem);
         });

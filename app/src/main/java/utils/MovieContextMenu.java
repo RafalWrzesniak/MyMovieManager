@@ -26,13 +26,23 @@ import java.nio.file.*;
 import java.util.*;
 
 @Slf4j
-public final class MovieContextMenu {
+public class MovieContextMenu {
 
-    @Getter
-    private final ContextMenu contextMenu;
-    private final ResourceBundle resourceBundle;
-    private final MovieKind owner;
+//    == fields ==
+    @Getter protected final ContextMenu contextMenu;
+    protected final ResourceBundle resourceBundle;
+    protected final MovieKind owner;
     private Movie movie;
+
+//    == constructor ==
+    protected MovieContextMenu(ResourceBundle resourceBundle, MovieKind owner) {
+        if(resourceBundle == null) {
+            throw new IllegalArgumentException("Args cannot be null!");
+        }
+        this.resourceBundle = resourceBundle;
+        this.owner = owner;
+        contextMenu = new ContextMenu();
+    }
 
     public MovieContextMenu(Movie movie, ResourceBundle resourceBundle, MovieKind owner) {
         if(movie == null || resourceBundle == null || owner == null) {
@@ -47,23 +57,22 @@ public final class MovieContextMenu {
         openItem.setOnAction(event -> owner.getMainController().openMovieInfo(movie, resourceBundle));
 
         final MenuItem markAsWatchedItem = new MenuItem(resourceBundle.getString("context_menu.mark_as_watched"));
-        markAsWatchedItem.setOnAction(event -> markAsWatched());
+        markAsWatchedItem.setOnAction(event -> markAsWatched(movie));
 
         final MenuItem editItem = new MenuItem(resourceBundle.getString("context_menu.edit"));
         editItem.setOnAction(event -> editMovie());
 
         final MenuItem reDownload = new MenuItem(resourceBundle.getString("context_menu.re_download"));
-        reDownload.setOnAction(event -> downloadAgain());
+        reDownload.setOnAction(event -> downloadAgain(movie));
 
 
         final MenuItem changeCoverItem = new MenuItem(resourceBundle.getString("context_menu.change_cover"));
         changeCoverItem.setOnAction(event -> changeCover());
 
         final Menu addToListItem = new Menu(resourceBundle.getString("context_menu.add_to_list"));
-        MainController.observableContentMovies.forEach(list -> handleAddingToList(list, addToListItem));
 
         final MenuItem removeItem = new MenuItem(resourceBundle.getString("context_menu.remove_from_list"));
-        removeItem.setOnAction(event -> handleRemovingFromList());
+        removeItem.setOnAction(event -> handleRemovingFromList(movie));
 
 
         contextMenu.getItems().addAll(openItem, editItem, reDownload, changeCoverItem, addToListItem, removeItem);
@@ -75,19 +84,29 @@ public final class MovieContextMenu {
             if(selectedList.equals(MainController.allMovies)) {
                 removeItem.setDisable(true);
             }
-
+            for(ContentList<Movie> list : MainController.observableContentMovies) {
+                MenuItem listMenu = new MenuItem(list.getDisplayName());
+                if(list.get(movie) != null) {
+                    listMenu.setDisable(true);
+                }
+                listMenu.setOnAction(actionEvent -> handleAddingToList(movie, list));
+                addToListItem.getItems().add(listMenu);
+            }
         });
     }
 
-    private void downloadAgain() {
+//   == methods ==
+
+    protected void downloadAgain(Movie movie) {
         log.info("Downloading data again for \"{}\"", movie);
+        final Movie finalMovie = movie;
         Thread download = new Thread(() -> {
             Connection connection;
             Movie downloadedMovie;
             try {
-                connection = new Connection(movie.getFilmweb());
+                connection = new Connection(finalMovie.getFilmweb());
                 Map<String, List<String>> map = connection.grabMovieDataFromFilmweb();
-                map.put(Movie.ID, Collections.singletonList(String.valueOf(movie.getId())));
+                map.put(Movie.ID, Collections.singletonList(String.valueOf(finalMovie.getId())));
                 downloadedMovie = new Movie(map);
                 connection.addCastToMovie(downloadedMovie, MainController.allActors);
 
@@ -97,13 +116,13 @@ public final class MovieContextMenu {
                         downloadedMovie.setImagePath(downloadedImagePath);
                     }
                 }
-                movie = downloadedMovie;
-                owner.setMovie(movie);
+                this.movie = downloadedMovie;
+                owner.setMovie(downloadedMovie);
                 owner.getMainController().getActorListView().refresh();
                 if(owner instanceof MoviePane) Platform.runLater(((MoviePane) owner)::selectItem);
                 if(owner instanceof MovieDetail && ((MovieDetail) owner).getOwner() != null) Platform.runLater(((MovieDetail) owner).getOwner()::selectItem);
             } catch (IOException e) {
-                log.warn("Invalid URL - no such movie \"{}\"", movie);
+                log.warn("Invalid URL - no such movie \"{}\"", finalMovie);
             }
         });
         download.start();
@@ -138,27 +157,19 @@ public final class MovieContextMenu {
         if(owner instanceof MovieDetail && ((MovieDetail) owner).getOwner() != null) Platform.runLater(((MovieDetail) owner).getOwner()::selectItem);
     }
 
-    private void handleAddingToList(ContentList<Movie> list, Menu addToListItem) {
-        MenuItem listMenu = new MenuItem(list.getDisplayName());
-        if(list.get(movie) != null) {
-            listMenu.setDisable(true);
+    protected void handleAddingToList(Movie movie, ContentList<Movie> list) {
+        list.add(movie);
+        if(list.equals(MainController.moviesToWatch)) {
+            File movieFile = new File(String.valueOf(Config.getMAIN_MOVIE_FOLDER().resolve(movie.getTitle().replaceAll("[]\\[*./:;|,\"]", ""))));
+            Map<File, Integer> mainMovieMap = IO.readLastStateOfMainMovieFolder();
+            mainMovieMap.putIfAbsent(movieFile, movie.getId());
+            IO.writeLastRideFile(mainMovieMap);
+            log.info("Movie folder creation ends with status \"{}\"", movieFile.mkdir());
         }
-
-        listMenu.setOnAction(actionEvent -> {
-            list.add(movie);
-            if(list.equals(MainController.moviesToWatch)) {
-                File movieFile = new File(String.valueOf(Config.getMAIN_MOVIE_FOLDER().resolve(movie.getTitle().replaceAll("[]\\[*./:;|,\"]", ""))));
-                Map<File, Integer> mainMovieMap = IO.readLastStateOfMainMovieFolder();
-                mainMovieMap.putIfAbsent(movieFile, movie.getId());
-                IO.writeLastRideFile(mainMovieMap);
-                log.info("Movie folder creation ends with status \"{}\"", movieFile.mkdir());
-            }
-            owner.getMainController().getMovieListView().refresh();
-        });
-        addToListItem.getItems().add(listMenu);
+        owner.getMainController().getMovieListView().refresh();
     }
 
-    private void handleRemovingFromList() {
+    protected void handleRemovingFromList(Movie movie) {
         owner.getMainController().getMovieListView().getSelectionModel().getSelectedItem().remove(movie);
         owner.getMainController().displayPanesByPopulating(true);
         owner.getMainController().getMovieListView().refresh();
@@ -175,7 +186,7 @@ public final class MovieContextMenu {
         }
     }
 
-    private void markAsWatched() {
+    protected void markAsWatched(Movie movie) {
         if(MainController.recentlyWatched == null) {
             MainController.recentlyWatched = new ContentList<>(ContentList.RECENTLY_WATCHED);
             MainController.observableContentMovies.add(MainController.recentlyWatched);
@@ -184,7 +195,7 @@ public final class MovieContextMenu {
         if(MainController.recentlyWatched.size() > 10) {
             MainController.recentlyWatched.remove(0);
         }
-        handleRemovingFromList();
+        handleRemovingFromList(movie);
 
     }
 
