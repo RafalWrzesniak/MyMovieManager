@@ -77,7 +77,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
         try { this.imageUrl = new URL(actorMap.get(IMAGE_URL)); } catch (MalformedURLException | NullPointerException ignored) { }
         this.birthday = ContentType.convertStrToLocalDate(actorMap.get(Actor.BIRTHDAY));
         if(actorMap.get(Actor.DEATH_DAY) != null) {
-            setDeathDay(LocalDate.parse(actorMap.get(Actor.DEATH_DAY)));
+            setDeathDay(Objects.requireNonNull(ContentType.convertStrToLocalDate(actorMap.get(Actor.DEATH_DAY))));
         }
         setAge();
         int id = actorMap.get(ID) == null ? -1 : Integer.parseInt(actorMap.get(ID));
@@ -97,7 +97,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
 //    == getters ==
 
     public String getNameAndSurname() {
-        return getName().concat(" ").concat(getSurname());
+        return name + " " + surname;
     }
 
     public List<Movie> getAllMoviesActorPlayedIn() {

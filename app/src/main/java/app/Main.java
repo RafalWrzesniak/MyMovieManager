@@ -58,7 +58,7 @@ public class Main extends Application {
         Thread.currentThread().setName("JavaFX");
         Main.primaryStage = primaryStage;
         primaryStage.setTitle("MyMovieManager");
-        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/favicon.ico")));
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/favicon.png")));
         loadView(localePl, primaryStage);
     }
 

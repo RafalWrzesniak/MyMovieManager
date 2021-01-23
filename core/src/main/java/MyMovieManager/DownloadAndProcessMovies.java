@@ -121,6 +121,7 @@ public final class DownloadAndProcessMovies extends Thread {
             movie = allMovies.getObjByUrlIfExists(connection.getMainMoviePage());
             if(movie != null) {
                 log.info("Movie \"{}\" already exists on the list \"{}\", new data won't be downloaded", movie, allMovies);
+                taskManager.removeTask(movieFile);
                 return movie;
             }
             movie = connection.createMovieFromFilmwebLink();
@@ -130,7 +131,7 @@ public final class DownloadAndProcessMovies extends Thread {
                 File movieDir = IO.createContentDirectory(movie);
                 Path downloadedImagePath = Paths.get(
                         movieDir.toString(),
-                        movie.getReprName().replaceAll("[]\\[*./:;|,\"]", "").concat(".jpg"));
+                        movie.getReprName().replaceAll("[]?\\[*./:;|,\"]", "").concat(".jpg"));
                 if( Connection.downloadImage(movie.getImageUrl(), downloadedImagePath) ) {
                     movie.setImagePath(downloadedImagePath);
                 } else {

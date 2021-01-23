@@ -105,7 +105,7 @@ public final class IO {
      */
     public static String removeFileExtension(String fileName) {
         if(fileName == null) return null;
-        if(fileName.contains(".")) {
+        if(fileName.matches("^.+\\.\\w.+$")) {
             return fileName.substring(0, fileName.lastIndexOf('.'));
         }
         return fileName;

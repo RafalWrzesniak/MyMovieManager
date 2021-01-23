@@ -68,7 +68,7 @@ public final class Connection {
 
     public Connection(String desiredTitle) throws IOException {
         String desiredTitleEncoded = URLEncoder.encode(desiredTitle, "UTF-8");
-        changeUrlTo(FILMWEB + "/search?type=film&q=" + desiredTitleEncoded);//.replaceAll(" ", "+"));
+        changeUrlTo(FILMWEB + "/search?type=film&q=" + desiredTitleEncoded);
         changeUrlTo(getMostSimilarTitleUrlFromQuery(desiredTitle));
     }
 
@@ -420,7 +420,7 @@ public final class Connection {
         List<String> listOfItems = new ArrayList<>();
 
         if(matcherOfItemProp.find()) {
-            Pattern pattern = Pattern.compile("\"/ranking/film/\\w+/\\d+\">(.+?)</a>");
+            Pattern pattern = Pattern.compile("/ranking/film/\\D+/\\d+\">(.+?)</a>");
             Matcher matcher = pattern.matcher(matcherOfItemProp.group(1));
             while(matcher.find()) {
                 listOfItems.add(replaceAcutesHTML(matcher.group(1)));
@@ -487,8 +487,7 @@ public final class Connection {
         Pattern pattern = Pattern.compile("dateToCalc=new Date\\((.+?)\\)");
         Matcher matcher = pattern.matcher(line);
         if (matcher.find()) {
-            String[] split = matcher.group(1).replaceAll("2E3", "2000").split(",");
-            return LocalDate.of(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])).toString();
+            return matcher.group(1);
         }
         return null;
     }
@@ -501,12 +500,13 @@ public final class Connection {
         Map<String, String> map = new HashMap<>();
         Pattern pattern = Pattern.compile("<data class.+?data-title=\"(.+?)\".+?href=\"(.+?)\"");
         Matcher matcher = pattern.matcher(line);
-        while(matcher.find()) {
+        while(matcher.find() && map.size() <= 5) {
             map.putIfAbsent(replaceAcutesHTML(matcher.group(1)), matcher.group(2));
         }
         if(map.size() == 0) {
             log.warn("Couldn't find any results of query");
         }
+        System.out.println(map);
         return map;
     }
 
@@ -564,6 +564,7 @@ public final class Connection {
         str = str.replaceAll("&yacute;", "ý");
         str = str.replaceAll("&aring;", "å");
         str = str.replaceAll("&Aring;", "Å");
+        str = str.replaceAll("&agrave;", "à");
         return str;
     }
 }

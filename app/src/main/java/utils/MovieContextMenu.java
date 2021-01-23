@@ -111,14 +111,17 @@ public class MovieContextMenu {
                 connection.addCastToMovie(downloadedMovie, MainController.allActors);
 
                 if(downloadedMovie.getImagePath() == null || downloadedMovie.getImagePath().equals(Configuration.Files.NO_MOVIE_COVER))  {
-                    Path downloadedImagePath = Paths.get(IO.createContentDirectory(downloadedMovie).toString(), downloadedMovie.getReprName().concat(".jpg"));
+                    Path downloadedImagePath = Paths.get(IO.createContentDirectory(downloadedMovie).toString(), downloadedMovie.getReprName().replaceAll("[]?\\[*./:;|,\"]", "").concat(".jpg"));
                     if (Connection.downloadImage(downloadedMovie.getImageUrl(), downloadedImagePath)) {
                         downloadedMovie.setImagePath(downloadedImagePath);
                     }
                 }
                 this.movie = downloadedMovie;
-                owner.setMovie(downloadedMovie);
-                owner.getMainController().getActorListView().refresh();
+                Platform.runLater(() -> {
+                    owner.setMovie(downloadedMovie);
+                    owner.getMainController().getActorListView().refresh();
+                });
+
                 if(owner instanceof MoviePane) Platform.runLater(((MoviePane) owner)::selectItem);
                 if(owner instanceof MovieDetail && ((MovieDetail) owner).getOwner() != null) Platform.runLater(((MovieDetail) owner).getOwner()::selectItem);
             } catch (IOException e) {

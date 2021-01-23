@@ -64,8 +64,10 @@ public final class MovieInfo implements MovieKind, Initializable {
     public void setMovie(Movie movie) {
         StringBuilder genreBuild = new StringBuilder();
         movie.getGenres().forEach(genre -> genreBuild.append(genre).append(", "));
+        if(genreBuild.toString().contains(", ")) genreBuild.deleteCharAt(genreBuild.lastIndexOf(", "));
         StringBuilder productionsBuild = new StringBuilder();
         movie.getProduction().forEach(prod -> productionsBuild.append(prod).append(", "));
+        if(productionsBuild.toString().contains(", ")) productionsBuild.deleteCharAt(productionsBuild.lastIndexOf(", "));
 
         Platform.runLater(() -> {
             cover.setImage(new Image(movie.getImagePath().toUri().toString()));
@@ -75,8 +77,8 @@ public final class MovieInfo implements MovieKind, Initializable {
             duration.setText(movie.getDurationFormatted());
             rate.setText(String.format("%s / %d", movie.getRate(), movie.getRateCount()));
             description.setText(movie.getDescription());
-            genres.setText(genreBuild.deleteCharAt(genreBuild.lastIndexOf(", ")).toString());
-            productions.setText(productionsBuild.deleteCharAt(productionsBuild.lastIndexOf(", ")).toString());
+            genres.setText(genreBuild.toString());
+            productions.setText(productionsBuild.toString());
             movie.getDirectors().forEach(actor -> directors.getChildren().add(mainController.openActorPane(actor)));
             movie.getWriters().forEach(actor -> writers.getChildren().add(mainController.openActorPane(actor)));
             movie.getCast().forEach(actor -> cast.getChildren().add(mainController.openActorPane(actor)));

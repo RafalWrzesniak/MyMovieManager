@@ -31,7 +31,7 @@ public final class TaskManager {
     }
 
     public void addTask(List<File> fileList) {
-        if(fileList == null || fileList.size() > 0) return;
+        if(fileList == null || fileList.size() == 0) return;
         log.debug("Added {} files to task manager", fileList.size());
         fileList.forEach(file -> tasks.add(file.toString()));
         tasks.remove(null);
