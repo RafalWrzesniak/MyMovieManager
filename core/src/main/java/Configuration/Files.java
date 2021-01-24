@@ -22,11 +22,12 @@ public final class Files {
     /**
      * Default path of location of main movies folder
      */
-    public static final Path DEFAULT_MAIN_MOVIE = Paths.get("E:", "Rafał", "Filmy");
+    public static final Path DEFAULT_MAIN_MOVIE = Paths.get(System.getProperty("user.dir"), "Filmy");
     /**
      * Default path of location of recently watched movies
      */
-    public static final Path DEFAULT_RECENTLY_WATCHED = Paths.get("E:", "Rafał", "Filmy", "00DONE");
+    public static final Path DEFAULT_RECENTLY_WATCHED = Paths.get(System.getProperty("user.dir"), "Ogladnięte");
+
 
 
 //  == files ==
