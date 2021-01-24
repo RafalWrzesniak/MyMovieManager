@@ -180,7 +180,15 @@ public final class Connection {
     public Actor createActorFromFilmwebLink() throws NullPointerException, IOException {
         Map<String, String> actorMap = grabActorDataFromFilmweb();
         if(actorMap == null) return null;
-        return new Actor(actorMap);
+        Actor actor = new Actor(actorMap);
+        File actorDir = IO.createContentDirectory(actor);
+        Path downloadedImagePath = Paths.get(actorDir.toString(), actor.getReprName().concat(".jpg"));
+        if (Connection.downloadImage(actor.getImageUrl(), downloadedImagePath)) {
+            actor.setImagePath(downloadedImagePath);
+        } else {
+            return null;
+        }
+        return actor;
     }
 
 
@@ -196,17 +204,10 @@ public final class Connection {
                 if(actor == null) {
                     changeUrlTo(actorUrl);
                     actor = createActorFromFilmwebLink();
-                    if (allActors.add(actor)) {
-                        File actorDir = IO.createContentDirectory(actor);
-                        assert actorDir != null;
-                        Path downloadedImagePath = Paths.get(actorDir.toString(), actor.getReprName().concat(".jpg"));
-                        if (Connection.downloadImage(actor.getImageUrl(), downloadedImagePath)) {
-                            actor.setImagePath(downloadedImagePath);
-                        } else {
-                            actor.setImagePath(Configuration.Files.NO_ACTOR_IMAGE);
+                    if(actor != null) {
+                        if(!allActors.add(actor)) {
+                            actor = allActors.get(actor);
                         }
-                    } else if (actor != null) {
-                        actor = allActors.get(actor);
                     } else {
                         throw new NullPointerException("No data found for " + actorUrl);
                     }
@@ -506,7 +507,6 @@ public final class Connection {
         if(map.size() == 0) {
             log.warn("Couldn't find any results of query");
         }
-        System.out.println(map);
         return map;
     }
 
