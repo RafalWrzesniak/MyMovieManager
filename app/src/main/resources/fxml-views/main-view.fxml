@@ -3,29 +3,31 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.Cursor?>
-<?import javafx.scene.effect.GaussianBlur?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.Circle?>
-<?import java.lang.String?>
+<?import java.lang.*?>
 <?import java.net.*?>
-<BorderPane fx:id="main_view" prefHeight="750.0" prefWidth="1480.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
-   <top>
+<BorderPane fx:id="main_view" prefHeight="770.0" prefWidth="1490.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
+    <fx:define>
+        <Double fx:id="ICON_SIZE" fx:value="40.0"/>
+        <Double fx:id="SMALL_ICON_SIZE" fx:value="35.0"/>
+    </fx:define>
+    <top>
       <GridPane>
          <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" minWidth="-Infinity" />
+            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" />
          </columnConstraints>
          <rowConstraints>
-            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" valignment="TOP" vgrow="SOMETIMES" />
          </rowConstraints>
-            <ToolBar prefHeight="60.0" prefWidth="500.0" styleClass="background-color" stylesheets="@../css-styles/context-menu.css">
-                  <Button fx:id="addContentMovies" layoutX="10.0" layoutY="3.0" mnemonicParsing="false" onAction="#addContentList" prefHeight="50.0" prefWidth="50.0">
+            <ToolBar prefHeight="50.0" styleClass="background-color" stylesheets="@../css-styles/context-menu.css">
+                  <Button fx:id="addContentMovies" layoutX="10.0" layoutY="3.0" mnemonicParsing="false" onAction="#addContentList" prefHeight="${ICON_SIZE}" prefWidth="${ICON_SIZE}">
                      <tooltip>
                         <Tooltip text="%toolbar.add_content_list_movie" />
                      </tooltip>
                      <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="${ICON_SIZE}" fitWidth="${ICON_SIZE}" pickOnBounds="true" preserveRatio="true">
                            <Image url="@../icons/add_content_list_movies.png" />
                         </ImageView>
                      </graphic>
@@ -33,12 +35,12 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="addContentActors" layoutX="10.0" layoutY="3.0" mnemonicParsing="false" onAction="#addContentList" prefHeight="50.0" prefWidth="50.0">
+                  <Button fx:id="addContentActors" layoutX="10.0" layoutY="3.0" mnemonicParsing="false" onAction="#addContentList" prefHeight="${ICON_SIZE}" prefWidth="${ICON_SIZE}">
                      <tooltip>
                         <Tooltip text="%toolbar.add_content_list_actors" />
                      </tooltip>
                      <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="${ICON_SIZE}" fitWidth="${ICON_SIZE}" pickOnBounds="true" preserveRatio="true">
                            <Image url="@../icons/add_content_list_actors.png" />
                         </ImageView>
                      </graphic>
@@ -47,12 +49,12 @@
                      </padding>
                   </Button>
                   <Separator layoutX="282.0" layoutY="10.0" orientation="VERTICAL" />
-                  <Button layoutX="146.0" layoutY="3.0" mnemonicParsing="false" onAction="#setMainFolder" prefHeight="50.0" prefWidth="50.0">
+                  <Button layoutX="146.0" layoutY="3.0" mnemonicParsing="false" onAction="#setMainFolder" prefHeight="${ICON_SIZE}" prefWidth="${ICON_SIZE}">
                      <tooltip>
                         <Tooltip text="%dialog.chooser.set_main" />
                      </tooltip>
                      <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="${ICON_SIZE}" fitWidth="${ICON_SIZE}" pickOnBounds="true" preserveRatio="true">
                            <Image url="@../icons/main_folder.png" />
                         </ImageView>
                      </graphic>
@@ -60,12 +62,12 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button layoutX="78.0" layoutY="3.0" mnemonicParsing="false" onAction="#refreshMainFolder" prefHeight="50.0" prefWidth="50.0">
+                  <Button layoutX="78.0" layoutY="3.0" mnemonicParsing="false" onAction="#refreshMainFolder" prefHeight="${ICON_SIZE}" prefWidth="${ICON_SIZE}">
                      <tooltip>
                         <Tooltip text="%toolbar.refresh" />
                      </tooltip>
                      <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="${ICON_SIZE}" fitWidth="${ICON_SIZE}" pickOnBounds="true" preserveRatio="true">
                            <Image url="@../icons/refresh.png" />
                         </ImageView>
                      </graphic>
@@ -74,12 +76,12 @@
                      </padding>
                   </Button>
                   <Separator orientation="VERTICAL" />
-                  <Button fx:id="addFolderWithMovies" mnemonicParsing="false" onAction="#addMoviesToAppFromFile" prefHeight="50.0" prefWidth="50.0">
+                  <Button fx:id="addFolderWithMovies" mnemonicParsing="false" onAction="#addMoviesToAppFromFile" prefHeight="${ICON_SIZE}" prefWidth="${ICON_SIZE}">
                      <tooltip>
                         <Tooltip text="%toolbar.add_several_movies" />
                      </tooltip>
                      <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="${ICON_SIZE}" fitWidth="${ICON_SIZE}" pickOnBounds="true" preserveRatio="true">
                            <Image url="@../icons/add_movie_3_movies_icon.png" />
                         </ImageView>
                      </graphic>
@@ -87,12 +89,12 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="addSingleMovie" mnemonicParsing="false" onAction="#addMoviesToAppFromFile" prefHeight="50.0" prefWidth="50.0">
+                  <Button fx:id="addSingleMovie" mnemonicParsing="false" onAction="#addMoviesToAppFromFile" prefHeight="${ICON_SIZE}" prefWidth="${ICON_SIZE}">
                      <tooltip>
                         <Tooltip text="%toolbar.add_single_movie" />
                      </tooltip>
                      <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="${ICON_SIZE}" fitWidth="${ICON_SIZE}" pickOnBounds="true" preserveRatio="true">
                            <Image url="@../icons/add_movie_folder_icon.png" />
                         </ImageView>
                      </graphic>
@@ -100,12 +102,12 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button mnemonicParsing="false" onAction="#addMovieToAppFromWeb" prefHeight="50.0" prefWidth="50.0">
+                  <Button mnemonicParsing="false" onAction="#addMovieToAppFromWeb" prefHeight="${ICON_SIZE}" prefWidth="${ICON_SIZE}">
                      <tooltip>
                         <Tooltip text="%toolbar.add_movie_www" />
                      </tooltip>
                      <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="${ICON_SIZE}" fitWidth="${ICON_SIZE}" pickOnBounds="true" preserveRatio="true">
                            <Image url="@../icons/add_movie_www_icon.png" />
                         </ImageView>
                      </graphic>
@@ -115,64 +117,64 @@
                   </Button>
                   <Separator orientation="VERTICAL" />
 
-                  <MenuButton mnemonicParsing="false" prefHeight="25.0" prefWidth="76.0">
+                  <MenuButton maxHeight="${ICON_SIZE}" mnemonicParsing="false">
                      <tooltip>
                         <Tooltip text="%toolbar.import" />
                      </tooltip>
                     <items>
                       <MenuItem fx:id="importZip" mnemonicParsing="false" onAction="#importData" text="%toolbar.import.zip">
                            <graphic>
-                              <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                  <Image url="@../icons/zip.png" />
                               </ImageView>
                            </graphic>
                         </MenuItem>
                       <MenuItem fx:id="importXml" mnemonicParsing="false" onAction="#importData" text="%toolbar.import.xml">
                            <graphic>
-                              <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                  <Image url="@../icons/xml.png" />
                               </ImageView>
                            </graphic>
                         </MenuItem>
                     </items>
                      <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="${SMALL_ICON_SIZE}" fitWidth="${SMALL_ICON_SIZE}" pickOnBounds="true" preserveRatio="true">
                            <Image url="@../icons/import.png" />
                         </ImageView>
                      </graphic>
                   </MenuButton>
-                  <MenuButton mnemonicParsing="false" prefHeight="25.0" prefWidth="76.0">
+                  <MenuButton mnemonicParsing="false">
                      <tooltip>
                         <Tooltip text="%toolbar.export" />
                      </tooltip>
                      <items>
                         <MenuItem fx:id="exportZip" mnemonicParsing="false" onAction="#exportData" text="%toolbar.export.zip">
                            <graphic>
-                              <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                  <Image url="@../icons/zip.png" />
                               </ImageView>
                            </graphic>
                         </MenuItem>
                         <MenuItem fx:id="exportXml" mnemonicParsing="false" onAction="#exportData" text="%toolbar.export.xml">
                            <graphic>
-                              <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                  <Image url="@../icons/xml.png" />
                               </ImageView>
                            </graphic>
                         </MenuItem>
                      </items>
                      <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="${SMALL_ICON_SIZE}" fitWidth="${SMALL_ICON_SIZE}" pickOnBounds="true" preserveRatio="true">
                            <Image url="@../icons/export.png" />
                         </ImageView>
                      </graphic>
                   </MenuButton>
-                  <Button fx:id="settings" layoutX="362.0" layoutY="3.0" mnemonicParsing="false" onAction="#openSettings" prefHeight="50.0" prefWidth="50.0">
+                  <Button fx:id="settings" layoutX="362.0" layoutY="3.0" mnemonicParsing="false" onAction="#openSettings" prefHeight="${ICON_SIZE}" prefWidth="${ICON_SIZE}">
                      <tooltip>
                         <Tooltip text="%toolbar.settings" />
                      </tooltip>
                      <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="${ICON_SIZE}" fitWidth="${ICON_SIZE}" pickOnBounds="true" preserveRatio="true">
                            <Image url="@../icons/settings.png" />
                         </ImageView>
                      </graphic>
@@ -185,24 +187,19 @@
                </GridPane.margin>
             </ToolBar>
 
-            <HBox alignment="CENTER_RIGHT" fillHeight="false" spacing="10.0" GridPane.columnIndex="1">
-                  <Label alignment="CENTER" prefHeight="40.0" style="-fx-font-size: 28; -fx-font-family: Gabriola;" styleClass="blue_text" text="My Movie Manager" textOverrun="CLIP" />
-                  <StackPane prefHeight="50.0" prefWidth="50.0">
-                        <Circle radius="25.0" style="-fx-fill: my_blue;">
-                           <effect>
-                              <GaussianBlur />
-                           </effect>
-                        </Circle>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+            <HBox alignment="CENTER_RIGHT" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" spacing="10.0" GridPane.columnIndex="1" GridPane.valignment="TOP">
+                  <Label alignment="CENTER" prefHeight="${ICON_SIZE}" style="-fx-font-size: 24; -fx-font-family: Gabriola;" styleClass="blue_text" text="My Movie Manager" />
+                  <StackPane prefHeight="${ICON_SIZE}" prefWidth="${ICON_SIZE}">
+                        <ImageView fitHeight="${SMALL_ICON_SIZE}" fitWidth="${SMALL_ICON_SIZE}" pickOnBounds="true" preserveRatio="true">
                            <Image url="@../icons/logo.png" />
                         </ImageView>
                   </StackPane>
+            <padding>
+               <Insets top="10.0" />
+            </padding>
             </HBox>
-         <BorderPane.margin>
-            <Insets />
-         </BorderPane.margin>
          <padding>
-            <Insets bottom="10.0" left="2.0" right="10.0" top="10.0" />
+            <Insets right="10.0" />
          </padding>
       </GridPane>
    </top>
@@ -214,13 +211,13 @@
                   <Insets bottom="10.0" top="10.0" />
                </VBox.margin>
                <graphic>
-                  <Separator prefWidth="200.0">
+                  <Separator prefWidth="220.0">
                      <padding>
                         <Insets bottom="5.0" right="10.0" top="5.0" />
                      </padding>
                   </Separator>
                </graphic></Label>
-            <ListView fx:id="movieListView" maxWidth="200.0" minHeight="100.0">
+            <ListView fx:id="movieListView" maxWidth="210.0" prefHeight="500.0">
                <styleClass>
                   <String fx:value="background-color" />
                   <String fx:value="blue_text" />
@@ -247,13 +244,13 @@
                   <Insets bottom="10.0" top="10.0" />
                </VBox.margin>
                <graphic>
-                  <Separator prefWidth="200.0">
+                  <Separator prefWidth="220.0">
                      <padding>
                         <Insets bottom="5.0" right="10.0" top="5.0" />
                      </padding>
                   </Separator>
                </graphic></Label>
-            <ListView fx:id="actorListView" maxWidth="200.0" minHeight="100.0">
+            <ListView fx:id="actorListView" maxWidth="210.0">
                <styleClass>
                   <String fx:value="background-color" />
                   <String fx:value="blue_text" />
@@ -288,7 +285,7 @@
           <VBox>
             <HBox alignment="CENTER_LEFT">
                 <StackPane alignment="CENTER_LEFT">
-                  <TextField fx:id="searchField" alignment="CENTER_RIGHT" prefWidth="160.0" promptText="%main_view.search" />
+                  <TextField fx:id="searchField" alignment="CENTER_RIGHT" minWidth="160.0" prefWidth="160.0" promptText="%main_view.search" />
                   <Label fx:id="clearSearch" styleClass="cancelSearch" text="X">
                      <StackPane.margin>
                         <Insets left="5.0" />
@@ -308,7 +305,7 @@
                     <Image url="@../icons/search.png" />
                 </ImageView>
 
-                <MenuButton fx:id="sort" mnemonicParsing="false" prefHeight="30.0" text="%main_view.sort.type">
+                <MenuButton fx:id="sort" ellipsisString="" mnemonicParsing="false" prefHeight="30.0" text="%main_view.sort.type">
                     <graphic>
                         <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                             <Image url="@../icons/sort.png" />
@@ -316,70 +313,70 @@
                     </graphic>
 
                     <items>
-                        <MenuItem fx:id="movieAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" >
+                        <MenuItem fx:id="movieAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-alpha.png" />
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="movieShortest" mnemonicParsing="false" text="%main_view.sort.shortest" >
+                        <MenuItem fx:id="movieShortest" mnemonicParsing="false" text="%main_view.sort.shortest">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-shortest.png" />
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="movieLongest" mnemonicParsing="false" text="%main_view.sort.longest" >
+                        <MenuItem fx:id="movieLongest" mnemonicParsing="false" text="%main_view.sort.longest">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-longest.png" />
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="movieNewest" mnemonicParsing="false" text="%main_view.sort.newest" >
+                        <MenuItem fx:id="movieNewest" mnemonicParsing="false" text="%main_view.sort.newest">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-newest.png" />
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="movieOldest" mnemonicParsing="false" text="%main_view.sort.oldest" >
+                        <MenuItem fx:id="movieOldest" mnemonicParsing="false" text="%main_view.sort.oldest">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-oldest.png" />
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="moviePopular" mnemonicParsing="false" text="%main_view.sort.popularity" >
+                        <MenuItem fx:id="moviePopular" mnemonicParsing="false" text="%main_view.sort.popularity">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-popularity.png" />
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="movieByRate" mnemonicParsing="false" text="%main_view.sort.rate" >
+                        <MenuItem fx:id="movieByRate" mnemonicParsing="false" text="%main_view.sort.rate">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-rate.png" />
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="actorAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical" >
+                        <MenuItem fx:id="actorAlpha" mnemonicParsing="false" text="%main_view.sort.alphabetical">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-alpha.png" />
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="actorYoungest" mnemonicParsing="false" text="%main_view.sort.youngest" >
+                        <MenuItem fx:id="actorYoungest" mnemonicParsing="false" text="%main_view.sort.youngest">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-newest.png" />
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="actorOldest" mnemonicParsing="false" text="%main_view.sort.oldestActor" >
+                        <MenuItem fx:id="actorOldest" mnemonicParsing="false" text="%main_view.sort.oldestActor">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-oldest.png" />
@@ -394,26 +391,33 @@
                <StackPane fx:id="filterPane" />
 
                <VBox.margin>
-                  <Insets left="30.0" top="13.0" />
+                  <Insets left="30.0" top="7.0" />
                </VBox.margin>
             </HBox>
             <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minWidth="100.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER">
-               <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP" />
+               <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP">
+                  <padding>
+                     <Insets bottom="20.0" />
+                  </padding></FlowPane>
             </ScrollPane>
           </VBox>
        </StackPane>
    </center>
+
    <right>
-      <StackPane fx:id="rightDetail" BorderPane.alignment="CENTER" />
+      <StackPane fx:id="rightDetail" BorderPane.alignment="CENTER_LEFT" prefWidth="300.0"/>
    </right>
+
    <bottom>
-      <StackPane alignment="CENTER_RIGHT" prefHeight="20">
-         <Label text="created by Rafał" />
-         <StackPane.margin>
-            <Insets topRightBottomLeft="5" />
-         </StackPane.margin>
-      </StackPane>
+       <HBox fx:id="progressHBox" fillHeight="false" spacing="10.0" visible="false">
+           <padding>
+               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+           </padding>
+           <ProgressBar prefWidth="150.0" />
+           <Label fx:id="progressLabel" style="-fx-font-size: 12;" styleClass="white_text" />
+       </HBox>
    </bottom>
+
    <stylesheets>
       <URL value="@../css-styles/basic.css" />
       <URL value="@../css-styles/text-and-textfield.css" />
@@ -421,4 +425,5 @@
       <URL value="@../css-styles/context-menu.css" />
       <URL value="@../css-styles/list-view-and-cell.css" />
    </stylesheets>
+
 </BorderPane>
