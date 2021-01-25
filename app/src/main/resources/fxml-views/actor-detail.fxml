@@ -8,10 +8,10 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" maxWidth="300.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.actor.ActorDetail">
-    <VBox fx:id="vBox" alignment="TOP_CENTER" prefWidth="300.0" spacing="10.0" styleClass="background-color">
+<ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" maxWidth="300.0" prefWidth="300.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.actor.ActorDetail">
+    <VBox fx:id="vBox" alignment="TOP_CENTER" minWidth="275.0" maxWidth="275.0" prefWidth="275.0" spacing="10.0" styleClass="background-color" >
           <ImageView fx:id="contentImage" fitHeight="300.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true" />
-          <Label fx:id="name" style="-fx-font-weight: bold;" styleClass="blue_text" text="name ">
+          <Label fx:id="name" style="-fx-font-weight: bold;" styleClass="blue_text">
              <tooltip>
                 <Tooltip text="%detail.name_and_surname" />
              </tooltip>
@@ -19,17 +19,17 @@
                 <Cursor fx:constant="HAND" />
              </cursor>
           </Label>
-          <Label fx:id="bornDate" layoutX="66.0" layoutY="288.0" styleClass="blue_text" text="11.08.1994 - 24.03.2015">
+          <Label fx:id="bornDate" layoutX="66.0" layoutY="288.0" styleClass="blue_text" >
              <tooltip>
                 <Tooltip text="%detail.born_age" />
              </tooltip>
           </Label>
-          <Label fx:id="died" layoutX="60.0" layoutY="318.0" styleClass="blue_text" text="Zmarł w wieku 26 lat">
+          <Label fx:id="died" layoutX="60.0" layoutY="318.0" styleClass="blue_text" >
              <tooltip>
                 <Tooltip text="%detail.died" />
              </tooltip>
           </Label>
-          <Label fx:id="country" layoutX="60.0" layoutY="318.0" styleClass="blue_text" text="Polska">
+          <Label fx:id="country" layoutX="60.0" layoutY="318.0" styleClass="blue_text" >
              <tooltip>
                 <Tooltip text="%detail.country" />
              </tooltip>
