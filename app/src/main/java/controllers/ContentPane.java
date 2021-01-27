@@ -5,7 +5,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
@@ -16,12 +15,13 @@ public abstract class ContentPane {
 //    == fields ==
     protected static BooleanProperty clearBackSthWasClicked = new SimpleBooleanProperty(false);
     protected BooleanProperty iHaveImage = new SimpleBooleanProperty(false);
-    protected StackPane contentPane;
-    @FXML protected Rectangle blue_background;
-    @FXML protected Rectangle green_background;
-    @FXML protected ImageView cover;
-    @Getter protected MainController mainController;
     protected ContextMenu contextMenu;
+    protected StackPane contentPane;
+
+    @FXML protected Rectangle blue_background, green_background;
+    @FXML protected ImageView cover;
+
+    @Getter protected MainController mainController;
 
 
     //    == methods ==
@@ -38,16 +38,12 @@ public abstract class ContentPane {
     @FXML
     public void selectItemClicked(MouseEvent mouseEvent) {
         selectItem();
-        if(mouseEvent.getButton().equals(MouseButton.SECONDARY)) {
-            contextMenu.show(contentPane, mouseEvent.getScreenX(), mouseEvent.getScreenY());
-        }
     }
 
 
     protected void selectItem() {
         clearBackSthWasClicked.setValue(true);
         green_background.setVisible(true);
-        contextMenu.hide();
         clearBackSthWasClicked.setValue(false);
     }
 

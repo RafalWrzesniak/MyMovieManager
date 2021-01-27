@@ -12,18 +12,23 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import lombok.extern.slf4j.Slf4j;
 import utils.MovieContextMenu;
+import utils.MultiMovieContextMenu;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 @Slf4j
 public class MoviePane extends ContentPane implements Initializable, MovieKind {
 
 //    == fields ==
-    @FXML private StackPane moviePane;
-    @FXML private Label title, duration;
-    private Movie movie;
+    protected static Set<Movie> selectedMovies = new HashSet<>();
     private ResourceBundle resourceBundle;
+    @FXML private Label title, duration;
+    @FXML private StackPane moviePane;
+    private Movie movie;
 
 //    == init ==
     @Override
@@ -58,17 +63,53 @@ public class MoviePane extends ContentPane implements Initializable, MovieKind {
     }
 
 
+
     @Override
     public void selectItem() {
         super.selectItem();
         mainController.openMovieDetail(movie, this, false);
+
     }
 
     @Override
     public void selectItemClicked(MouseEvent mouseEvent) {
-        super.selectItemClicked(mouseEvent);
-        if(mouseEvent.getButton().equals(MouseButton.PRIMARY) && mouseEvent.getClickCount() >= 2) {
-            mainController.openMovieInfo(movie, resourceBundle);
+        contextMenu.hide();
+        if(mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            if(mouseEvent.isControlDown()) {
+                if(!selectedMovies.contains(movie)) {
+                    selectedMovies.add(movie);
+                    blue_background.setVisible(false);
+                    green_background.setVisible(true);
+                } else {
+                    selectedMovies.remove(movie);
+                    blue_background.setVisible(true);
+                    green_background.setVisible(false);
+                }
+            } else {
+                selectedMovies.clear();
+                selectedMovies.add(movie);
+                selectItem();
+                if(mouseEvent.getClickCount() >= 2) {
+                    mainController.openMovieInfo(movie, resourceBundle);
+                }
+            }
+        } else if(mouseEvent.getButton().equals(MouseButton.SECONDARY)) {
+            if(selectedMovies.size() == 0) selectedMovies.add(movie);
+            if(selectedMovies.size() == 1) {
+                selectedMovies.clear();
+                selectedMovies.add(movie);
+                selectItem();
+                contextMenu = new MovieContextMenu(movie, resourceBundle, this).getContextMenu();
+                contextMenu.show(contentPane, mouseEvent.getScreenX(), mouseEvent.getScreenY());
+            } else if(selectedMovies.size() > 1 && green_background.isVisible()) {
+                contextMenu = new MultiMovieContextMenu(new ArrayList<>(selectedMovies), resourceBundle, this).getContextMenu();
+                contextMenu.show(contentPane, mouseEvent.getScreenX(), mouseEvent.getScreenY());
+            } else {
+                selectedMovies.clear();
+                selectedMovies.add(movie);
+                selectItem();
+            }
         }
     }
+
 }
