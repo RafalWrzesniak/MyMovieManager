@@ -47,7 +47,7 @@ public final class Connection {
     private static final Map<String, String> MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
             entry(Movie.TITLE,      "data-title"),
             entry(Movie.TITLE_ORG,  "originalTitle"),
-            entry(Movie.PREMIERE,   "releaseCountryPublicString"),
+            entry(Movie.PREMIERE,   "releaseWorldPublicString"), //releaseCountryPublicString
             entry(Movie.DURATION,   "duration"),
             entry(Movie.RATE,       "data-rate"),
             entry(Movie.RATE_COUNT, "dataRating-count"),
