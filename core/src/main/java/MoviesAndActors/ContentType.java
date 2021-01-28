@@ -33,7 +33,7 @@ public interface ContentType  {
 //    == default methods ==
     static LocalDate convertStrToLocalDate(String string) {
         if(string == null || string.isEmpty()) {
-            throw new IllegalArgumentException("Birthday argument cannot be null or empty!");
+            throw new IllegalArgumentException("Date argument cannot be null or empty!");
         } else if(string.equals("-")) return null;
         string = string.replaceAll("2E3", "2000").replaceAll(",", "-").replaceAll("-0-", "-1-").replaceAll("-0$", "-1");
         if(string.matches("^\\d{4}$")) {
