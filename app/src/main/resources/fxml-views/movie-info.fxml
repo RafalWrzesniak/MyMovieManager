@@ -91,7 +91,7 @@
                <Insets top="10.0" />
             </VBox.margin>
             <Label styleClass="blue_text" text="%movie.cast" />
-            <FlowPane fx:id="cast" style="-fx-border-color: blue;">
+            <FlowPane fx:id="cast" prefWidth="720.0">
                <padding>
                   <Insets left="15.0" />
                </padding>
