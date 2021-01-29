@@ -38,16 +38,19 @@ public final class Actor implements ContentType, Comparable<Actor> {
     // actor
     @Getter private boolean isActor = false;
     private final List<Movie> playedInMovies = new ArrayList<>();
+    @Getter final List<String> playedIds = new ArrayList<>();
     // director
     @Getter private boolean isDirector = false;
     private final List<Movie> directedMovies = new ArrayList<>();
+    @Getter final List<String> directedIds = new ArrayList<>();
     // writer
     @Getter private boolean isWriter = false;
     private final List<Movie> wroteMovies = new ArrayList<>();
+    @Getter final List<String> wroteIds = new ArrayList<>();
 
 //    == static fields ==
     private static int classActorId = -1;
-    boolean iAmFromConstructor;
+    public boolean iAmFromConstructor;
 
 //    == constants ==
     public static final String NAME = "name", SURNAME = "surname", NATIONALITY = "nationality", BIRTHDAY = "birthday",
@@ -89,6 +92,10 @@ public final class Actor implements ContentType, Comparable<Actor> {
         } else {
             this.id = id;
         }
+//        System.out.println(this + " : " + actorMap.get(PLAYED_IN_MOVIES));
+        if(actorMap.get(PLAYED_IN_MOVIES) != null) playedIds.addAll(Arrays.asList(actorMap.get(PLAYED_IN_MOVIES).split(";")));
+        if(actorMap.get(DIRECTED_MOVIES) != null) directedIds.addAll(Arrays.asList(actorMap.get(DIRECTED_MOVIES).split(";")));
+        if(actorMap.get(WROTE_MOVIES) != null) wroteIds.addAll(Arrays.asList(actorMap.get(WROTE_MOVIES).split(";")));
         iAmFromConstructor = false;
         log.debug("New actor created: {}", this.toString());
     }
@@ -171,21 +178,18 @@ public final class Actor implements ContentType, Comparable<Actor> {
     public void setIsAnActor(boolean isActor) {
         if(!this.isActor) {
             this.isActor = isActor;
-            log.debug("\"{}\" is now an actor", this.toString());
         }
     }
 
     public void setIsADirector(boolean isDirector) {
         if(!this.isDirector) {
             this.isDirector = isDirector;
-            log.debug("\"{}\" is now a director", this.toString());
         }
     }
 
     public void setIsAWriter(boolean isWriter) {
         if(!this.isWriter) {
             this.isWriter = isWriter;
-            log.debug("\"{}\" is now a writer", this.toString());
         }
     }
 
@@ -227,7 +231,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
                 movie.addActor(this);
             }
             log.debug("\"{}\" is now an actor in: \"{}\"", this.toString(), movie);
-            saveMe();
+            if(!iAmFromConstructor) saveMe();
         }
     }
     public void addSeveralMoviesToActor(List<Movie> moviesToAdd) {
@@ -254,8 +258,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
                 movie.addDirector(this);
             }
             log.debug("\"{}\" is now a director in: \"{}\"", this.toString(), movie);
-            saveMe();
-        }
+            if(!iAmFromConstructor) saveMe();        }
     }
 
     // writer
@@ -272,17 +275,8 @@ public final class Actor implements ContentType, Comparable<Actor> {
                 movie.addWriter(this);
             }
             log.debug("\"{}\" is now a writer in: \"{}\"", this.toString(), movie);
-            saveMe();
+            if(!iAmFromConstructor) saveMe();
         }
-    }
-
-    public void printPretty() {
-        System.out.println("ID          : " + id);
-        System.out.println("FullName    : " + name + " " + surname);
-        System.out.println("BirthDate   : " + birthday);
-        if(deathDay != null) System.out.println("DeathDate   : " + deathDay);
-        System.out.println("Age         : " + age);
-        System.out.println("Nationality : " + nationality);
     }
 
 

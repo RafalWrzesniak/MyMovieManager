@@ -35,13 +35,16 @@ public final class Movie implements ContentType, Comparable<Movie> {
     @Getter private URL imageUrl;
     @Getter private URL filmweb;
     private final Set<Actor> cast = new LinkedHashSet<>();
+    @Getter private final List<String> castIds = new ArrayList<>();
     private final Set<Actor> directors = new LinkedHashSet<>();
+    @Getter private final List<String> directorIds = new ArrayList<>();
     private final Set<Actor> writers = new LinkedHashSet<>();
+    @Getter private final List<String> writerIds = new ArrayList<>();
     private final Set<String> genres = new HashSet<>();
     private final Set<String> production = new HashSet<>();
 
     private static int classMovieId = -1;
-    private boolean iAmFromConstructor;
+    public boolean iAmFromConstructor;
 
 //    == constants ==
     public static final String TITLE = "title", TITLE_ORG = "titleOrg",  PREMIERE = "premiere", DURATION = "duration",
@@ -79,6 +82,15 @@ public final class Movie implements ContentType, Comparable<Movie> {
         iAmFromConstructor = false;
         log.info("New movie \"{}\" created", this.toString());
         saveMe();
+    }
+
+    public Movie(Map<String, List<String>> movieMap, boolean readFromFile) {
+        updateClassMovieId();
+        iAmFromConstructor = true;
+        setAllNonActorFields(movieMap);
+        iAmFromConstructor = false;
+        log.info("New movie \"{}\" created", this.toString());
+        if(!readFromFile) saveMe();
     }
 
 
@@ -158,6 +170,9 @@ public final class Movie implements ContentType, Comparable<Movie> {
         // List<String>
         addGenres(movieMap.get(Movie.GENRES));
         addProductions(movieMap.get(Movie.PRODUCTION));
+        castIds.addAll(movieMap.get(Movie.CAST));
+        directorIds.addAll(movieMap.get(Movie.DIRECTORS));
+        writerIds.addAll(movieMap.get(Movie.WRITERS));
     }
 
 
@@ -267,10 +282,10 @@ public final class Movie implements ContentType, Comparable<Movie> {
     public void addActor(Actor actor) {
         if(actor == null) return;
         cast.add(actor);
-        if(iAmFromConstructor) actor.iAmFromConstructor = true;
-        actor.addMovieActorPlayedIn(this);
-        if(iAmFromConstructor) actor.iAmFromConstructor = false;
-        saveMe();
+        if(!actor.iAmFromConstructor) {
+            actor.addMovieActorPlayedIn(this);
+            saveMe();
+        }
     }
     public void addActors(List<Actor> actors) {
         if(actors == null || actors.size() == 0) return;
@@ -283,10 +298,10 @@ public final class Movie implements ContentType, Comparable<Movie> {
     public void addDirector(Actor director) {
         if(director == null) return;
         directors.add(director);
-        if(iAmFromConstructor) director.iAmFromConstructor = true;
-        director.addMovieDirectedBy(this);
-        if(iAmFromConstructor) director.iAmFromConstructor = false;
-        saveMe();
+        if(!director.iAmFromConstructor) {
+            director.addMovieDirectedBy(this);
+            saveMe();
+        }
     }
     public void addDirectors(List<Actor> directors) {
         if(directors == null || directors.size() == 0) return;
@@ -299,10 +314,10 @@ public final class Movie implements ContentType, Comparable<Movie> {
     public void addWriter(Actor writer) {
         if(writer == null) return;
         writers.add(writer);
-        if(iAmFromConstructor) writer.iAmFromConstructor = true;
-        writer.addMovieWrittenBy(this);
-        if(iAmFromConstructor) writer.iAmFromConstructor = false;
-        saveMe();
+        if(!writer.iAmFromConstructor) {
+            writer.addMovieWrittenBy(this);
+            saveMe();
+        }
     }
     public void addWriters(List<Actor> writers) {
         if(writers == null || writers.size() == 0) return;
@@ -485,6 +500,9 @@ public final class Movie implements ContentType, Comparable<Movie> {
         }
         for(Actor actor : cast) {
             if(actor.getNameAndSurname().toLowerCase().contains(searchingStr)) return true;
+        }
+        for(Actor director : directors) {
+            if(director.getNameAndSurname().toLowerCase().contains(searchingStr)) return true;
         }
         try {
             return filmweb.toString().equals(searchingStr);
