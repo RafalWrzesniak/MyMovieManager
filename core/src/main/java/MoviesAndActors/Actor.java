@@ -32,7 +32,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
     @Getter private String nationality;
     @Getter private LocalDate deathDay;
     @Getter private LocalDate birthday;
-    @Getter private Path imagePath;
+    private Path imagePath;
     @Getter private URL imageUrl;
     @Getter @Setter(AccessLevel.PRIVATE) private URL filmweb;
     // actor
@@ -122,6 +122,11 @@ public final class Actor implements ContentType, Comparable<Actor> {
         return getNameAndSurname().replaceAll(" ", "_");
     }
 
+    @Override
+    public Path getImagePath() {
+        return Config.getSAVE_PATH_ACTOR().resolve(imagePath);
+    }
+
 
 //    == setters ==
 
@@ -162,7 +167,11 @@ public final class Actor implements ContentType, Comparable<Actor> {
     }
 
     public void setImagePath(Path imagePath) {
-        this.imagePath = imagePath;
+        if(imagePath.getNameCount() >= 2) {
+            this.imagePath = imagePath.subpath(imagePath.getNameCount()-2, imagePath.getNameCount());
+        } else {
+            this.imagePath = imagePath;
+        }
         saveMe();
     }
 

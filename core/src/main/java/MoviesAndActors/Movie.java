@@ -31,9 +31,9 @@ public final class Movie implements ContentType, Comparable<Movie> {
     @Getter private Integer rateCount;
     @Getter private Double rate;
     @Getter private LocalDate premiere;
-    @Getter private Path imagePath;
     @Getter private URL imageUrl;
     @Getter private URL filmweb;
+    private Path imagePath;
     private final Set<Actor> cast = new LinkedHashSet<>();
     @Getter private final List<String> castIds = new ArrayList<>();
     private final Set<Actor> directors = new LinkedHashSet<>();
@@ -61,29 +61,6 @@ public final class Movie implements ContentType, Comparable<Movie> {
 
 
 //    == constructors ==
-
-    // constructor to use when creating instance from XML
-    public Movie(Map<String, List<String>> movieMap, ContentList<Actor> allActors) {
-        updateClassMovieId();
-        iAmFromConstructor = true;
-        setAllNonActorFields(movieMap);
-        addActors(allActors.convertStrIdsToObjects(movieMap.get(Movie.CAST)));
-        addDirectors(allActors.convertStrIdsToObjects(movieMap.get(Movie.DIRECTORS)));
-        addWriters(allActors.convertStrIdsToObjects(movieMap.get(Movie.WRITERS)));
-        iAmFromConstructor = false;
-        log.debug("New movie \"{}\" created", this.toString());
-    }
-
-    // constructor to use when creating instance from WEB
-    public Movie(Map<String, List<String>> movieMap) {
-        updateClassMovieId();
-        iAmFromConstructor = true;
-        setAllNonActorFields(movieMap);
-        iAmFromConstructor = false;
-        log.info("New movie \"{}\" created", this.toString());
-        saveMe();
-    }
-
     public Movie(Map<String, List<String>> movieMap, boolean readFromFile) {
         updateClassMovieId();
         iAmFromConstructor = true;
@@ -231,7 +208,11 @@ public final class Movie implements ContentType, Comparable<Movie> {
 
     // Path
     public void setImagePath(Path imagePath) {
-        this.imagePath = imagePath;
+        if(imagePath.getNameCount() >= 2) {
+            this.imagePath = imagePath.subpath(imagePath.getNameCount()-2, imagePath.getNameCount());
+        } else {
+            this.imagePath = imagePath;
+        }
         saveMe();
     }
 
@@ -369,6 +350,10 @@ public final class Movie implements ContentType, Comparable<Movie> {
         return title.replaceAll(" ", "_");
     }
 
+    @Override
+    public Path getImagePath() {
+        return Config.getSAVE_PATH_MOVIE().resolve(imagePath);
+    }
 
     public boolean isActorPlayingIn(Actor actor) {
         return this.getCast().contains(actor);
