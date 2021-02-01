@@ -85,9 +85,9 @@ class ConnectionTest {
         Connection connection = new Connection(movieUrl);
         List<String> emptyList = new ArrayList<>();
 
-        assertEquals(new ArrayList<>(), connection.createActorsFromFilmwebLinks(emptyList, allActors));
-        assertEquals(new ArrayList<>(), connection.createActorsFromFilmwebLinks(null, allActors));
-        assertEquals(new ArrayList<>(), connection.createActorsFromFilmwebLinks(emptyList, null));
+        assertEquals(new ArrayList<>(), connection.createActorsFromFilmwebLinks(emptyList, allActors, null));
+        assertEquals(new ArrayList<>(), connection.createActorsFromFilmwebLinks(null, allActors, null));
+        assertEquals(new ArrayList<>(), connection.createActorsFromFilmwebLinks(emptyList, null, null));
     }
 
     @Test
@@ -95,7 +95,7 @@ class ConnectionTest {
         ContentList<Actor> allActors = new ContentList<>("test1");
         List<String> actorUrls = List.of(actorURL.toString(), "https://www.filmweb.pl/person/Tom+Hanks-124", actorURL.toString());
         Connection connection = new Connection(movieUrl);
-        List<Actor> createdActors = connection.createActorsFromFilmwebLinks(actorUrls, allActors);
+        List<Actor> createdActors = connection.createActorsFromFilmwebLinks(actorUrls, allActors, null);
         assertEquals(3, createdActors.size());
         assertEquals(2, allActors.size());
         assertEquals("Jennifer Aniston", createdActors.get(0).getNameAndSurname());
@@ -116,7 +116,7 @@ class ConnectionTest {
         ContentList<Actor> allActors = new ContentList<>("test2");
         Connection connection = new Connection(movieUrl);
         Movie movie = connection.createMovieFromFilmwebLink();
-        connection.addCastToMovie(movie, allActors);
+        connection.addCastToMovie(movie, allActors, null);
 
         assertEquals(1, movie.getWriters().size());
         assertEquals(1, movie.getDirectors().size());

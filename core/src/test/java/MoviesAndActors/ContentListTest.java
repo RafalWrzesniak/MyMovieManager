@@ -25,12 +25,12 @@ class ContentListTest {
             Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
             Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16")),
             Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Most+szpieg%C3%B3w-2015-728144"))
-    ));
+    ), true);
     Movie movie2 = new Movie(Map.ofEntries(
             Map.entry(Movie.TITLE, Collections.singletonList("Birdman")),
             Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13")),
             Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Birdman-2014-680709"))
-    ));
+    ), true);
     private final Actor actor = new Actor(Map.ofEntries(
             Map.entry(Actor.NAME, "Cezary"),
             Map.entry(Actor.SURNAME, "Pazura"),

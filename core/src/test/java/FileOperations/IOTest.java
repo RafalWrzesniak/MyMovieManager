@@ -6,9 +6,9 @@ import org.junit.jupiter.api.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class IOTest {
@@ -80,7 +80,7 @@ class IOTest {
                 Map.entry(Movie.TITLE, Collections.singletonList("Some Title")),
                 Map.entry(Movie.PREMIERE, Collections.singletonList("2020-08-31")),
                 Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/movie"))
-        ));
+        ), true);
         IO.createSummaryImage(movie, tmp);
         assertTrue(IO.listDirectory(tmp).contains(new File(tmpPath.concat("\\tmpTest.png"))));
     }

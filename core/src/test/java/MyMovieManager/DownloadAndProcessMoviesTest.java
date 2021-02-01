@@ -46,7 +46,7 @@ class DownloadAndProcessMoviesTest {
         File movieFile2 = Files.TMP_FILES.resolve("movies").resolve("Ewolucja planety małp").toFile();
         File movieFile3 = Files.TMP_FILES.resolve("movies").resolve("Wojna o planetę małp").toFile();
         if(movieFile1.mkdirs() && movieFile2.mkdirs() && movieFile3.mkdirs()) System.out.println("All ready");
-        DownloadAndProcessMovies dap = new DownloadAndProcessMovies(IO.listDirectory(Files.TMP_FILES.resolve("movies").toFile()), allMovies, allActors);
+        DownloadAndProcessMovies dap = new DownloadAndProcessMovies(IO.listDirectory(Files.TMP_FILES.resolve("movies").toFile()), allMovies, allActors, null);
         dap.start();
         dap.join();
 
@@ -63,7 +63,7 @@ class DownloadAndProcessMoviesTest {
     void handleMovieFromUrl() throws MalformedURLException {
         int numberOfFiles = IO.listDirectory(Config.getSAVE_PATH_MOVIE().toFile()).size();
         URL url = new URL("https://www.filmweb.pl/film/12+ma%C5%82p-1995-1210");
-        DownloadAndProcessMovies.handleMovieFromUrl(url, allMovies, allActors);
+        DownloadAndProcessMovies.handleMovieFromUrl(url, allMovies, allActors, null);
 
         assertEquals(IO.listDirectory(Config.getSAVE_PATH_MOVIE().toFile()).size(), numberOfFiles + 1);
         assertEquals("12 małp", allMovies.getObjByUrlIfExists(url).getTitle());
@@ -76,7 +76,7 @@ class DownloadAndProcessMoviesTest {
         System.out.println(movieFile.mkdir());
         int numberOfFiles = IO.listDirectory(movieFile).size();
 
-        DownloadAndProcessMovies.handleMovieFromFile(movieFile, allMovies, allActors);
+        DownloadAndProcessMovies.handleMovieFromFile(movieFile, allMovies, allActors, null);
 
         assertEquals(IO.listDirectory(movieFile).size(), numberOfFiles + 1);
         assertEquals("Planeta małp", allMovies.getObjByUrlIfExists(url).getTitle());

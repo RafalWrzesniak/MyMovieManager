@@ -61,23 +61,23 @@ class ActorTest {
             Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
             Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16")),
             Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Most+szpieg%C3%B3w-2015-728144"))
-            ));
+            ), true);
     Movie birdman = new Movie(Map.ofEntries(
         Map.entry(Movie.TITLE, Collections.singletonList("Birdman")),
         Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13")),
         Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Birdman-2014-680709"))
-        ));
+        ), true);
 
     Movie lotr = new Movie(Map.ofEntries(
         Map.entry(Movie.TITLE, Collections.singletonList("Władca pierścieni: Drużyna Pierścienia")),
         Map.entry(Movie.PREMIERE, Collections.singletonList("2001-12-13")),
         Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/W%C5%82adca+Pier%C5%9Bcieni%3A+Dru%C5%BCyna+Pier%C5%9Bcienia-2001-1065"))
-        ));
+        ), true);
     Movie deadpool = new Movie(Map.ofEntries(
         Map.entry(Movie.TITLE, Collections.singletonList("Deadpool")),
         Map.entry(Movie.PREMIERE, Collections.singletonList("2016-01-21")),
         Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Deadpool-2016-514675"))
-        ));
+        ), true);
         
     void setUp() {
         actor = new Actor(Map.ofEntries(

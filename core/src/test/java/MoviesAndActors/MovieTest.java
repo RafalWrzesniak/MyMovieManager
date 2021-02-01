@@ -77,21 +77,21 @@ class MovieTest {
                 Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
                 Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16")),
                 Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Most+szpieg%C3%B3w-2015-728144"))
-        ));
+        ), true);
     }
 
 
     @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
     @MethodSource("stringParams")
     void getTitle(Map<String, List<String>> map) {
-        Movie movie = new Movie(map);
+        Movie movie = new Movie(map, true);
         assertEquals(map.get(Movie.TITLE).get(0), movie.getTitle());
     }
 
     @ParameterizedTest(name = "#{index} - Test with Argument = {arguments}")
     @MethodSource("stringParams")
     void getPremiere(Map<String, List<String>> map) {
-        Movie movie = new Movie(map);
+        Movie movie = new Movie(map, true);
         assertEquals(map.get(Movie.PREMIERE).get(0), movie.getPremiere().toString());
     }
 
@@ -285,12 +285,12 @@ class MovieTest {
                 Map.entry(Movie.TITLE, Collections.singletonList("Most szpiegów")),
                 Map.entry(Movie.PREMIERE, Collections.singletonList("2015-10-16")),
                 Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Most+szpieg%C3%B3w-2015-728144"))
-        ));
+        ), true);
         Movie movie3 = new Movie(Map.ofEntries(
                 Map.entry(Movie.TITLE, Collections.singletonList("Deadpool")),
                 Map.entry(Movie.PREMIERE, Collections.singletonList("2016-01-21")),
                 Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Deadpool-2016-514675"))
-        ));
+        ), true);
         assertEquals(0, movie.compareTo(movie2));
         assertEquals(9, movie.compareTo(movie3));
     }

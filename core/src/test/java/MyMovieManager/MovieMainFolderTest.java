@@ -29,18 +29,18 @@ class MovieMainFolderTest {
             Map.entry(Movie.TITLE, Collections.singletonList("Joker")),
             Map.entry(Movie.PREMIERE, Collections.singletonList("2019-08-31")),
             Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Joker-2019-810167"))
-    ));
+    ), true);
     private final Movie kiler = new Movie(Map.ofEntries(
             Map.entry(Movie.TITLE, Collections.singletonList("Kiler")),
             Map.entry(Movie.PREMIERE, Collections.singletonList("1997-11-17")),
             Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Kiler-1997-529"))
-            ));
+            ), true);
 
     private final Movie deadpool = new Movie(Map.ofEntries(
             Map.entry(Movie.TITLE, Collections.singletonList("Deadpool")),
             Map.entry(Movie.PREMIERE, Collections.singletonList("2016-01-21")),
             Map.entry(Movie.FILMWEB, Collections.singletonList("https://www.filmweb.pl/film/Deadpool-2016-514675"))
-    ));
+    ), true);
 
     static void clearTmp() {
         IO.deleteDirectoryRecursively(Configuration.Files.TMP_FILES.toFile());
@@ -90,7 +90,7 @@ class MovieMainFolderTest {
         File movie3 = testMovieMain.resolve("Deadpool").toFile();
         movie3.mkdir();
 
-        MovieMainFolder movieMainFolder2 = new MovieMainFolder(movieMainFolder.getMoviesToWatch(), allMovies, allActors);
+        MovieMainFolder movieMainFolder2 = new MovieMainFolder(movieMainFolder.getMoviesToWatch(), allMovies, allActors, null);
         movieMainFolder2.start();
         movieMainFolder2.join();
         assertEquals(3, movieMainFolder.getMoviesToWatch().size());
