@@ -1,6 +1,8 @@
 package Internet;
 
+import Configuration.Config;
 import FileOperations.IO;
+import FileOperations.XMLOperator;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
@@ -9,7 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
 import java.io.*;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
@@ -23,6 +28,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import static java.util.Map.entry;
 
 @Slf4j
@@ -192,7 +198,7 @@ public final class Connection {
     }
 
 
-    public List<Actor> createActorsFromFilmwebLinks(List<String> actorUrls, ContentList<Actor> allActors) {
+    public List<Actor> createActorsFromFilmwebLinks(List<String> actorUrls, ContentList<Actor> allActors, List<String> actorStringList) {
         List<Actor> actorList = new ArrayList<>();
         if(actorUrls == null || actorUrls.size() == 0 || allActors == null) {
              log.warn("Null or empty argument passed to createActorsFromFilmwebLinks()");
@@ -201,6 +207,15 @@ public final class Connection {
         for(String actorUrl : actorUrls) {
             try {
                 Actor actor = allActors.getObjByUrlIfExists(new URL(actorUrl));
+                if(actor == null) {
+                    for(String s : actorStringList) {
+                        if(s.contains(actorUrl)) {
+                            String id = s.split(";")[0];
+                            actor = XMLOperator.createActorFromXml(Paths.get(Config.getSAVE_PATH_ACTOR().toString(), "actor".concat(id)).toFile());
+                            break;
+                        }
+                    }
+                }
                 if(actor == null) {
                     changeUrlTo(actorUrl);
                     actor = createActorFromFilmwebLink();
@@ -250,25 +265,25 @@ public final class Connection {
     public Movie createMovieFromFilmwebLink() throws NullPointerException, IOException {
         Map<String, List<String>> movieData;
         movieData = grabMovieDataFromFilmweb();
-        Movie movie = new Movie(movieData);
+        Movie movie = new Movie(movieData, false);
         if(movie.getPremiere() == null) throw new NullPointerException("Couldn't find proper data of " + movie.getTitle());
         return movie;
     }
 
-    public void addCastToMovie(Movie movie, ContentList<Actor> allActors) throws IOException {
+    public void addCastToMovie(Movie movie, ContentList<Actor> allActors, List<String> actorStringList) throws IOException {
         changeMovieUrlToCastActors();
         List<String> castUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST));
-        List<Actor> actors = createActorsFromFilmwebLinks(castUrls, allActors);
+        List<Actor> actors = createActorsFromFilmwebLinks(castUrls, allActors, actorStringList);
         movie.addActors(actors);
 
         changeMovieUrlToCastCrew();
         List<String> directorUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.DIRECTORS));
-        List<Actor> directors = createActorsFromFilmwebLinks(directorUrls, allActors);
+        List<Actor> directors = createActorsFromFilmwebLinks(directorUrls, allActors, actorStringList);
         movie.addDirectors(directors);
 
         changeMovieUrlToCastCrew();
         List<String> writerUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.WRITERS));
-        List<Actor> writers = createActorsFromFilmwebLinks(writerUrls, allActors);
+        List<Actor> writers = createActorsFromFilmwebLinks(writerUrls, allActors, actorStringList);
         movie.addWriters(writers);
     }
 
