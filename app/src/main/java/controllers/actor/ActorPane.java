@@ -40,7 +40,7 @@ public class ActorPane extends ContentPane implements Initializable, ActorKind {
     public void setActor(Actor actor) {
         this.actor = actor;
         this.contextMenu = new ActorContextMenu(actor, resourceBundle, this).getContextMenu();
-        if(actor.getImagePath() == null || !actor.getImagePath().toFile().exists()) {
+        if(!actor.getImagePath().toFile().exists()) {
             actor.setImagePath(Files.NO_ACTOR_IMAGE);
         } else if(!actor.getImagePath().equals(Files.NO_ACTOR_IMAGE)) {
             super.iHaveImage.setValue(true);
