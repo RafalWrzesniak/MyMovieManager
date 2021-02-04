@@ -1,6 +1,7 @@
 package MoviesAndActors;
 
 import Configuration.Config;
+import Configuration.Files;
 import FileOperations.AutoSave;
 import FileOperations.IO;
 import lombok.AccessLevel;
@@ -124,7 +125,11 @@ public final class Actor implements ContentType, Comparable<Actor> {
 
     @Override
     public Path getImagePath() {
-        return Config.getSAVE_PATH_ACTOR().resolve(imagePath);
+        if(!imagePath.equals(Files.NO_ACTOR_IMAGE)) {
+            return Config.getSAVE_PATH_ACTOR().resolve(imagePath);
+        } else {
+            return imagePath;
+        }
     }
 
 
@@ -167,7 +172,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
     }
 
     public void setImagePath(Path imagePath) {
-        if(imagePath.getNameCount() >= 2) {
+        if(imagePath.getNameCount() >= 2 && !imagePath.equals(Files.NO_ACTOR_IMAGE)) {
             this.imagePath = imagePath.subpath(imagePath.getNameCount()-2, imagePath.getNameCount());
         } else {
             this.imagePath = imagePath;

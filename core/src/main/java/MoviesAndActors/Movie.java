@@ -1,6 +1,7 @@
 package MoviesAndActors;
 
 import Configuration.Config;
+import Configuration.Files;
 import FileOperations.AutoSave;
 import FileOperations.IO;
 import lombok.EqualsAndHashCode;
@@ -208,7 +209,7 @@ public final class Movie implements ContentType, Comparable<Movie> {
 
     // Path
     public void setImagePath(Path imagePath) {
-        if(imagePath.getNameCount() >= 2) {
+        if(imagePath.getNameCount() >= 2 && !imagePath.equals(Files.NO_MOVIE_COVER)) {
             this.imagePath = imagePath.subpath(imagePath.getNameCount()-2, imagePath.getNameCount());
         } else {
             this.imagePath = imagePath;
@@ -352,7 +353,11 @@ public final class Movie implements ContentType, Comparable<Movie> {
 
     @Override
     public Path getImagePath() {
-        return Config.getSAVE_PATH_MOVIE().resolve(imagePath);
+        if(!imagePath.equals(Files.NO_MOVIE_COVER)) {
+            return Config.getSAVE_PATH_MOVIE().resolve(imagePath);
+        } else {
+            return imagePath;
+        }
     }
 
     public boolean isActorPlayingIn(Actor actor) {
