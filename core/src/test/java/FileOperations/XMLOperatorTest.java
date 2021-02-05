@@ -118,7 +118,7 @@ class XMLOperatorTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        XMLOperator.ReadAllDataFromFiles readAllDataFromFiles = new XMLOperator.ReadAllDataFromFiles();
+        XMLOperator.ReadInitDataFromFiles readAllDataFromFiles = new XMLOperator.ReadInitDataFromFiles();
         readAllDataFromFiles.start();
         readAllDataFromFiles.join();
 

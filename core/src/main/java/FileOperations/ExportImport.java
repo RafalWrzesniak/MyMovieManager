@@ -213,7 +213,7 @@ public final class ExportImport {
 
     }
 
-    public static class ImportDataFromXml extends XMLOperator.ReadAllDataFromFiles {
+    public static class ImportDataFromXml extends XMLOperator.ReadInitDataFromFiles {
 
         private final File importFile;
 
@@ -295,7 +295,8 @@ public final class ExportImport {
                     if(!outDir.mkdirs()) {
                         log.warn("Could not create directory \"{}\"", outDir);
                     }
-                    File targetFile = new File(outDir.toString().concat("\\").concat(reprName).concat(".xml"));
+                    String fileName = reprName.replaceAll("[]?\\[*./:;|,\"]", "");
+                    File targetFile = new File(outDir.toString().concat("\\").concat(fileName).concat(".xml"));
                     XMLOperator.makeSimpleSave(doc, targetFile);
                 }
                 return true;
