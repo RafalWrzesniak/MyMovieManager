@@ -25,6 +25,7 @@ public class MovieMainFolder extends Thread {
 //    == fields ==
     @Getter private final ContentList<Movie> moviesToWatch;
     @Getter private List<Movie> newMovies;
+    private List<String> actorStringList;
 
 //    == required fields ==
     private final ContentList<Movie> allMovies;
@@ -45,10 +46,11 @@ public class MovieMainFolder extends Thread {
         log.debug("Attempt to remove \"{}\" ends with status \"{}\"", path.toString(), path.toFile().delete());
     }
 
-    public MovieMainFolder(ContentList<Movie> moviesToWatch, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
+    public MovieMainFolder(ContentList<Movie> moviesToWatch, ContentList<Movie> allMovies, ContentList<Actor> allActors, List<String> actorStringList) {
         this.allMovies = allMovies;
         this.allActors = allActors;
         this.moviesToWatch = moviesToWatch;
+        this.actorStringList = actorStringList;
     }
 
 //    == methods ==
@@ -73,7 +75,7 @@ public class MovieMainFolder extends Thread {
 
         log.debug("Found \"{}\" new movies in main movie folder", newPositionsToHandle.size());
         if(newPositionsToHandle.size() > 0) {
-            DownloadAndProcessMovies downloadAndProcessMovies = new DownloadAndProcessMovies(newPositionsToHandle, allMovies, allActors);
+            DownloadAndProcessMovies downloadAndProcessMovies = new DownloadAndProcessMovies(newPositionsToHandle, allMovies, allActors, actorStringList);
             downloadAndProcessMovies.start();
             try {
                 downloadAndProcessMovies.join();

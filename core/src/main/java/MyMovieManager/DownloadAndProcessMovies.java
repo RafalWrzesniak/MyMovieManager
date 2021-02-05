@@ -33,6 +33,7 @@ public final class DownloadAndProcessMovies extends Thread {
     private final List<File> movieFileList;
     private final ContentList<Movie> allMovies;
     private final ContentList<Actor> allActors;
+    private final List<String> actorStringList;
 
 //    == methods ==
     @Override
@@ -57,7 +58,7 @@ public final class DownloadAndProcessMovies extends Thread {
                             break;
                         }
                     }
-                    Movie movie = handleMovieFromFile(movieFile, allMovies, allActors);
+                    Movie movie = handleMovieFromFile(movieFile, allMovies, allActors, actorStringList);
                     if(movie != null) {
                         downloadedMovies.add(movie);
                         movieFileMap.put(movieFile, movie.getId());
@@ -80,7 +81,7 @@ public final class DownloadAndProcessMovies extends Thread {
     }
 
 
-    public static void handleMovieFromUrl(URL movieUrl, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
+    public static void handleMovieFromUrl(URL movieUrl, ContentList<Movie> allMovies, ContentList<Actor> allActors, List<String> actorStringList) {
         taskManager.addTask(movieUrl);
         long startTime = System.nanoTime();
         Connection connection;
@@ -89,7 +90,7 @@ public final class DownloadAndProcessMovies extends Thread {
             connection = new Connection(movieUrl);
             movie = connection.createMovieFromFilmwebLink();
             if(allMovies.add(movie)) {
-                connection.addCastToMovie(movie, allActors);
+                connection.addCastToMovie(movie, allActors, actorStringList);
                 movie.printPretty();
                 File movieDir = IO.createContentDirectory(movie);
                 Path downloadedImagePath = Paths.get(movieDir.toString(), movie.getReprName().replaceAll(":", "").concat(".jpg"));
@@ -111,7 +112,7 @@ public final class DownloadAndProcessMovies extends Thread {
         taskManager.removeTask(movieUrl);
     }
 
-    public static Movie handleMovieFromFile(File movieFile, ContentList<Movie> allMovies, ContentList<Actor> allActors) {
+    public static Movie handleMovieFromFile(File movieFile, ContentList<Movie> allMovies, ContentList<Actor> allActors, List<String> actorStringList) {
         taskManager.addTask(movieFile);
         long startTime = System.nanoTime();
         Connection connection;
@@ -126,7 +127,7 @@ public final class DownloadAndProcessMovies extends Thread {
             }
             movie = connection.createMovieFromFilmwebLink();
             if(allMovies.add(movie)) {
-                connection.addCastToMovie(movie, allActors);
+                connection.addCastToMovie(movie, allActors, actorStringList);
                 IO.createSummaryImage(movie, movieFile);
                 File movieDir = IO.createContentDirectory(movie);
                 Path downloadedImagePath = Paths.get(

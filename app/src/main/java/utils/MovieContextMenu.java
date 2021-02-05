@@ -107,8 +107,8 @@ public class MovieContextMenu {
                 connection = new Connection(finalMovie.getFilmweb());
                 Map<String, List<String>> map = connection.grabMovieDataFromFilmweb();
                 map.put(Movie.ID, Collections.singletonList(String.valueOf(finalMovie.getId())));
-                downloadedMovie = new Movie(map);
-                connection.addCastToMovie(downloadedMovie, MainController.allActors);
+                downloadedMovie = new Movie(map, false);
+                connection.addCastToMovie(downloadedMovie, MainController.allActors,MainController.actorStringList);
 
                 if(downloadedMovie.getImagePath() == null || downloadedMovie.getImagePath().equals(Configuration.Files.NO_MOVIE_COVER))  {
                     Path downloadedImagePath = Paths.get(IO.createContentDirectory(downloadedMovie).toString(), downloadedMovie.getReprName().replaceAll("[]?\\[*./:;|,\"]", "").concat(".jpg"));

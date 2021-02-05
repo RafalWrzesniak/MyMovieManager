@@ -75,6 +75,7 @@ public class MainController implements Initializable {
     public static ContentList<Movie> moviesToWatch;
     public static ContentList<Actor> allActors;
     public static ContentList<Movie> allMovies;
+    public static List<String> actorStringList;
     public static Rectangle recForDialogs;
 
 //    == fields ==
