@@ -31,7 +31,7 @@ public final class SortFilter<T extends ContentType> implements Initializable {
 
 //    == fields ==
     @FXML public HBox filterHBox;
-    @FXML private MenuButton genresMenu, productionMenu, filtersMenu;
+    @FXML private MenuButton genresMenu, productionMenu, filtersMenu, countryMenu;
     @FXML private CustomMenuItem actorCustomCountry, movieCustomGenre, moreFilters, movieCustomProduction;
     @FXML private Label actorAgeLowValue, actorAgeHighValue, moviePremiereHigh, moviePremiereLow, movieDurationLow,
             movieDurationHigh, movieRateLow, movieRateHigh, movieRateCountLow, movieRateCountHigh;
@@ -64,6 +64,7 @@ public final class SortFilter<T extends ContentType> implements Initializable {
         if(productionMenu != null) productionMenu.showingProperty().addListener(borderButtonListener(productionMenu));
         if(genresMenu != null) genresMenu.showingProperty().addListener(borderButtonListener(genresMenu));
         if(filtersMenu != null) filtersMenu.showingProperty().addListener(borderButtonListener(filtersMenu));
+        if(countryMenu != null) countryMenu.showingProperty().addListener(borderButtonListener(countryMenu));
     }
 
 
@@ -306,4 +307,29 @@ public final class SortFilter<T extends ContentType> implements Initializable {
         };
     }
 
+    @FXML
+    public void clearMovieFilters() {
+        moviePremiere.setHighValue(moviePremiere.getMax());
+        moviePremiere.setLowValue(moviePremiere.getMin());
+        movieRate.setHighValue(movieRate.getMax());
+        movieRate.setLowValue(movieRate.getMin());
+        movieRateCount.setHighValue(movieRateCount.getMax());
+        movieRateCount.setLowValue(movieRateCount.getMin());
+        movieDuration.setHighValue(movieDuration.getMax());
+        movieDuration.setLowValue(movieDuration.getMin());
+        movieFilteredGenres.clear();
+        movieGenreGrid.getChildren().forEach(node -> ((CheckBox) node).setSelected(false));
+        movieFilteredProduction.clear();
+        movieProductionGrid.getChildren().forEach(node -> ((CheckBox) node).setSelected(false));
+        applyFilters();
+    }
+
+    @FXML
+    public void clearActorFilters() {
+        actorAgeSlider.setHighValue(actorAgeSlider.getMax());
+        actorAgeSlider.setLowValue(actorAgeSlider.getMin());
+        actorFilteredCountries.clear();
+        actorCountriesGrid.getChildren().forEach(node -> ((CheckBox) node).setSelected(false));
+        applyFilters();
+    }
 }

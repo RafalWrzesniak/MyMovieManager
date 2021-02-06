@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.CustomMenuItem?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import org.controlsfx.control.RangeSlider?>
+<?import java.net.URL?>
+<HBox fx:id="filterHBox" alignment="CENTER" spacing="10.0" styleClass="background-color"
+      xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SortFilter">
 
-<?import javafx.scene.layout.VBox?>
-<HBox fx:id="filterHBox" alignment="CENTER" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SortFilter">
-
-   <MenuButton mnemonicParsing="false" text="%main_view.filter.actor.country" >
+   <MenuButton fx:id="countryMenu" mnemonicParsing="false" text="%main_view.filter.actor.country" >
       <items>
          <CustomMenuItem fx:id="actorCustomCountry" styleClass="filter-context" mnemonicParsing="false" text="Unspecified Action">
             <content>
@@ -21,7 +17,7 @@
          </CustomMenuItem>
       </items>
       <HBox.margin>
-         <Insets left="20.0" right="10.0" />
+         <Insets left="10.0" />
       </HBox.margin>
    </MenuButton>
 
@@ -37,6 +33,8 @@
       </VBox>
       <Label fx:id="actorAgeHighValue" style="-fx-font-size: 14;" styleClass="white_text" />
    </HBox>
+
+   <Button onAction="#clearActorFilters" text="%main_view.filter.clearFilter" styleClass="white_text"/>
 
    <stylesheets>
       <URL value="@../css-styles/basic.css" />

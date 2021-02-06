@@ -94,6 +94,8 @@
                      </items>
                   </MenuButton>
 
+                  <Button onAction="#clearMovieFilters" text="%main_view.filter.clearFilter" styleClass="white_text"/>
+
                </VBox>
             </content>
          </CustomMenuItem>
