@@ -15,10 +15,15 @@ import org.w3c.dom.NodeList;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.*;
 
 /**
  * Fully static and final class with private constructor to manage some I/O operations
@@ -61,8 +66,8 @@ public final class IO {
         if(directory == null) return null;
         List<File> list = new ArrayList<>();
         for (File file : Objects.requireNonNull(listDirectory(directory))) {
+            list.add(file);
             if(file.isDirectory()) {
-                list.add(file);
                 list.addAll(listDirectoryRecursively(file));
             }
         }
@@ -200,6 +205,23 @@ public final class IO {
         return null;
     }
 
+    public static void moveFiles(Path source, Path target) {
+        IO.listDirectoryRecursively(source.toFile()).forEach(file -> {
+            if(!file.isDirectory() && file.exists()) {
+                Path targetPath = target.resolve(file.toPath().subpath(source.getNameCount(), file.toPath().getNameCount()));
+                try {
+                    targetPath.getParent().toFile().mkdirs();
+                    java.nio.file.Files.move(file.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+                    java.nio.file.Files.delete(file.toPath().getParent());
+                } catch (IOException ignored) { }
+            }
+        });
+        try {
+            java.nio.file.Files.delete(source.getParent());
+        } catch (IOException ignored) { }
+
+
+    }
 
     /** Method created a .png file with basic information about movie. It uses {@link Movie#getDataForSummary()} to get
      * all need movie data. It will be saved in pathName\pathName.{@link File#getName()}.png

@@ -65,11 +65,7 @@ public final class Config {
                 log.warn("Could not create directory \"{}\"", newDirectory);
             }
             if(moveFiles) {
-                try {
-                    Files.move(SAVE_PATH, newDirectory.toPath(), REPLACE_EXISTING);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                IO.moveFiles(SAVE_PATH, newDirectory.toPath());
             }
             updateParamInCfg("SAVE_PATH", newDirectory.toString());
             SAVE_PATH = newDirectory.toPath();
