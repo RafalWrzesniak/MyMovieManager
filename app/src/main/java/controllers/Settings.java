@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import lombok.Setter;
@@ -18,15 +19,19 @@ import java.util.ResourceBundle;
 public class Settings implements Initializable {
 
 //    == fields ==
-    @FXML public TextField mainDir, watched, save;
-    @Setter public Dialog<ButtonType> dialog;
+    @FXML private Label saveLabel, watchedLabel, mainDirLabel;
+    @FXML private TextField mainDir, watched, save;
     @Setter private MainController mainController;
+    @Setter public Dialog<ButtonType> dialog;
     private ResourceBundle resourceBundle;
 
 //    == init ==
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.resourceBundle = resourceBundle;
+        saveLabel.setText(Config.getSAVE_PATH().toString());
+        watchedLabel.setText(Config.getRECENTLY_WATCHED().toString());
+        mainDirLabel.setText(Config.getMAIN_MOVIE_FOLDER().toString());
     }
 
 

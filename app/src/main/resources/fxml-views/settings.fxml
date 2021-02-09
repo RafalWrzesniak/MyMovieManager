@@ -11,6 +11,7 @@
       <VBox spacing="10.0">
 
          <Label maxHeight="40" minHeight="40" prefHeight="40" styleClass="white_text" text="%dialog.chooser.set_main" wrapText="true" />
+         <Label fx:id="mainDirLabel" styleClass="underTextFieldInfo" wrapText="true" />
          <TextField fx:id="mainDir" onMouseClicked="#chooseDirectory" prefWidth="250.0" promptText="%settings.choose_file_prompt" editable="false">
             <VBox.margin>
                <Insets bottom="20.0" />
@@ -18,6 +19,7 @@
          </TextField>
 
          <Label maxHeight="40" minHeight="40" prefHeight="40" styleClass="white_text" text="%settings.set_watched" wrapText="true" />
+         <Label fx:id="watchedLabel" styleClass="underTextFieldInfo" wrapText="true" />
          <TextField fx:id="watched" onMouseClicked="#chooseDirectory" prefWidth="250.0" promptText="%settings.choose_file_prompt" editable="false">
             <VBox.margin>
                <Insets bottom="20.0" />
@@ -25,6 +27,7 @@
          </TextField>
 
          <Label maxHeight="40" minHeight="40" prefHeight="40" styleClass="white_text" text="%settings.set_save" wrapText="true" />
+         <Label fx:id="saveLabel" styleClass="underTextFieldInfo" wrapText="true" />
          <TextField fx:id="save" onMouseClicked="#chooseDirectory" prefWidth="250.0" promptText="%settings.choose_file_prompt" editable="false">
             <VBox.margin>
                <Insets bottom="20.0" />
