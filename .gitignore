@@ -27,3 +27,6 @@ core/core.iml
 /app/src/main/resources/MMM3.png
 /app/src/main/resources/logo.png
 /logs/
+/app/src/main/java/app/GUIStarter.java
+/MMMLaunchBundledJRE.xml
+/MMMLaunchJREinstalled.xml
