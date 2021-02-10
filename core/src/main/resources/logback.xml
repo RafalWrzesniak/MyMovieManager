@@ -13,19 +13,19 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/mmm-log-%d{yyyy-MM-dd_HH-mm}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
-            <totalSizeCap>20MB</totalSizeCap>
+            <totalSizeCap>50MB</totalSizeCap>
         </rollingPolicy>
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>3MB</maxFileSize>
+            <maxFileSize>30MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %green([%thread]) %highlight(%level) %magenta(%logger{50}) - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %level %logger{50} - %msg%n</pattern>
         </encoder>
     </appender>
 
     <root level="DEBUG">
         <appender-ref ref="colorAppender"/>
-<!--        <appender-ref ref="rollingFile"/>-->
+        <appender-ref ref="rollingFile"/>
     </root>
 
 </configuration>
