@@ -30,7 +30,7 @@ public final class DownloadAndProcessMovies extends Thread {
     private static final TaskManager taskManager = TaskManager.getInstance();
 
 //    == required fields ==
-    private final List<File> movieFileList;
+    private final List<File> initFileList;
     private final ContentList<Movie> allMovies;
     private final ContentList<Actor> allActors;
     private final List<String> actorStringList;
@@ -43,6 +43,14 @@ public final class DownloadAndProcessMovies extends Thread {
         movieFileMap = new HashMap<>();
         downloadedMovies = new ArrayList<>();
         List<Thread> threads = new ArrayList<>();
+        List<String> readFileNames = new ArrayList<>();
+        List<File> movieFileList = new ArrayList<>();
+        initFileList.forEach(file -> {
+            if(!readFileNames.contains(IO.removeFileExtension(file.getName()))) {
+                readFileNames.add(IO.removeFileExtension(file.getName()));
+                movieFileList.add(file);
+            }
+        });
         int numberOfThreads = movieFileList.size() > 20 ? 5 : 3;
         taskManager.addTask(movieFileList);
         for(int i = 0; i < numberOfThreads; i++) {
@@ -90,7 +98,7 @@ public final class DownloadAndProcessMovies extends Thread {
             connection = new Connection(movieUrl);
             movie = connection.createMovieFromFilmwebLink();
             if(allMovies.add(movie)) {
-                connection.addCastToMovie(movie, allActors, actorStringList);
+                connection.addCastToMovie(movie, allActors, actorStringList, allMovies);
                 movie.printPretty();
                 File movieDir = IO.createContentDirectory(movie);
                 Path downloadedImagePath = Paths.get(movieDir.toString(), movie.getReprName().replaceAll(":", "").concat(".jpg"));
@@ -127,7 +135,7 @@ public final class DownloadAndProcessMovies extends Thread {
             }
             movie = connection.createMovieFromFilmwebLink();
             if(allMovies.add(movie)) {
-                connection.addCastToMovie(movie, allActors, actorStringList);
+                connection.addCastToMovie(movie, allActors, actorStringList, allMovies);
                 IO.createSummaryImage(movie, movieFile);
                 File movieDir = IO.createContentDirectory(movie);
                 Path downloadedImagePath = Paths.get(
@@ -146,7 +154,7 @@ public final class DownloadAndProcessMovies extends Thread {
             }
             movie.printPretty();
         } catch (IOException | NullPointerException e) {
-            log.warn("Unexpected error while downloading \"{}\" - \"{}\"", movieFile.getName(), e);
+            log.warn("Unexpected error while downloading \"{}\" - \"{}\"", movieFile.getName(), e.getMessage());
         }
         taskManager.removeTask(movieFile);
         return movie;
