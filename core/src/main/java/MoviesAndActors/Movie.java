@@ -28,9 +28,9 @@ public final class Movie implements ContentType, Comparable<Movie> {
     @Getter private String title;
     @Getter private String titleOrg;
     @Getter private String description;
-    @Getter private Integer duration;
-    @Getter private Integer rateCount;
-    @Getter private Double rate;
+    @Getter private int duration;
+    @Getter private int rateCount;
+    @Getter private double rate;
     @Getter private LocalDate premiere;
     @Getter private URL imageUrl;
     @Getter private URL filmweb;
@@ -456,9 +456,9 @@ public final class Movie implements ContentType, Comparable<Movie> {
         map.put(TITLE, title);
         map.put(TITLE_ORG, titleOrg);
         map.put(PREMIERE, premiere != null ? premiere.toString() : null);
-        map.put(DURATION, duration != null ? String.valueOf(duration) : null);
-        map.put(RATE, rate != null ? String.valueOf(rate) : null);
-        map.put(RATE_COUNT, rateCount != null ? String.valueOf(rateCount) : null);
+        map.put(DURATION, String.valueOf(duration));
+        map.put(RATE,String.valueOf(rate));
+        map.put(RATE_COUNT, String.valueOf(rateCount));
         map.put(CAST, getFromList.apply(cast));
         map.put(DIRECTORS, getFromList.apply(directors));
         map.put(WRITERS, getFromList.apply(writers));
