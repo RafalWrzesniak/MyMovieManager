@@ -16,6 +16,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -93,7 +94,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
         } else {
             this.id = id;
         }
-//        System.out.println(this + " : " + actorMap.get(PLAYED_IN_MOVIES));
+
         if(actorMap.get(PLAYED_IN_MOVIES) != null) playedIds.addAll(Arrays.asList(actorMap.get(PLAYED_IN_MOVIES).split(";")));
         if(actorMap.get(DIRECTED_MOVIES) != null) directedIds.addAll(Arrays.asList(actorMap.get(DIRECTED_MOVIES).split(";")));
         if(actorMap.get(WROTE_MOVIES) != null) wroteIds.addAll(Arrays.asList(actorMap.get(WROTE_MOVIES).split(";")));
@@ -120,12 +121,12 @@ public final class Actor implements ContentType, Comparable<Actor> {
 
     @Override
     public String getReprName() {
-        return getNameAndSurname().replaceAll(" ", "_");
+        return getNameAndSurname().replaceAll(" ", "_").replaceAll("[]?\\[*./:;|,\"]", "");
     }
 
     @Override
     public Path getImagePath() {
-        if(!imagePath.equals(Files.NO_ACTOR_IMAGE)) {
+        if(imagePath != null && !imagePath.equals(Files.NO_ACTOR_IMAGE)) {
             return Config.getSAVE_PATH_ACTOR().resolve(imagePath);
         } else {
             return imagePath;
@@ -159,9 +160,9 @@ public final class Actor implements ContentType, Comparable<Actor> {
     public void setAge() {
         if(birthday == null) return;
         if(deathDay == null) {
-            this.age = LocalDate.now().minusYears(getBirthday().getYear()).getYear();
+            this.age = Period.between(birthday, LocalDate.now()).getYears();
         } else {
-            this.age = deathDay.minusYears(birthday.getYear()).getYear();
+            this.age = Period.between(birthday, deathDay).getYears();
         }
         saveMe();
     }
@@ -186,7 +187,6 @@ public final class Actor implements ContentType, Comparable<Actor> {
         }
         this.deathDay = deathDay;
         setAge();
-        saveMe();
     }
 
     public void setIsAnActor(boolean isActor) {
@@ -348,15 +348,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
 
     @Override
     public String toString() {
-        String bold = "\033[1m";
-        String end = "\033[0m";
-        return "Actor{" +
-                "id='" + bold + id + end + '\'' +
-                ", name='" + bold + name + end + '\'' +
-                ", surname='" + bold + surname + end + '\'' +
-                ", age='" + bold + age + end + '\'' +
-                ", born='" + bold + nationality + end + '\'' +
-        '}';
+        return String.format("Actor{id='%s', name='%s', surname='%s', age='%s', nationality='%s'}", id, name, surname, age, nationality);
     }
 
     @Override
