@@ -348,12 +348,12 @@ public final class Movie implements ContentType, Comparable<Movie> {
 
     @Override
     public String getReprName() {
-        return title.replaceAll(" ", "_");
+        return title.replaceAll(" ", "_").replaceAll("[]?\\[*./:;|,\"]", "");
     }
 
     @Override
     public Path getImagePath() {
-        if(!imagePath.equals(Files.NO_MOVIE_COVER)) {
+        if(imagePath != null && !imagePath.equals(Files.NO_MOVIE_COVER)) {
             return Config.getSAVE_PATH_MOVIE().resolve(imagePath);
         } else {
             return imagePath;
@@ -503,29 +503,39 @@ public final class Movie implements ContentType, Comparable<Movie> {
 
     @Override
     public String toString() {
-        String bold = "\033[1m";
-        String end = "\033[0m";
-        return "Movie{" +
-                "id='" + bold + id + end + '\'' +
-                ", title='" + bold + title + end + '\'' +
-                ", premiere=" + bold + premiere + end +
-                '}';
+        return String.format("Movie{id='%s', title='%s', premiere='%s'}", id, title, premiere);
     }
 
-    public void printPretty() {
-        System.out.println("Title      : " + title);
-        System.out.println("TitleOrg   : " + titleOrg);
-        System.out.println("Premiere   : " + premiere);
-        System.out.println("Duration   : " + getDurationFormatted());
-        System.out.println("Directors  : " + directors);
-        System.out.println("Writers    : " + writers);
-        System.out.println("Genres     : " + genres);
-        System.out.println("Production : " + production);
-        System.out.println("Rate       : " + rate);
-        System.out.println("RateCount  : " + rateCount);
-        System.out.println("Plot       : " + description);
-        System.out.println("Cast       : " + cast);
-        System.out.println("WebLink    : " + filmweb);
+    public String printPretty() {
+        String toPrint = String.format(
+                "Title      : %s\n" +
+                "TitleOrg   : %s\n" +
+                "Premiere   : %s\n" +
+                "Duration   : %s\n" +
+                "Directors  : %s\n" +
+                "Writers    : %s\n" +
+                "Genres     : %s\n" +
+                "Production : %s\n" +
+                "Rate       : %s\n" +
+                "RateCount  : %s\n" +
+                "Plot       : %s\n" +
+                "WebLink    : %s\n" +
+                "Cast : %s\n"
+                , title, titleOrg, premiere, getDurationFormatted(), printActors(directors), printActors(writers), genres,
+                production, rate, rateCount, description, filmweb, printActors(cast));
+
+        System.out.println(toPrint);
+        return toPrint;
+    }
+
+    private String printActors(Set<Actor> listToPrint) {
+        StringBuilder print = new StringBuilder();
+        int actorNumber = 1;
+        for (Actor actor : listToPrint) {
+            print.append("\n\t").append(actorNumber).append(") ").append(actor);
+            actorNumber++;
+        }
+        return print.toString();
     }
 
 
