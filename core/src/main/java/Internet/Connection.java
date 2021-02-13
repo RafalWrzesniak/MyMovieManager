@@ -37,6 +37,8 @@ public final class Connection {
 //    == fields ==
     private URL websiteUrl;
     @Getter private URL mainMoviePage;
+    @Getter private String searchingMessage;
+    private final StringBuilder failedActorsMessageBuilder = new StringBuilder("\nActors that wasn't downloaded because of low data quality:\n");
 
 //    == constants ==
     private static final String FILMWEB = "https://www.filmweb.pl";
@@ -92,6 +94,10 @@ public final class Connection {
         this.websiteUrl = new URL(mainMoviePage.toString().concat("/cast/crew"));
     }
 
+    public String getFailedActorsMessage() {
+        return failedActorsMessageBuilder.toString();
+    }
+
     public File downloadWebsite() throws IOException {
         String tmpFileName =
                 "tmp_"
@@ -134,10 +140,10 @@ public final class Connection {
         }
     }
 
-    public void changeUrlTo(URL newUrl) throws IOException {
+    public void changeUrlTo(URL newUrl) {
         if(newUrl == null) {
             log.warn("Null as input - cannot change URL to null");
-            throw new IOException("Null as input - cannot change URL to null");
+            return;
         }
         if (newUrl.toString().matches("^" + FILMWEB + "/film/[^/]+?$")) {
             this.mainMoviePage = newUrl;
@@ -224,7 +230,9 @@ public final class Connection {
                             actor = allActors.get(actor);
                         }
                     } else {
-                        throw new NullPointerException("No data found for " + actorUrl);
+                        log.warn("Can't get data from \"{}\"", actorUrl);
+                        failedActorsMessageBuilder.append(actorUrl).append("\n");
+//                        throw new NullPointerException("No data found for " + actorUrl);
                     }
                 } else {
                     log.debug("Actor \"{}\" already exists on \"{}\", new data won't be downloaded", actor, allActors);
@@ -364,12 +372,16 @@ public final class Connection {
 //            System.out.println("Correlation of \"" + foundTitle + "\" : " + Math.round(correlation*100) + "%");
         }
         String result = String.format("\"%s\" with correlation: %d%%", chosenTitle, Math.round(highestCorrelation * 100));
-        if(Math.round(highestCorrelation*100) > 50) {
-            log.info("For query \"{}\" there was found {}", desiredTitle, result);
+        String fullResultMessage;
+        if(Math.round(highestCorrelation*100) > 65) {
+            fullResultMessage = String.format("For query \"%s\" there was found %s", desiredTitle, result);
+            log.info(fullResultMessage);
         } else {
-            log.warn("For query \"{}\" there was found {}. Low correlation. Possibility of wrong movie assigning. Aborting.", desiredTitle, result);
+            fullResultMessage = String.format("For query \"%s\" there was found %s. Low correlation. Possibility of wrong movie assigning. Aborting.", desiredTitle, result);
+            log.warn(fullResultMessage);
             urlToReturn = null;
         }
+        this.searchingMessage = fullResultMessage + "\n";
         return urlToReturn != null ? new URL(urlToReturn) : null;
     }
 
