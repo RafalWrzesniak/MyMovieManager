@@ -14,19 +14,19 @@ public final class Files {
     /**
      * Path for files that are needed only for some time
      */
-    public static final Path TMP_FILES = Paths.get(System.getProperty("user.dir"), "tmp");
+    public static final Path TMP_FILES = Config.getDEF_PATH().resolve("tmp");
     /**
      * Default path for saving data by application
      */
-    public static final Path DEFAULT_SAVED_DATA = Paths.get(System.getProperty("user.dir"),"savedData");
+    public static final Path DEFAULT_SAVED_DATA = Config.getDEF_PATH().resolve("savedData");
     /**
      * Default path of location of main movies folder
      */
-    public static final Path DEFAULT_MAIN_MOVIE = Paths.get(System.getProperty("user.dir"), "Filmy");
+    public static final Path DEFAULT_MAIN_MOVIE = Config.getDEF_PATH().resolve("Filmy");
     /**
      * Default path of location of recently watched movies
      */
-    public static final Path DEFAULT_RECENTLY_WATCHED = Paths.get(System.getProperty("user.dir"), "Ogladnięte");
+    public static final Path DEFAULT_RECENTLY_WATCHED = Config.getDEF_PATH().resolve("Oglądnięte");
 
 
 
@@ -42,10 +42,10 @@ public final class Files {
     /**
      * File that contains last seen movies in {@link Config#getMAIN_MOVIE_FOLDER()}
      */
-    public static final File LAST_RIDE = Paths.get("core","src", "main", "resources", "lastRide.xml").toFile();
+    public static final File LAST_RIDE = Config.getDEF_PATH().resolve("cfg").resolve("lastRide.xml").toFile();
     /**
      * File to store some app configuration
      */
-    static final File CFG_FILE = Paths.get("core","src", "main", "resources", "config.cfg").toFile();
+    static final File CFG_FILE = Config.getDEF_PATH().resolve("cfg").resolve("config.cfg").toFile();
 
 }
