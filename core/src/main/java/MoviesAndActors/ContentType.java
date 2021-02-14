@@ -38,13 +38,14 @@ public interface ContentType  {
         string = string.replaceAll("2E3", "2000").replaceAll(",", "-").replaceAll("-0-", "-1-").replaceAll("-0$", "-1");
         if(string.matches("^\\d{4}$")) {
             return LocalDate.of(Integer.parseInt(string), 1, 1);
-        } else if(string.matches("^\\d{4}-\\d{2}$")) {
+        } else if(string.matches("^\\d{4}-\\d{1,2}$")) {
             return LocalDate.of(Integer.parseInt(string.substring(0, 4)), Integer.parseInt(string.substring(5)), 1);
         }
         try {
             return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
         } catch (DateTimeParseException e) {
-            return LocalDate.of(Integer.parseInt(string.substring(0, 4)), Integer.parseInt(string.substring(5, 6)), Integer.parseInt(string.substring(7)));
+            String[] sepDate = string.split("-");
+            return LocalDate.of(Integer.parseInt(sepDate[0]), Integer.parseInt(sepDate[1]), Integer.parseInt(sepDate[2]));
         }
 
     }
