@@ -134,9 +134,9 @@ public class ContentList<T extends ContentType> {
     }
 
     public void remove(T obj) {
+        XMLOperator.removeFromContentList(this, obj.getId());
         if(list.remove(obj)) {
             log.debug("\"{}\" removed from \"{}\"", obj.toString(), getListName());
-            XMLOperator.removeFromContentList(this, obj.getId());
             return;
         }
         log.warn("\"{}\" didn't removed from \"{}\"", obj.toString(), getListName());
