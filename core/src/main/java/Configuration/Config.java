@@ -13,12 +13,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -26,15 +22,29 @@ public final class Config {
 
 //    == fields ==
     @Getter private static Path SAVE_PATH;
+    @Getter private static final Path DEF_PATH;
     @Getter private static Path SAVE_PATH_MOVIE;
     @Getter private static Path SAVE_PATH_ACTOR;
-    @Getter private static Path MAIN_MOVIE_FOLDER;
     @Getter private static Path RECENTLY_WATCHED;
-
+    @Getter private static Path MAIN_MOVIE_FOLDER;
 
 //  == static initializer ==
     static {
+        if(Config.class.getResource("Config.class").toString().startsWith("jar")) {
+            String startPath = Config.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            int toIndex = startPath.contains("!") ? startPath.indexOf("!") : startPath.length();
+            DEF_PATH = Paths.get(startPath.substring(startPath.indexOf("/") + 1, toIndex)).getParent();
+        } else {
+            DEF_PATH = Paths.get(System.getProperty("user.dir"));
+        }
+        log.debug("Default path is {}", DEF_PATH);
         initCfg();
+        boolean createSaveData = Configuration.Files.DEFAULT_SAVED_DATA.toFile().mkdirs();
+        boolean createMainMovie = Configuration.Files.DEFAULT_MAIN_MOVIE.toFile().mkdirs();
+        boolean createRecently = Configuration.Files.DEFAULT_RECENTLY_WATCHED.toFile().mkdirs();
+        if(createSaveData && createMainMovie && createRecently) {
+            log.debug("All three default directories created");
+        }
 
         File tmpFiles = Configuration.Files.TMP_FILES.toFile();
         if(!tmpFiles.mkdir()) {
@@ -105,6 +115,10 @@ public final class Config {
                 element = doc.createElement("RECENTLY_WATCHED");
                 rootElement.appendChild(element);
                 rootElement.appendChild(doc.createTextNode("\n"));
+                File cfgPath = Configuration.Files.CFG_FILE.getParentFile();
+                if(!cfgPath.exists() && !cfgPath.mkdirs()) {
+                    log.warn("Could not create directory \"{}\"", cfgPath);
+                }
                 XMLOperator.makeSimpleSave(doc, Configuration.Files.CFG_FILE);
             }
             SAVE_PATH = Configuration.Files.DEFAULT_SAVED_DATA;
