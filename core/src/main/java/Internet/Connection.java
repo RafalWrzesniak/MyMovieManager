@@ -1,20 +1,17 @@
 package Internet;
 
-import Configuration.Config;
 import FileOperations.IO;
 import FileOperations.XMLOperator;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
@@ -46,6 +43,7 @@ public final class Connection {
     private static final String LINE_WITH_MOVIE_DATA2 = "data-source=\"linksData\"";
     private static final String LINE_WITH_ACTOR_DATA = "personMainHeader";
     private static final String LINE_WITH_CAST_DATA = "data-linkable=\"filmFullCast\"";
+    private static final String LINE_WITH_ACTOR_FILMOGRAPHY = "userFilmographyfalseactors";
     private static final Map<String, String> ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
             entry(Actor.NAME,        "name"),
             entry(Actor.NATIONALITY, "birthPlace"),
@@ -55,7 +53,7 @@ public final class Connection {
     private static final Map<String, String> MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
             entry(Movie.TITLE,      "data-title"),
             entry(Movie.TITLE_ORG,  "originalTitle"),
-            entry(Movie.PREMIERE,   "releaseWorldPublicString"), //releaseCountryPublicString
+            entry(Movie.PREMIERE,   "releaseWorldPublicString"),
             entry(Movie.DURATION,   "duration"),
             entry(Movie.RATE,       "data-rate"),
             entry(Movie.RATE_COUNT, "dataRating-count"),
@@ -80,7 +78,7 @@ public final class Connection {
         changeUrlTo(getMostSimilarTitleUrlFromQuery(desiredTitle));
     }
 
-    public Connection(URL websiteUrl) throws IOException {
+    public Connection(URL websiteUrl) {
         changeUrlTo(websiteUrl);
     }
 
@@ -192,7 +190,13 @@ public final class Connection {
     public Actor createActorFromFilmwebLink() throws NullPointerException, IOException {
         Map<String, String> actorMap = grabActorDataFromFilmweb();
         if(actorMap == null) return null;
-        Actor actor = new Actor(actorMap);
+        Actor actor;
+        try {
+            actor = new Actor(actorMap);
+        } catch (Exception e) {
+            log.warn("Unexpected error while creating actor from \"{}\"", actorMap);
+            return null;
+        }
         File actorDir = IO.createContentDirectory(actor);
         Path downloadedImagePath = Paths.get(actorDir.toString(), actor.getReprName().concat(".jpg"));
         if (Connection.downloadImage(actor.getImageUrl(), downloadedImagePath)) {
@@ -204,7 +208,7 @@ public final class Connection {
     }
 
 
-    public List<Actor> createActorsFromFilmwebLinks(List<String> actorUrls, ContentList<Actor> allActors, List<String> actorStringList) {
+    public List<Actor> createActorsFromFilmwebLinks(List<String> actorUrls, ContentList<Actor> allActors, List<String> actorStringList, ContentList<Movie> allMovies) {
         List<Actor> actorList = new ArrayList<>();
         if(actorUrls == null || actorUrls.size() == 0 || allActors == null) {
              log.warn("Null or empty argument passed to createActorsFromFilmwebLinks()");
@@ -217,7 +221,8 @@ public final class Connection {
                     for(String s : actorStringList) {
                         if(s.contains(actorUrl)) {
                             String id = s.split(";")[0];
-                            actor = XMLOperator.createActorFromXml(Paths.get(Config.getSAVE_PATH_ACTOR().toString(), "actor".concat(id)).toFile());
+                            XMLOperator.createActorsAndAssignThemToMovies(List.of(id), allActors, allMovies);
+                            actor = allActors.getObjByUrlIfExists(new URL(actorUrl));
                             break;
                         }
                     }
@@ -278,20 +283,20 @@ public final class Connection {
         return movie;
     }
 
-    public void addCastToMovie(Movie movie, ContentList<Actor> allActors, List<String> actorStringList) throws IOException {
+    public void addCastToMovie(Movie movie, ContentList<Actor> allActors, List<String> actorStringList, ContentList<Movie> allMovies) throws IOException {
         changeMovieUrlToCastActors();
         List<String> castUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.CAST));
-        List<Actor> actors = createActorsFromFilmwebLinks(castUrls, allActors, actorStringList);
+        List<Actor> actors = createActorsFromFilmwebLinks(castUrls, allActors, actorStringList, allMovies);
         movie.addActors(actors);
 
         changeMovieUrlToCastCrew();
         List<String> directorUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.DIRECTORS));
-        List<Actor> directors = createActorsFromFilmwebLinks(directorUrls, allActors, actorStringList);
+        List<Actor> directors = createActorsFromFilmwebLinks(directorUrls, allActors, actorStringList, allMovies);
         movie.addDirectors(directors);
 
         changeMovieUrlToCastCrew();
         List<String> writerUrls = grabCastOrCrewFromFilmweb(Connection.MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS.get(Movie.WRITERS));
-        List<Actor> writers = createActorsFromFilmwebLinks(writerUrls, allActors, actorStringList);
+        List<Actor> writers = createActorsFromFilmwebLinks(writerUrls, allActors, actorStringList, allMovies);
         movie.addWriters(writers);
     }
 
@@ -414,6 +419,7 @@ public final class Connection {
         return null;
     }
 
+    @SneakyThrows
     private String extractItemFromFilmwebLine(String itemToExtract, String line) {
         if(itemToExtract == null || line == null) {
             log.warn("Null as input - can't extract item \"{}\" from \"{}\"", itemToExtract, websiteUrl);
@@ -494,7 +500,8 @@ public final class Connection {
             return null;
         }
         List<String> listOfItems = new ArrayList<>();
-        Pattern pattern = Pattern.compile("data-profession=\"" + itemToExtract + "\".+?<a href=\"(.+?)\">");
+        Pattern pattern = Pattern.compile("\"profession\":\"" + itemToExtract + "\",\"person\":\\{\"name\":\".+?\",\"link\":\"(.+?)\"");
+//        Pattern pattern = Pattern.compile("data-profession=\"" + itemToExtract + "\".+?<a href=\"(.+?)\">");
         Matcher matcher = pattern.matcher(line);
         int numberOfMatcher = 0;
         while(matcher.find() && numberOfMatcher < 10) {
@@ -505,6 +512,21 @@ public final class Connection {
             log.warn("Couldn't find any cast link \"{}\" on \"{}\"", itemToExtract, websiteUrl);
         }
         return listOfItems;
+    }
+    
+    public Set<String> extractAllMovieLinksForActor() throws IOException {
+        Set<String> movieLinks = new HashSet<>();
+        String line = grepLineFromWebsite(LINE_WITH_ACTOR_FILMOGRAPHY);
+        if(line == null) return movieLinks;
+        int indexOfActor = line.indexOf("<thead data-profession=\"actors\">") + 10;
+        int indexToEndSearching = line.indexOf("<thead data-profession=", indexOfActor);
+        line = line.substring(0, indexToEndSearching > 0 ? indexToEndSearching : line.length());
+        Pattern pattern = Pattern.compile("\"(/film/.+?)\"");
+        Matcher matcher = pattern.matcher(line);
+        while(matcher.find()) {
+            movieLinks.add(FILMWEB.concat(matcher.group(1)));
+        }
+        return movieLinks;
     }
 
     private String extractDeathDateFromFilmwebLine(String line) {
@@ -592,6 +614,24 @@ public final class Connection {
         str = str.replaceAll("&aring;", "å");
         str = str.replaceAll("&Aring;", "Å");
         str = str.replaceAll("&agrave;", "à");
+        str = str.replaceAll("Ä…","ą");
+        str = str.replaceAll("Ä‡","ć");
+        str = str.replaceAll("Ä™","ę");
+        str = str.replaceAll("Ăł","ó");
+        str = str.replaceAll("Ĺ‚","ł");
+        str = str.replaceAll("Ĺ�","Ł");
+        str = str.replaceAll("Ĺ„","ń");
+        str = str.replaceAll("Ĺ›","ś");
+        str = str.replaceAll("Ĺš","Ś");
+        str = str.replaceAll("(Ĺź|ĹĽ)","ż");
+        str = str.replaceAll("Ĺ»","Ż");
+        str = str.replaceAll("Ĺş","ź");
+        str = str.replaceAll("Ĺ","Ł");
+        str = str.replaceAll("Ă“","Ó");
+        str = str.replaceAll("Ăź","ü");
+        str = str.replaceAll("Ă¤","ä");
+        str = str.replaceAll("Ĺ‘","ö");
+        str = str.replaceAll("Ĺ","Ö");
         return str;
     }
 }
