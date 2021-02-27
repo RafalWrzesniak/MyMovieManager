@@ -1,7 +1,7 @@
 .idea/
-encodings.xml
 .lib/
 .out/
+encodings.xml
 /src/main/java/xMain/
 /savedData/
 /savedImages/
@@ -30,3 +30,4 @@ core/core.iml
 /app/src/main/java/app/GUIStarter.java
 /MMMLaunchBundledJRE.xml
 /MMMLaunchJREinstalled.xml
+\app\app.iml
