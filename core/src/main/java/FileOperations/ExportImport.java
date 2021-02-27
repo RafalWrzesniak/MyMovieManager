@@ -13,10 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -52,7 +49,7 @@ public final class ExportImport {
             setName("ExportAll");
             if(outPutFile == null) {
                 outPutFile = new File(
-                        System.getProperty("user.dir")
+                        Config.getDEF_PATH().toString()
                         .concat("\\MyMovieManager_exported_data_")
                         .concat(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
                         .replaceAll("\\..*$", "")
@@ -79,6 +76,9 @@ public final class ExportImport {
             List<File> files = IO.listDirectory(fileToZip);
 //            if(files.size() == 0) files.add(fileToZip);
             for(File file : files) {
+                file.setExecutable(true);
+                file.setWritable(true);
+                file.setReadable(true);
                 if(file.isDirectory()) {
                     zipFile(file, fileName.concat("\\").concat(file.getName()), zipOut);
                 } else {
@@ -111,38 +111,41 @@ public final class ExportImport {
         @Override
         public void run() {
             setName("ImportAll");
-            try {
-                IO.deleteDirectoryRecursively(Config.getSAVE_PATH().toFile());
-                unZipFile();
-                log.info("Successfully imported data from \"{}\"", inputFile);
-            } catch (IOException e) {
-                log.warn("Failed to import file \"{}\" because of \"{}\"", inputFile, e.getMessage());
-            }
+            IO.deleteDirectoryRecursively(Config.getSAVE_PATH().toFile());
+            unZipFile();
+            log.info("Successfully imported data from \"{}\"", inputFile);
         }
 
-        private void unZipFile() throws IOException{
-            File destDir = Config.getSAVE_PATH().toFile();
+        private void unZipFile() {
+            File savePath = Config.getSAVE_PATH().toFile();
             byte[] buffer = new byte[1024];
-            ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile));
-            ZipEntry zipEntry = zis.getNextEntry();
-            while (zipEntry != null) {
-                String zipName;
-                if(zipEntry.getName().startsWith("exported")) {
-                    zipName = zipEntry.getName().substring(zipEntry.getName().indexOf('\\'));
-                } else throw new IOException("Wrong ZIP file, can't import data");
-                String relPath = zipName.substring(0, zipName.lastIndexOf('\\'));
-                new File(destDir, relPath).mkdirs();
-                File newFile = new File(destDir, zipName);
-                FileOutputStream fos = new FileOutputStream(newFile);
-                int len;
-                while ((len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
+            try(ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile))) {
+                ZipEntry zipEntry = zis.getNextEntry();
+                while (zipEntry != null) {
+                    String zippedFile;
+                    if(zipEntry.getName().startsWith("exported")) {
+                        zippedFile = zipEntry.getName().substring(zipEntry.getName().indexOf('\\'));
+                    } else throw new IOException("Wrong ZIP file, can't import data");
+                    String relPathsToCreate = zippedFile.substring(0, zippedFile.lastIndexOf('\\'));
+                    File parentDirectory = new File(savePath, relPathsToCreate);
+                    parentDirectory.mkdirs();
+                    if(!parentDirectory.canWrite()) parentDirectory.setWritable(true);
+                    File targetFile = new File(savePath, zippedFile);
+                    targetFile.setWritable(true);
+                    try(FileOutputStream fos = new FileOutputStream(targetFile)) {
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        log.warn("Failed to write {} because of {}", targetFile, e.getMessage());
+                    }
+                    zipEntry = zis.getNextEntry();
                 }
-                fos.close();
-                zipEntry = zis.getNextEntry();
+            } catch (IOException e) {
+                log.warn("Failed to read {} because of {}", inputFile, e.getMessage());
             }
-            zis.closeEntry();
-            zis.close();
         }
 
     }
@@ -166,7 +169,7 @@ public final class ExportImport {
                 exportAll(exportFile);
             } else {
                 exportAll(new File(
-                        System.getProperty("user.dir")
+                        Config.getDEF_PATH().toString()
                         .concat("\\MyMovieManager_exported_data_")
                         .concat(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
                         .replaceAll("\\..*$", "")
