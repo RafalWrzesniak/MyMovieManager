@@ -73,9 +73,12 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.4.0</version>
+                <configuration>
+                    <mainClass>app.GUIStarter</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
-
 
 </project>
