@@ -8,7 +8,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import java.lang.Double?>
 <?import java.net.URL?>
-<StackPane fx:id="actorPane" styleClass="blurred-background" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.actor.ActorPane">
+<StackPane cache="true" fx:id="actorPane" styleClass="blurred-background" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.actor.ActorPane">
     <fx:define>
         <Double fx:id="PANE_WIDTH" fx:value="100.0"/>
         <Double fx:id="PANE_HEIGHT" fx:value="143.0"/>
