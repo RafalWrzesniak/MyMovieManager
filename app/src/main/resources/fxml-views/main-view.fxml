@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import java.lang.*?>
 <?import java.net.*?>
-<BorderPane fx:id="main_view" prefHeight="770.0" prefWidth="1490.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
+<BorderPane fx:id="main_view" prefHeight="770.0" prefWidth="1500.0" styleClass="background-color" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
     <fx:define>
         <Double fx:id="ICON_SIZE" fx:value="40.0"/>
         <Double fx:id="SMALL_ICON_SIZE" fx:value="35.0"/>
@@ -320,6 +320,13 @@
                                 </ImageView>
                             </graphic>
                         </MenuItem>
+                        <MenuItem fx:id="movieZheta" mnemonicParsing="false" text="%main_view.sort.alphabetical">
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-azheta.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
                         <MenuItem fx:id="movieShortest" mnemonicParsing="false" text="%main_view.sort.shortest">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
@@ -334,17 +341,17 @@
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="movieNewest" mnemonicParsing="false" text="%main_view.sort.newest">
-                            <graphic>
-                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
-                                    <Image url="@../icons/sort-newest.png" />
-                                </ImageView>
-                            </graphic>
-                        </MenuItem>
                         <MenuItem fx:id="movieOldest" mnemonicParsing="false" text="%main_view.sort.oldest">
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-oldest.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="movieNewest" mnemonicParsing="false" text="%main_view.sort.newest">
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-newest.png" />
                                 </ImageView>
                             </graphic>
                         </MenuItem>
@@ -366,6 +373,13 @@
                             <graphic>
                                 <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                     <Image url="@../icons/sort-alpha.png" />
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="actorZheta" mnemonicParsing="false" text="%main_view.sort.alphabetical">
+                            <graphic>
+                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                    <Image url="@../icons/sort-azheta.png" />
                                 </ImageView>
                             </graphic>
                         </MenuItem>
@@ -391,14 +405,18 @@
                <StackPane fx:id="filterPane" />
 
                <VBox.margin>
-                  <Insets left="30.0" top="7.0" />
+                  <Insets left="30.0" top="7.0" bottom="10.0" />
                </VBox.margin>
             </HBox>
             <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minWidth="100.0" style="-fx-background-color: transparent;" vbarPolicy="NEVER">
-               <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP">
-                  <padding>
-                     <Insets bottom="20.0" />
-                  </padding></FlowPane>
+                <VBox>
+                    <FlowPane fx:id="flowPaneContentList" prefWrapLength="600.0" rowValignment="TOP">
+                        <padding>
+                            <Insets bottom="20.0" />
+                        </padding>
+                    </FlowPane>
+                </VBox>
+
             </ScrollPane>
           </VBox>
        </StackPane>
