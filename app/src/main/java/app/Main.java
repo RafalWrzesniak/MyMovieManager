@@ -13,19 +13,24 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Orientation;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.stage.Window;
+import javafx.stage.*;
 import lombok.extern.slf4j.Slf4j;
 import utils.PaneNames;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -44,6 +49,7 @@ public class Main extends Application {
 
     public static AutoSave autoSave;
     public static Stage primaryStage;
+    private static JFrame loadingWindow;
     public static final Locale localePl = new Locale("pl", "PL");
     public static final Locale localeEn = new Locale("en", "EN");
     public static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -55,9 +61,10 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        primaryStage.setTitle("MyMovieManager");
+        loadingWindow = new LoadingWindow().getInitWindow();
         Thread.currentThread().setName("JavaFX");
         Main.primaryStage = primaryStage;
-        primaryStage.setTitle("MyMovieManager");
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/favicon.png")));
         loadView(localePl, primaryStage);
     }
@@ -86,6 +93,7 @@ public class Main extends Application {
         }
         Scene mainScene = new Scene(root);
         primaryStage.setScene(mainScene);
+        primaryStage.setOnShown(event -> loadingWindow.dispose());
         primaryStage.show();
     }
 
@@ -242,4 +250,26 @@ public class Main extends Application {
         log.debug("Chosen file is \"{}\"", chosenFile);
         return chosenFile;
     }
+
+    public static class LoadingWindow {
+
+        public JFrame getInitWindow() {
+
+            JFrame loadingFrame = new JFrame("MyMovieManager");
+            URL url = this.getClass().getResource("/icons/MMM.png");
+            Icon icon = new ImageIcon(url);
+            JLabel label = new JLabel(icon);
+            loadingFrame.setIconImage(new ImageIcon(getClass().getResource("/icons/favicon.png").getPath()).getImage());
+            loadingFrame.setUndecorated(true);
+            loadingFrame.setBackground(new Color(0,0,0,0));
+            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+            loadingFrame.setLocation((int) ((screenBounds.getWidth() - 600) / 2), (int) ((screenBounds.getHeight() - 0) / 2));
+            loadingFrame.getContentPane().add(label);
+            loadingFrame.pack();
+            loadingFrame.setLocationRelativeTo(null);
+            loadingFrame.setVisible(true);
+            return loadingFrame;
+        }
+    }
+
 }
