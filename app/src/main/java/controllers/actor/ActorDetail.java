@@ -28,10 +28,9 @@ public class ActorDetail extends ContentDetail implements Initializable, ActorKi
 
 //    == fields ==
     @FXML private Label name, bornDate, died, country;
-    private Actor actor;
-    private ResourceBundle resourceBundle;
     @Getter @Setter private ActorPane owner;
-
+    private ResourceBundle resourceBundle;
+    private Actor actor;
 
 //    == init ==
     @Override
@@ -110,6 +109,23 @@ public class ActorDetail extends ContentDetail implements Initializable, ActorKi
                 flowPane.getChildren().add(movieLabel);
             }
         }
+
+        // update movies if files are not complete
+        actor.getAllMoviesActorPlayedIn().forEach(movie -> {
+            if(!movie.getCast().contains(actor)) {
+                movie.addActor(actor);
+            }
+        });
+        actor.getAllMoviesDirectedBy().forEach(movie -> {
+            if(!movie.getDirectors().contains(actor)) {
+                movie.addDirector(actor);
+            }
+        });
+        actor.getAllMoviesWrittenBy().forEach(movie -> {
+            if(!movie.getWriters().contains(actor)) {
+                movie.addWriter(actor);
+            }
+        });
     }
 
 }
