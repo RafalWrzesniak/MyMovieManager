@@ -6,6 +6,7 @@ import MoviesAndActors.ContentList;
 import MoviesAndActors.ContentType;
 import MoviesAndActors.Movie;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ import java.util.*;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class XMLOperator {
 
+    public static boolean detailNeedToBeRead;
 //    == public static methods ==
 
     public static <E extends ContentType> void saveContentToXML(E content) {
@@ -37,11 +39,20 @@ public final class XMLOperator {
         assert doc != null;
         createXmlStructure(content, doc);
         File contentDir = IO.createContentDirectory(content);
-        File targetFile = new File(
-                contentDir.toString()
-                .concat("\\")
-                .concat(content.getReprName().replaceAll("[]\\[*./:;|,\"]", ""))
-                .concat(".xml"));
+        String fileName;
+        if(content.getReprName() != null) {
+            fileName = content.getReprName().replaceAll("[]?\\[*./:;|,\"]", "");
+        } else {
+            fileName = "fileName";
+        }
+        File targetFile = IO.getXmlFileFromDir(contentDir);
+        if(targetFile == null) {
+            targetFile = new File(
+                                contentDir.toString()
+                                .concat("\\")
+                                .concat(fileName)
+                                .concat(".xml"));
+        }
         makeSimpleSave(doc, targetFile);
         log.debug("Content \"{}\" properly saved in \"{}\"", content.toString(), targetFile);
     }
@@ -199,6 +210,162 @@ public final class XMLOperator {
         return null;
     }
 
+    public static void addActorsToMovieIfTheyDoNotExist(Movie movie, ContentList<Actor> allActors, ContentList<Movie> allMovies) {
+        movie.iAmFromConstructor = true;
+        createActorsAndAssignThemToMovies(movie.getCastIds(), allActors, allMovies);
+        createActorsAndAssignThemToMovies(movie.getDirectorIds(), allActors, allMovies);
+        createActorsAndAssignThemToMovies(movie.getWriterIds(), allActors, allMovies);
+        movie.iAmFromConstructor = false;
+    }
+
+    public static void createActorsAndAssignThemToMovies(List<String> idList, ContentList<Actor> allActors, ContentList<Movie> allMovies) {
+        for(String id : idList) {
+            if(id == null) continue;
+            Actor actor = allActors.getById(Integer.parseInt(id));
+            if(actor == null) {
+                allActors.addFromXml(
+                        createActorFromXml(Paths.get(Config.getSAVE_PATH_ACTOR().toString(), "actor".concat(id)).toFile()));
+                actor = allActors.getById(Integer.parseInt(id));
+            }
+            if(actor == null) continue;
+            actor.iAmFromConstructor = true;
+            for (String movieId : actor.getPlayedIds()) {
+                Movie movie = allMovies.getById(Integer.parseInt(movieId));
+                if(!actor.getAllMoviesActorPlayedIn().contains(movie)) actor.addMovieActorPlayedIn(movie);
+            }
+            for (String movieId : actor.getDirectedIds()) {
+                Movie movie = allMovies.getById(Integer.parseInt(movieId));
+                if(!actor.getAllMoviesDirectedBy().contains(movie)) actor.addMovieDirectedBy(movie);
+            }
+            for (String movieId : actor.getWroteIds()) {
+                Movie movie = allMovies.getById(Integer.parseInt(movieId));
+                if(!actor.getAllMoviesWrittenBy().contains(movie)) actor.addMovieWrittenBy(movie);
+            }
+            actor.iAmFromConstructor = false;
+        }
+    }
+
+    public static Actor createActorFromXml(File inputDir) {
+        File inputFile = IO.getXmlFileFromDir(inputDir);
+        Element root = createRootElementFromXml(inputFile);
+        if(root == null) {
+            log.warn("Couldn't create actor from file \"{}\" - internal XML file issue", inputFile);
+            return null;
+        } else if(!root.getTagName().equals(Actor.class.getSimpleName())) {
+            log.warn("Couldn't create actor from file \"{}\" - different structure type", inputFile);
+            return null;
+        }
+
+        Map<String, String> map = new HashMap<>();
+        for(String fieldName : Actor.FIELD_NAMES) {
+            NodeList element = root.getElementsByTagName(fieldName);
+            if(element.getLength() == 1) {
+                String value = element.item(0).getChildNodes().item(0).getNodeValue();
+                if(value != null) map.put(fieldName, value);
+            } else if(element.getLength() > 1){
+                StringBuilder value = new StringBuilder();
+                for(int i = 0; i < element.getLength(); i++) {
+                    value.append(element.item(i).getChildNodes().item(0).getNodeValue()).append(";");
+                }
+                map.put(fieldName, value.toString());
+            }
+        }
+        log.info("New actor created successfully from file \"{}\"", inputFile);
+        return new Actor(map);
+    }
+
+    public static Thread readActorsForList(List<Movie> movieList, ContentList<Actor> allActors, ContentList<Movie> allMovies) {
+        return new Thread(() -> {
+            Thread.currentThread().setName("ReadA4L");
+            int listSize = movieList.size();
+            for(int i = 0; i < listSize; i++) {
+                Movie movie = movieList.get(i);
+                XMLOperator.addActorsToMovieIfTheyDoNotExist(movie, allActors, allMovies);
+            }
+        });
+    }
+
+    public static List<String> createStringActorList() {
+        List<String> actorsList = new ArrayList<>();
+        File inputFile = Paths.get(Config.getSAVE_PATH_ACTOR().toString(), ContentList.ALL_ACTORS_DEFAULT.concat(".xml")).toFile();
+        Element root = createRootElementFromXml(inputFile);
+        if(root == null) {
+            log.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
+            return actorsList;
+        }
+        NodeList nodes = root.getElementsByTagName(Actor.class.getSimpleName().toLowerCase());
+        File actorFile;
+        for(int i = 0; i < nodes.getLength(); i++) {
+            actorFile = IO.getXmlFileFromDir(Paths.get(Config.getSAVE_PATH_ACTOR().toString(), "actor".concat(nodes.item(i).getTextContent())).toFile());
+            Element rootElement = XMLOperator.createRootElementFromXml(actorFile);
+            if (rootElement == null) {
+                log.warn("Failed to import file \"{}\" - wrong XML", actorFile);
+                continue;
+            }
+            NodeList actorNodes = rootElement.getChildNodes();
+            StringBuilder actorString = new StringBuilder();
+            for(int j = 0; j < actorNodes.getLength(); j++) {
+                Node node = actorNodes.item(j);
+                if(node.getNodeName().equals("id") || node.getNodeName().equals("filmweb")
+                        || node.getNodeName().equals("name") || node.getNodeName().equals("surname")) {
+                    actorString.append(node.getTextContent()).append(";");
+                }
+            }
+            actorsList.add(actorString.toString());
+        }
+        log.debug("ActorStringList read, found {} items", actorsList.size());
+        return actorsList;
+    }
+
+    public static void fixRelationBetweenActorsAndMovies() {
+        ContentList<Movie> allMovies = createDefaultMovieContentList();
+        ContentList<Actor> allActors = createDefaultActorContentList();
+
+        assert allMovies != null;
+        assert allActors != null;
+        allMovies.getList().forEach(movie -> addActorsToMovieIfTheyDoNotExist(movie, allActors, allMovies));
+
+        allMovies.getList().forEach(movie -> {
+            movie.getCast().forEach(actor -> {
+                if(!actor.isPlayingIn(movie)) {
+                    log.warn("\"{}\" should play in \"{}\"", actor, movie);
+                    actor.addMovieActorPlayedIn(movie);
+                }
+            });
+            movie.getDirectors().forEach(director -> {
+                if(!director.isDirecting(movie)) {
+                    log.warn("\"{}\" should direct \"{}\"", director, movie);
+                    director.addMovieDirectedBy(movie);
+                }
+            });
+            movie.getWriters().forEach(writer -> {
+                if(!writer.isWriting(movie)) {
+                    log.warn("\"{}\" should write \"{}\"", writer, movie);
+                    writer.addMovieWrittenBy(movie);
+                }
+            });
+        });
+
+        allActors.getList().forEach(actor -> {
+            actor.getAllMoviesActorPlayedIn().forEach(movie -> {
+                if(!movie.getCast().contains(actor)) {
+                    movie.addActor(actor);
+                }
+            });
+            actor.getAllMoviesDirectedBy().forEach(movie -> {
+                if(!movie.getDirectors().contains(actor)) {
+                    movie.addDirector(actor);
+                }
+            });
+            actor.getAllMoviesWrittenBy().forEach(movie -> {
+                if(!movie.getWriters().contains(actor)) {
+                    movie.addWriter(actor);
+                }
+            });
+        });
+    }
+
+
 //    == package-private static methods ==
 
     static <E extends ContentType> void createXmlStructure(E content, Document doc) {
@@ -248,70 +415,234 @@ public final class XMLOperator {
     }
 
 
+//    == private static methods ==
+
+    public static Movie createMovieFromXml(File inputDir) {
+        File inputFile = IO.getXmlFileFromDir(inputDir);
+        Element root = createRootElementFromXml(inputFile);
+        if(root == null) {
+            log.warn("Couldn't create movie from file \"{}\" - internal XML file issue", inputFile);
+            return null;
+        } else if(!root.getTagName().equals(Movie.class.getSimpleName())) {
+            log.warn("Couldn't create movie from file \"{}\" - different structure type", inputFile);
+            return null;
+        }
+
+        Map<String, List<String>> map = new LinkedHashMap<>();
+        for(String fieldName : Movie.FIELD_NAMES) {
+            NodeList element = root.getElementsByTagName(fieldName);
+            List<String> param = new ArrayList<>();
+            for(int i = 0; i < element.getLength(); i++) {
+                String value = element.item(i).getChildNodes().item(0).getNodeValue();
+                if(value != null) param.add(value);
+            }
+            map.put(fieldName, param);
+        }
+        log.info("New movie created successfully from file \"{}\"", inputFile);
+        return new Movie(map, true);
+    }
+
+    @SneakyThrows
+    private static ContentList<Actor> createDefaultActorContentList() {
+        File inputFile = Paths.get(Config.getSAVE_PATH_ACTOR().toString(), ContentList.ALL_ACTORS_DEFAULT.concat(".xml")).toFile();
+        Element root = createRootElementFromXml(inputFile);
+        if(root == null) {
+            log.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
+            return null;
+        }
+        NodeList nodes = root.getElementsByTagName(Actor.class.getSimpleName().toLowerCase());
+        ContentList<Actor> contentList = new ContentList<>(root.getElementsByTagName("listName").item(0).getTextContent());
+        contentList.setDisplayName(root.getElementsByTagName("displayName").item(0).getTextContent());
+        List<String> actorsIds = new ArrayList<>();
+        for(int i = 0; i < nodes.getLength(); i++) {
+            actorsIds.add(nodes.item(i).getTextContent());
+        }
+        List<Thread> actorThreads = new ArrayList<>();
+        int numberOfThreads = 10;
+        for(int i = 0; i < numberOfThreads; i++) {
+            Thread createActors = new Thread(() -> {
+                Thread.currentThread().setName("CreateActor");
+                while(actorsIds.size() != 0) {
+                    String id;
+                    synchronized (actorsIds) {
+                        id = actorsIds.get(0);
+                        actorsIds.remove(0);
+                    }
+                    contentList.addFromXml(
+                            createActorFromXml(
+                                    Paths.get(Config.getSAVE_PATH_ACTOR().toString(), "actor".concat(id)).toFile()));
+                }
+            });
+            createActors.setName("newActor" + i);
+            actorThreads.add(createActors);
+            createActors.start();
+
+            if(i == numberOfThreads-1) {
+                boolean iAmStillWorking = true;
+                while(iAmStillWorking) {
+                    actorThreads.removeIf(thread -> thread.getState().equals(Thread.State.TERMINATED));
+                    if(actorThreads.size() == 0) {
+                        iAmStillWorking = false;
+                    }
+                }
+            }
+        }
+
+        return contentList;
+    }
+
+    @SneakyThrows
+    private static ContentList<Movie> createDefaultMovieContentList() {
+        File inputFile = Paths.get(Config.getSAVE_PATH_MOVIE().toString(), ContentList.ALL_MOVIES_DEFAULT.concat(".xml")).toFile();
+        Element root = createRootElementFromXml(inputFile);
+        if(root == null) {
+            log.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
+            return null;
+        }
+
+        NodeList nodes = root.getElementsByTagName(Movie.class.getSimpleName().toLowerCase());
+        ContentList<Movie> contentList = new ContentList<>(root.getElementsByTagName("listName").item(0).getTextContent());
+        contentList.setDisplayName(root.getElementsByTagName("displayName").item(0).getTextContent());
+        List<String> moviesIds = new ArrayList<>();
+        for(int i = 0; i < nodes.getLength(); i++) {
+            moviesIds.add(nodes.item(i).getTextContent());
+        }
+        List<Thread> movieThreads = new ArrayList<>();
+        int numberOfThreads = moviesIds.size()/10 + 1;
+        for(int i = 0; i < numberOfThreads; i++) {
+            Thread createMovies = new Thread(() -> {
+                Thread.currentThread().setName("CreateMovie");
+                while(moviesIds.size() != 0) {
+                    String id;
+                    synchronized (moviesIds) {
+                        id = moviesIds.get(0);
+                        moviesIds.remove(0);
+                    }
+                    Movie movie = createMovieFromXml(Paths.get(Config.getSAVE_PATH_MOVIE().toString(), "movie".concat(id)).toFile());
+                    if(movie != null) {
+                        contentList.addFromXml(movie);
+                    }
+
+                }
+            });
+            createMovies.setName("newMovie" + i);
+            movieThreads.add(createMovies);
+            createMovies.start();
+
+            if(i == numberOfThreads-1) {
+                boolean iAmStillWorking = true;
+                while(iAmStillWorking) {
+                    movieThreads.removeIf(thread -> thread.getState().equals(Thread.State.TERMINATED));
+                    if(movieThreads.size() == 0) {
+                        iAmStillWorking = false;
+                    }
+                }
+            }
+        }
+        return contentList;
+    }
+
+
 //    == public static inner classes ==
 
-    public static class ReadAllDataFromFiles extends Thread {
-        private List<ContentList<Actor>> allActorsLists;
-        private List<ContentList<Movie>> allMoviesLists;
-        private ContentList<Actor> allActors;
-        private ContentList<Movie> allMovies;
+    public static class ReadInitDataFromFiles extends Thread {
+        @Getter private List<ContentList<Actor>> allActorsLists;
+        @Getter private List<ContentList<Movie>> allMoviesLists;
+        @Getter private ContentList<Actor> allActors;
+        @Getter private ContentList<Movie> allMovies, moviesToWatch, recentlyWatched;
 
 
+        @SneakyThrows
         @Override
         public void run() {
-            setName("ReadAll");
+            setName("InitRead");
+            allActors = new ContentList<>(ContentList.ALL_ACTORS_DEFAULT);
             allActorsLists = createAllActorsContentListsFromXml();
-            allMoviesLists = createAllMoviesContentListsFromXml(allActorsLists);
+            allMoviesLists = createAllMoviesContentListsFromXml();
 
-            allActors = ContentList.getContentListFromListByName(allActorsLists, ContentList.ALL_ACTORS_DEFAULT);
-            if(allActors == null) {
-                allActors = new ContentList<>(ContentList.ALL_ACTORS_DEFAULT);
-            }
             allMovies = ContentList.getContentListFromListByName(allMoviesLists, ContentList.ALL_MOVIES_DEFAULT);
             if(allMovies == null) {
                 allMovies = new ContentList<>(ContentList.ALL_MOVIES_DEFAULT);
+                allMovies.setDisplayName("Wszystkie filmy");
+            }
+            moviesToWatch = ContentList.getContentListFromListByName(allMoviesLists, ContentList.MOVIES_TO_WATCH);
+            if(moviesToWatch == null) {
+                moviesToWatch = new ContentList<>(ContentList.MOVIES_TO_WATCH);
+                moviesToWatch.setDisplayName("Do oglądnięcia");
+                allMoviesLists.add(moviesToWatch);
+            }
+            recentlyWatched = ContentList.getContentListFromListByName(allMoviesLists, ContentList.RECENTLY_WATCHED);
+            if(recentlyWatched == null) {
+                recentlyWatched = new ContentList<>(ContentList.RECENTLY_WATCHED);
+                recentlyWatched.setDisplayName("Ostatnio oglądnięte");
+                allMoviesLists.add(recentlyWatched);
             }
 
             log.info("All data read from files");
         }
 
-
-        public ContentList<Actor> getAllActors() {
-            return allActors;
+        public Thread readActorsForReadContentLists() {
+            return new Thread(() -> {
+                setName("ReadActor");
+                List<ContentList<Movie>> listToManage = allMoviesLists;
+                listToManage.remove(moviesToWatch);
+                for(int i = 0; i < listToManage.size(); i++) {
+                    ContentList<Movie> contentList = listToManage.get(i);
+                    if(contentList.size() > 0) {
+                        contentList.getList().sort(Movie.COMP_ALPHABETICAL);
+                        addActorsToMovieIfTheyDoNotExist(contentList.get(0), allActors, allMovies);
+                    }
+                }
+                addMoviesToActorsFromLists();
+                readActorsForList(moviesToWatch.getList(), allActors, allMovies).start();
+            });
         }
 
-        public ContentList<Movie> getAllMovies() {
-            return allMovies;
+        private void addMoviesToActorsFromLists() {
+            allActorsLists.forEach(contentList ->
+                contentList.getList().forEach(actor -> {
+                    actor.iAmFromConstructor = true;
+                    for (String movieId : actor.getPlayedIds()) {
+                        Movie movie = allMovies.getById(Integer.parseInt(movieId));
+                        if(!movie.getCast().contains(actor)) {
+                            actor.addMovieActorPlayedIn(movie);
+                        }
+
+                    }
+                    for (String movieId : actor.getDirectedIds()) {
+                        Movie movie = allMovies.getById(Integer.parseInt(movieId));
+                        if(!movie.getCast().contains(actor)) {
+                            actor.addMovieDirectedBy(movie);
+                        }
+                    }
+                    for (String movieId : actor.getWroteIds()) {
+                        Movie movie = allMovies.getById(Integer.parseInt(movieId));
+                        if(!movie.getCast().contains(actor)) {
+                            actor.addMovieWrittenBy(movie);
+                        }
+                    }
+                    actor.iAmFromConstructor = false;
+                })
+            );
         }
 
-        public List<ContentList<Actor>> getAllActorsLists() {
-            return allActorsLists;
-        }
-
-        public List<ContentList<Movie>> getAllMoviesLists() {
-            return allMoviesLists;
-        }
-
-
-        private static List<ContentList<Actor>> createAllActorsContentListsFromXml() {
+        private List<ContentList<Actor>> createAllActorsContentListsFromXml() {
             List<ContentList<Actor>> allActorLists = new ArrayList<>();
-            ContentList<Actor> defaultAllActors = createDefaultActorContentList();
-            allActorLists.add(defaultAllActors);
             for(File file : Objects.requireNonNull(IO.listDirectory(Config.getSAVE_PATH_ACTOR().toFile()))) {
                 if(file.getName().endsWith(".xml") && !file.getName().matches(ContentList.ALL_ACTORS_DEFAULT.concat(".xml"))) {
-                    allActorLists.add(createActorContentList(file, defaultAllActors));
+                    allActorLists.add(createActorContentList(file));
                     log.info("ContentList<Actor> \"{}\" successfully read from file \"{}\"", file.getName().replaceAll("\\.xml$", "") ,file);
                 }
             }
             return allActorLists;
         }
 
-        private static List<ContentList<Movie>> createAllMoviesContentListsFromXml(List<ContentList<Actor>> allActorsContentLists) {
+        private List<ContentList<Movie>> createAllMoviesContentListsFromXml() {
             List<ContentList<Movie>> allMovieLists = new ArrayList<>();
-            ContentList<Movie> defaultAllMovies = createDefaultMovieContentList(allActorsContentLists);
-            allMovieLists.add(defaultAllMovies);
+            ContentList<Movie> defaultAllMovies = createDefaultMovieContentList();
+            if(defaultAllMovies != null) allMovieLists.add(defaultAllMovies);
             for(File file : Objects.requireNonNull(IO.listDirectory(Config.getSAVE_PATH_MOVIE().toFile()))) {
-                if(file.toString().endsWith(".xml") && !file.getName().matches(ContentList.ALL_MOVIES_DEFAULT.concat(".xml"))) {
+                if(file.toString().endsWith(".xml") && !file.getName().matches(ContentList.ALL_MOVIES_DEFAULT.concat(".xml"))) { //  && !file.getName().matches(ContentList.MOVIES_TO_WATCH.concat(".xml"))
                     allMovieLists.add(createMovieContentList(file, defaultAllMovies));
                     log.info("ContentList<Movie> \"{}\" successfully read from file \"{}\"", file.getName().replaceAll("\\.xml$", "") ,file);
                 }
@@ -320,7 +651,7 @@ public final class XMLOperator {
         }
 
         @SneakyThrows
-        private static ContentList<Actor> createActorContentList(File inputFile, ContentList<Actor> defaultAllActors) {
+        private ContentList<Actor> createActorContentList(File inputFile) {
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
                 log.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
@@ -333,14 +664,15 @@ public final class XMLOperator {
 
             for(int i = 0; i < nodes.getLength(); i++) {
                 String id = nodes.item(i).getTextContent();
-                assert defaultAllActors != null;
-                contentList.addFromXml(defaultAllActors.getById(Integer.parseInt(id)));
+                Actor actor = createActorFromXml(Paths.get(Config.getSAVE_PATH_ACTOR().toString(), "actor".concat(id)).toFile());
+                contentList.addFromXml(actor);
+                allActors.addFromXml(actor);
             }
             return contentList;
         }
 
         @SneakyThrows
-        private static ContentList<Movie> createMovieContentList(File inputFile, ContentList<Movie> defaultAllMovies) {
+        private ContentList<Movie> createMovieContentList(File inputFile, ContentList<Movie> defaultAllMovies) {
             Element root = createRootElementFromXml(inputFile);
             if(root == null) {
                 log.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
@@ -354,169 +686,13 @@ public final class XMLOperator {
             for(int i = 0; i < nodes.getLength(); i++) {
                 String id = nodes.item(i).getTextContent();
                 if(defaultAllMovies == null) return null;
-                contentList.addFromXml(defaultAllMovies.getById(Integer.parseInt(id)));
+                Movie movie = defaultAllMovies.getById(Integer.parseInt(id));
+                contentList.addFromXml(movie);
             }
             return contentList;
         }
-
-
-        @SneakyThrows
-        private static ContentList<Actor> createDefaultActorContentList() {
-            File inputFile = Paths.get(Config.getSAVE_PATH_ACTOR().toString(), ContentList.ALL_ACTORS_DEFAULT.concat(".xml")).toFile();
-            Element root = createRootElementFromXml(inputFile);
-            if(root == null) {
-                log.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
-                return null;
-            }
-            NodeList nodes = root.getElementsByTagName(Actor.class.getSimpleName().toLowerCase());
-            ContentList<Actor> contentList = new ContentList<>(root.getElementsByTagName("listName").item(0).getTextContent());
-            contentList.setDisplayName(root.getElementsByTagName("displayName").item(0).getTextContent());
-            List<String> actorsIds = new ArrayList<>();
-            for(int i = 0; i < nodes.getLength(); i++) {
-                actorsIds.add(nodes.item(i).getTextContent());
-            }
-            List<Thread> actorThreads = new ArrayList<>();
-            int numberOfThreads = actorsIds.size()/50 + 1;
-            for(int i = 0; i < numberOfThreads; i++) {
-                Thread createActors = new Thread(() -> {
-                    while(actorsIds.size() != 0) {
-                        String id;
-                        synchronized (actorsIds) {
-                            id = actorsIds.get(0);
-                            actorsIds.remove(0);
-                        }
-                        contentList.addFromXml(
-                                createActorFromXml(
-                                        Paths.get(Config.getSAVE_PATH_ACTOR().toString(), "actor".concat(id)).toFile()));
-                    }
-                });
-                createActors.setName("newActor" + i);
-                actorThreads.add(createActors);
-                createActors.start();
-
-                if(i == numberOfThreads-1) {
-                    boolean iAmStillWorking = true;
-                    while(iAmStillWorking) {
-                        actorThreads.removeIf(thread -> thread.getState().equals(Thread.State.TERMINATED));
-                        if(actorThreads.size() == 0) {
-                            iAmStillWorking = false;
-                        }
-                    }
-                }
-            }
-
-            return contentList;
-        }
-
-        @SneakyThrows
-        private static ContentList<Movie> createDefaultMovieContentList(List<ContentList<Actor>> allActorsContentLists) {
-            File inputFile = Paths.get(Config.getSAVE_PATH_MOVIE().toString(), ContentList.ALL_MOVIES_DEFAULT.concat(".xml")).toFile();
-            Element root = createRootElementFromXml(inputFile);
-            if(root == null) {
-                log.warn("Couldn't create ContentList from file \"{}\" - internal XML file issue", inputFile);
-                return null;
-            }
-
-            NodeList nodes = root.getElementsByTagName(Movie.class.getSimpleName().toLowerCase());
-            ContentList<Actor> defaultActors = null;
-            for(ContentList<Actor> contentList : allActorsContentLists) {
-                if(contentList.getListName().equals(ContentList.ALL_ACTORS_DEFAULT)) {
-                    defaultActors = contentList;
-                }
-            }
-            if(defaultActors == null) {
-                log.warn("Couldn't create ContentList from file \"{}\" - no correct default actor list", inputFile);
-                return null;
-            }
-            ContentList<Movie> contentList = new ContentList<>(root.getElementsByTagName("listName").item(0).getTextContent());
-            contentList.setDisplayName(root.getElementsByTagName("displayName").item(0).getTextContent());
-            List<String> moviesIds = new ArrayList<>();
-            for(int i = 0; i < nodes.getLength(); i++) {
-                moviesIds.add(nodes.item(i).getTextContent());
-            }
-            List<Thread> movieThreads = new ArrayList<>();
-            int numberOfThreads = moviesIds.size()/10 + 1;
-            for(int i = 0; i < numberOfThreads; i++) {
-                ContentList<Actor> finalDefaultActors = defaultActors;
-                Thread createMovies = new Thread(() -> {
-                    while(moviesIds.size() != 0) {
-                        String id;
-                        synchronized (moviesIds) {
-                            id = moviesIds.get(0);
-                            moviesIds.remove(0);
-                        }
-                        contentList.addFromXml(
-                                createMovieFromXml(
-                                        Paths.get(Config.getSAVE_PATH_MOVIE().toString(), "movie".concat(id)).toFile(),
-                                        finalDefaultActors));
-                    }
-                });
-                createMovies.setName("newMovie" + i);
-                movieThreads.add(createMovies);
-                createMovies.start();
-
-                if(i == numberOfThreads-1) {
-                    boolean iAmStillWorking = true;
-                    while(iAmStillWorking) {
-                        movieThreads.removeIf(thread -> thread.getState().equals(Thread.State.TERMINATED));
-                        if(movieThreads.size() == 0) {
-                            iAmStillWorking = false;
-                        }
-                    }
-                }
-            }
-            return contentList;
-        }
-
-        private static Actor createActorFromXml(File inputDir) {
-            File inputFile = IO.getXmlFileFromDir(inputDir);
-            Element root = createRootElementFromXml(inputFile);
-            if(root == null) {
-                log.warn("Couldn't create actor from file \"{}\" - internal XML file issue", inputFile);
-                return null;
-            } else if(!root.getTagName().equals(Actor.class.getSimpleName())) {
-                log.warn("Couldn't create actor from file \"{}\" - different structure type", inputFile);
-                return null;
-            }
-
-            Map<String, String> map = new HashMap<>();
-            for(String fieldName : Actor.FIELD_NAMES) {
-                NodeList element = root.getElementsByTagName(fieldName);
-                if(element.getLength() == 1) {
-                    String value = element.item(0).getChildNodes().item(0).getNodeValue();
-                    if(value != null) map.put(fieldName, value);
-                }
-            }
-            log.info("New actor created successfully from file \"{}\"", inputFile);
-            return new Actor(map);
-        }
-
-        private static Movie createMovieFromXml(File inputDir, ContentList<Actor> allActors) {
-            File inputFile = IO.getXmlFileFromDir(inputDir);
-            Element root = createRootElementFromXml(inputFile);
-            if(root == null) {
-                log.warn("Couldn't create actor from file \"{}\" - internal XML file issue", inputFile);
-                return null;
-            } else if(!root.getTagName().equals(Movie.class.getSimpleName())) {
-                log.warn("Couldn't create actor from file \"{}\" - different structure type", inputFile);
-                return null;
-            }
-
-            Map<String, List<String>> map = new LinkedHashMap<>();
-            for(String fieldName : Movie.FIELD_NAMES) {
-                NodeList element = root.getElementsByTagName(fieldName);
-                List<String> param = new ArrayList<>();
-                for(int i = 0; i < element.getLength(); i++) {
-                    String value = element.item(i).getChildNodes().item(0).getNodeValue();
-                    if(value != null) param.add(value);
-                }
-                map.put(fieldName, param);
-            }
-            log.info("New movie created successfully from file \"{}\"", inputFile);
-            return new Movie(map, allActors);
-        }
-
     }
+
 
 
 }
