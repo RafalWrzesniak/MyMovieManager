@@ -19,7 +19,6 @@ public interface ContentType  {
     String FILMWEB = "filmweb";
     String IMAGE_URL = "imageUrl";
 
-
     //    == methods ==
     Map<String, String> getAllFieldsAsStrings();
     boolean searchFor(String strToFind);
@@ -31,7 +30,7 @@ public interface ContentType  {
     int getId();
 
 //    == default methods ==
-    static LocalDate convertStrToLocalDate(String string) {
+    default LocalDate convertStrToLocalDate(String string) {
         if(string == null || string.isEmpty()) {
             throw new IllegalArgumentException("Date argument cannot be null or empty!");
         } else if(string.equals("-")) return null;

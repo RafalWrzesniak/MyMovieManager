@@ -136,7 +136,7 @@ public final class Movie implements ContentType, Comparable<Movie> {
             setRate(Double.parseDouble(movieMap.get(Movie.RATE).get(0)));
         }
         // LocalDate
-        setPremiere(ContentType.convertStrToLocalDate(movieMap.get(Movie.PREMIERE).get(0)));
+        setPremiere(convertStrToLocalDate(movieMap.get(Movie.PREMIERE).get(0)));
         // Path
         if(movieMap.get(Movie.IMAGE_PATH).get(0) != null) {
             setImagePath(Paths.get(movieMap.get(Movie.IMAGE_PATH).get(0)));

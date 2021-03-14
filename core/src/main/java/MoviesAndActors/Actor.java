@@ -80,9 +80,9 @@ public final class Actor implements ContentType, Comparable<Actor> {
         setNationality(actorMap.get(NATIONALITY));
         try { this.imagePath = Paths.get(actorMap.get(IMAGE_PATH)); } catch (NullPointerException ignored) { }
         try { this.imageUrl = new URL(actorMap.get(IMAGE_URL)); } catch (MalformedURLException | NullPointerException ignored) { }
-        this.birthday = ContentType.convertStrToLocalDate(actorMap.get(Actor.BIRTHDAY));
+        this.birthday = convertStrToLocalDate(actorMap.get(Actor.BIRTHDAY));
         if(actorMap.get(Actor.DEATH_DAY) != null) {
-            setDeathDay(Objects.requireNonNull(ContentType.convertStrToLocalDate(actorMap.get(Actor.DEATH_DAY))));
+            setDeathDay(Objects.requireNonNull(convertStrToLocalDate(actorMap.get(Actor.DEATH_DAY))));
         }
         setAge();
         int id = actorMap.get(ID) == null ? -1 : Integer.parseInt(actorMap.get(ID));
