@@ -82,7 +82,7 @@ public abstract class ContentDetail {
     protected Label textLabel(String text) {
         if(text == null || text.isEmpty()) return null;
         Label label = new Label(text);
-        label.setMaxWidth(160);
+        label.setMaxWidth(275);
         label.setWrapText(true);
         label.setTextAlignment(TextAlignment.CENTER);
         label.getStyleClass().add("contentButton");
@@ -95,6 +95,9 @@ public abstract class ContentDetail {
         label.getStyleClass().add("white_text");
 
         FlowPane flowPane = new FlowPane();
+        flowPane.setMaxWidth(275);
+        flowPane.setPrefWidth(275);
+        flowPane.setMinWidth(275);
         flowPane.setHgap(10);
         flowPane.setVgap(15);
 
