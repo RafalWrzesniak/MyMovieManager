@@ -78,12 +78,13 @@ public class MovieContextMenu {
         contextMenu.getItems().addAll(openItem, editItem, reDownload, changeCoverItem, addToListItem, removeItem);
         contextMenu.setOnShowing(event -> {
             ContentList<Movie> selectedList = owner.getMainController().getMovieListView().getSelectionModel().getSelectedItem();
-            if(selectedList.equals(MainController.moviesToWatch)) {
+            if(selectedList != null && selectedList.equals(MainController.moviesToWatch)) {
                 contextMenu.getItems().add(1, markAsWatchedItem);
             }
-            if(selectedList.equals(MainController.allMovies)) {
-                removeItem.setDisable(true);
-            }
+//            if(selectedList != null && selectedList.equals(MainController.allMovies)) {
+//                removeItem.setDisable(true);
+//            }
+            addToListItem.getItems().clear();
             for(ContentList<Movie> list : MainController.observableContentMovies) {
                 MenuItem listMenu = new MenuItem(list.getDisplayName());
                 if(list.get(movie) != null) {
@@ -108,7 +109,7 @@ public class MovieContextMenu {
                 Map<String, List<String>> map = connection.grabMovieDataFromFilmweb();
                 map.put(Movie.ID, Collections.singletonList(String.valueOf(finalMovie.getId())));
                 downloadedMovie = new Movie(map, false);
-                connection.addCastToMovie(downloadedMovie, MainController.allActors,MainController.actorStringList);
+                connection.addCastToMovie(downloadedMovie, MainController.allActors,MainController.actorStringList, MainController.allMovies);
 
                 if(downloadedMovie.getImagePath() == null || downloadedMovie.getImagePath().equals(Configuration.Files.NO_MOVIE_COVER))  {
                     Path downloadedImagePath = Paths.get(IO.createContentDirectory(downloadedMovie).toString(), downloadedMovie.getReprName().replaceAll("[]?\\[*./:;|,\"]", "").concat(".jpg"));
@@ -179,6 +180,7 @@ public class MovieContextMenu {
         if(owner.getMainController().getMovieListView().getSelectionModel().getSelectedItem().equals(MainController.moviesToWatch)) {
             final File[] movieFile = new File[1];
             IO.readLastStateOfMainMovieFolder().forEach((file, id) -> { if(id == movie.getId()) movieFile[0] = file; });
+            if(movieFile[0] == null) return;
             try {
                 Files.move(movieFile[0].toPath(), Config.getRECENTLY_WATCHED().resolve(movieFile[0].getName()), StandardCopyOption.REPLACE_EXISTING);
             } catch (DirectoryNotEmptyException directoryNotEmptyException) {
@@ -199,7 +201,6 @@ public class MovieContextMenu {
             MainController.recentlyWatched.remove(0);
         }
         handleRemovingFromList(movie);
-
     }
 
     private void changeCover() {
