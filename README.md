@@ -46,6 +46,10 @@ Settings
 
 ![Settings](overviewImages/settings.PNG)
 
+Application has logging
+
+![Logging](overviewImages/logs.png)
+
 A created file containing summary of recently downloaded movies
 
 ![File](overviewImages/downloadSummary.PNG)
