@@ -32,6 +32,7 @@ public class MultiActorContextMenu extends ActorContextMenu {
             if(selectedList == null || selectedList.getListName().equals(ContentList.ALL_ACTORS_DEFAULT)) {
                 removeFromList.setDisable(true);
             }
+            addToContentList.getItems().clear();
             for(ContentList<Actor> list : MainController.observableContentActors) {
                 MenuItem listMenu = new MenuItem(list.getDisplayName());
                 if(list.getListName().equals(ContentList.ALL_ACTORS_DEFAULT) || list.equals(selectedList)) {

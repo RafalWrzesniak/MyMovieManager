@@ -37,6 +37,7 @@ public class MultiMovieContextMenu extends MovieContextMenu {
             if(selectedList.equals(MainController.allMovies)) {
                 removeItem.setDisable(true);
             }
+            addToListItem.getItems().clear();
             for(ContentList<Movie> list : MainController.observableContentMovies) {
                 MenuItem listMenu = new MenuItem(list.getDisplayName());
                 if(list.getListName().equals(ContentList.ALL_MOVIES_DEFAULT) || list.equals(selectedList)) {
