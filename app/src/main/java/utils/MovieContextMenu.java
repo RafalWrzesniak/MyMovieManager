@@ -197,7 +197,7 @@ public class MovieContextMenu {
             MainController.observableContentMovies.add(MainController.recentlyWatched);
         }
         MainController.recentlyWatched.add(movie);
-        if(MainController.recentlyWatched.size() > 10) {
+        if(MainController.recentlyWatched.size() > 12) {
             MainController.recentlyWatched.remove(0);
         }
         handleRemovingFromList(movie);
