@@ -42,10 +42,11 @@ public final class Connection {
     private static final String LINE_WITH_MOVIE_DATA = "data-linkable=\"filmMain\"";
     private static final String LINE_WITH_MOVIE_DATA2 = "data-source=\"linksData\"";
     private static final String LINE_WITH_ACTOR_DATA = "personMainHeader";
+    private static final String LINE_WITH_ACTOR_DATA2 = "data-linkable=\"personMain\"";
     private static final String LINE_WITH_CAST_DATA = "data-linkable=\"filmFullCast\"";
     private static final String LINE_WITH_ACTOR_FILMOGRAPHY = "userFilmographyfalseactors";
     private static final Map<String, String> ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
-            entry(Actor.NAME,        "name"),
+            entry(Actor.NAME,        "itemprop=\"name\""),
             entry(Actor.NATIONALITY, "birthPlace"),
             entry(Actor.BIRTHDAY,    "itemprop=\"birthDate\" content"),
             entry(Actor.IMAGE_URL,  "itemprop=\"image\" src")
@@ -157,7 +158,7 @@ public final class Connection {
     public Map<String, String> grabActorDataFromFilmweb() throws IOException {
         Map<String, String> actorData = new HashMap<>();
         String foundLine = grepLineFromWebsite(LINE_WITH_ACTOR_DATA);
-
+        if(foundLine == null) foundLine = grepLineFromWebsite(LINE_WITH_ACTOR_DATA2);
         String fullName = Objects.requireNonNull(
                 extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.NAME), foundLine))
                 .replaceAll(" [iIvVxX]+$", "")
@@ -175,6 +176,7 @@ public final class Connection {
         String imageUrl = replaceNullWithDash(extractItemFromFilmwebLine(ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Actor.IMAGE_URL), foundLine));
         String deathDay = extractDeathDateFromFilmwebLine(foundLine);
 
+        if(fullName.endsWith(" ")) fullName = fullName.substring(0, fullName.length()-1);
         actorData.put(Actor.NAME, fullName.substring(0, fullName.lastIndexOf(" ")));
         actorData.put(Actor.SURNAME, fullName.substring(fullName.lastIndexOf(" ") + 1));
         actorData.put(Actor.BIRTHDAY, birthday);
