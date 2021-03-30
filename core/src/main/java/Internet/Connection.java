@@ -568,7 +568,10 @@ public final class Connection {
             log.warn("Wrong castType parameter, can't download cast data of \"{}\" from \"{}\"", castType, websiteUrl);
             throw new IllegalArgumentException("Wrong castType parameter");
         }
-        return extractCastLinksFromFilmwebLink(castType, grepLineFromWebsite(LINE_WITH_CAST_DATA));
+        String foundLine = grepLineFromWebsite(LINE_WITH_CAST_DATA);
+        String dubbingPl = "id=\"dubbing_pl\"";
+        if(foundLine.contains(dubbingPl)) foundLine = foundLine.substring(0, foundLine.indexOf(dubbingPl));
+        return extractCastLinksFromFilmwebLink(castType, foundLine);
     }
 
     private static int countChar(String string, char character) {
