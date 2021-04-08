@@ -81,9 +81,7 @@ public class MovieContextMenu {
             if(selectedList != null && selectedList.equals(MainController.moviesToWatch)) {
                 contextMenu.getItems().add(1, markAsWatchedItem);
             }
-//            if(selectedList != null && selectedList.equals(MainController.allMovies)) {
-//                removeItem.setDisable(true);
-//            }
+            removeItem.setDisable(selectedList == null || selectedList.get(movie) == null);
             addToListItem.getItems().clear();
             for(ContentList<Movie> list : MainController.observableContentMovies) {
                 MenuItem listMenu = new MenuItem(list.getDisplayName());

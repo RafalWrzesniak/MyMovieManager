@@ -81,7 +81,7 @@ public class ActorContextMenu {
 
         contextMenu.setOnShown(event -> {
             ContentList<Actor> list = owner.getMainController().getActorListView().getSelectionModel().getSelectedItem();
-            if(list == null || list.getListName().equals(ContentList.ALL_ACTORS_DEFAULT)) {
+            if(list == null || list.getListName().equals(ContentList.ALL_ACTORS_DEFAULT) || list.get(actor) == null) {
                 removeFromList.setDisable(true);
             }
         });
