@@ -50,8 +50,8 @@ public class MovieEdit {
         setTitle.setText(movie.getTitle());
         setTitleOrg.setText(movie.getTitleOrg());
         setLength.setText(movie.getDurationShortFormatted());
-        setRate.setText(movie.getRate().toString());
-        setRateCount.setText(movie.getRateCount().toString());
+        setRate.setText(String.valueOf(movie.getRate()));
+        setRateCount.setText(String.valueOf(movie.getRateCount()));
         StringBuilder genres = new StringBuilder();
         movie.getGenres().forEach(genre -> genres.append(genre).append("; "));
         setGenre.setText(genres.deleteCharAt(genres.lastIndexOf("; ")).toString());
@@ -75,10 +75,10 @@ public class MovieEdit {
             int duration = Integer.parseInt(len.substring(0, len.indexOf(":")))*60 + Integer.parseInt(len.substring(len.indexOf(":")+1));
             movie.setDuration(duration);
         }
-        if(!setRate.getText().isEmpty() && !setRate.getText().equals(movie.getRate().toString())) {
+        if(!setRate.getText().isEmpty() && !setRate.getText().equals(String.valueOf(movie.getRate()))) {
             movie.setRate(Double.parseDouble(setRate.getText()));
         }
-        if(!setRateCount.getText().isEmpty() && !setRateCount.getText().equals(movie.getRateCount().toString())) {
+        if(!setRateCount.getText().isEmpty() && !setRateCount.getText().equals(String.valueOf(movie.getRateCount()))) {
             movie.setRateCount(Integer.parseInt(setRateCount.getText()));
         }
         if(!setDescription.getText().isEmpty() && !setDescription.getText().equals(movie.getDescription())) {
