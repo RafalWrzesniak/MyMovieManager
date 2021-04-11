@@ -29,9 +29,9 @@ public class MovieDetail extends ContentDetail implements Initializable, MovieKi
 
 //    == fields ==
     @FXML private Label title, year, duration, description;
+    @Getter @Setter private MoviePane owner;
     private ResourceBundle resourceBundle;
     private Movie movie;
-    @Getter @Setter private MoviePane owner;
 
 //    == init ==
     @Override
@@ -72,6 +72,9 @@ public class MovieDetail extends ContentDetail implements Initializable, MovieKi
             contentImage.setImage(new Image(movie.getImagePath().toUri().toString()));
         });
 
+        while(vBox.getChildren().size() > 5) {
+            vBox.getChildren().remove(5);
+        }
         FlowPane flowPane;
         List<Actor> actorList;
         if(movie.getDirectors().size() > 0) {
@@ -91,6 +94,26 @@ public class MovieDetail extends ContentDetail implements Initializable, MovieKi
             actorLabel.setOnMouseClicked(event -> mainController.openActorDetail(actor, null, true));
             flowPane.getChildren().add(actorLabel);
         }
+
+        // update actors if files are not complete
+        movie.getCast().forEach(actor -> {
+            if(!actor.isPlayingIn(movie)) {
+                log.warn("\"{}\" should play in \"{}\"", actor, movie);
+                actor.addMovieActorPlayedIn(movie);
+            }
+        });
+        movie.getDirectors().forEach(director -> {
+            if(!director.isDirecting(movie)) {
+                log.warn("\"{}\" should direct \"{}\"", director, movie);
+                director.addMovieDirectedBy(movie);
+            }
+        });
+        movie.getWriters().forEach(writer -> {
+            if(!writer.isWriting(movie)) {
+                log.warn("\"{}\" should write \"{}\"", writer, movie);
+                writer.addMovieWrittenBy(movie);
+            }
+        });
     }
 
 }
