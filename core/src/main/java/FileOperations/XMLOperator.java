@@ -147,6 +147,18 @@ public final class XMLOperator {
         log.warn("Failed to remove id \"{}\" from \"{}\"", idToRemove, list.getListName());
     }
 
+    public static <E extends ContentType> int getFirstIdFromListFile(File listFile) {
+        if(listFile == null || !listFile.exists()) return -1;
+        Document doc = createDocToRead(listFile);
+        if(doc == null) return -1;
+        Element rootElement = doc.getDocumentElement();
+        for(int i = 0; i < rootElement.getChildNodes().getLength(); i++) {
+            try {
+                return Integer.parseInt(rootElement.getChildNodes().item(i).getTextContent());
+            } catch(NumberFormatException ignored) {}
+        }
+        return -1;
+    }
 
     public static <E extends ContentType> void removeContentList(ContentList<E> list) {
         File savedFile;

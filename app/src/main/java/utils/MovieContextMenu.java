@@ -2,6 +2,7 @@ package utils;
 
 import Configuration.Config;
 import FileOperations.IO;
+import FileOperations.XMLOperator;
 import Internet.Connection;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
@@ -196,7 +197,9 @@ public class MovieContextMenu {
         }
         MainController.recentlyWatched.add(movie);
         if(MainController.recentlyWatched.size() > 12) {
-            MainController.recentlyWatched.remove(0);
+            File recentlyFile = Config.getSAVE_PATH_MOVIE().resolve(Paths.get(ContentList.RECENTLY_WATCHED.concat(".xml"))).toFile();
+            Movie movieToRemove = MainController.recentlyWatched.getById(XMLOperator.getFirstIdFromListFile(recentlyFile));
+            MainController.recentlyWatched.remove(movieToRemove);
         }
         handleRemovingFromList(movie);
     }
