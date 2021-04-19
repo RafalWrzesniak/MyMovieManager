@@ -808,6 +808,7 @@ public class MainController implements Initializable {
         rightDetail.getChildren().add(actorDetails);
     }
 
+    @SneakyThrows
     public void openMovieDetail(Movie movie, MoviePane owner, boolean withReturnButton) {
         FXMLLoader loader = Main.createLoader(PaneNames.MOVIE_DETAIL, resourceBundle);
         Parent movieDetails;
@@ -817,11 +818,16 @@ public class MainController implements Initializable {
             log.warn("Failed to load fxml view in MovieDetail");
             return;
         }
+        XMLOperator.detailNeedToBeRead = true;
+        XMLOperator.addActorsToMovieIfTheyDoNotExist(movie, allActors, allMovies);
+        XMLOperator.detailNeedToBeRead = false;
+
         MovieDetail movieDetailController = loader.getController();
         movieDetailController.setOwner(owner);
         movieDetailController.setMovie(movie);
         movieDetailController.setMainController(this);
         if(withReturnButton) {
+            movieDetailController.vBox.getChildren().add(0, movieDetailController.getReturnButton());
             int lastIndex = rightDetail.getChildren().size() - 1;
             rightDetail.getChildren().get(lastIndex).setVisible(false);
         } else {
