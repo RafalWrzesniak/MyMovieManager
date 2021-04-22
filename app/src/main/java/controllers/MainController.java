@@ -755,12 +755,12 @@ public class MainController implements Initializable {
         movieInfo.setMainController(this);
 
         allCenter.getChildren().forEach(child -> child.setVisible(false));
-        allCenter.getChildren().add(parentPane);
+        Platform.runLater(() -> allCenter.getChildren().add(parentPane));
         StackPane tempStackPane = new StackPane();
         tempStackPane.getChildren().addAll(rightDetail.getChildren());
         rightDetail.getChildren().clear();
 
-        movieInfo.returnButton.setOnAction(actionEvent -> {
+        movieInfo.getReturnButton().setOnAction(actionEvent -> {
             removeMovieInfo();
             rightDetail.getChildren().clear();
             rightDetail.getChildren().addAll(tempStackPane.getChildren());
