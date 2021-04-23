@@ -80,8 +80,8 @@ public class MainController implements Initializable {
 
 //    == fields ==
     private ResourceBundle resourceBundle;
-    private int lastTakenIndex;
     private SortFilter<?> sortAndFilter;
+    private int lastTakenIndex;
 
     @FXML private HBox progressHBox;
     @FXML private StackPane filterPane;
@@ -720,8 +720,12 @@ public class MainController implements Initializable {
     }
 
 
-    @SneakyThrows
     private <T extends ContentType> void createSortAndFilter(ContentList<T> contentList) {
+        filterPane.getChildren().clear();
+        if(contentList == null || contentList.size() == 0) {
+            flowPaneContentList.getChildren().clear();
+            return;
+        }
         SortFilter<T> filter;
         FXMLLoader filterLoader;
         if(contentList.get(0) instanceof Actor) {
@@ -730,13 +734,17 @@ public class MainController implements Initializable {
             filterLoader = Main.createLoader(PaneNames.MOVIE_FILTER, resourceBundle);
         } else return;
 
-        filterLoader.load();
+        try {
+            filterLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.warn(Arrays.toString(e.getStackTrace()));
+            log.warn(e.toString());
+        }
         filter = filterLoader.getController();
         filter.setMainController(this);
         sortAndFilter = filter;
         filter.setContentList(contentList);
-
-        filterPane.getChildren().clear();
         filterPane.getChildren().add(filter.filterHBox);
     }
 
