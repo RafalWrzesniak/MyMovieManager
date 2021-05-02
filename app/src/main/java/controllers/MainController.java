@@ -694,6 +694,15 @@ public class MainController implements Initializable {
                         }
                     }
                 };
+                cell.setOnMouseClicked(mouseEvent -> {
+                    if(cell.isEmpty()) {
+                        cell.setContextMenu(new ContextMenu());
+                    } else {
+                        cell.setContextMenu(movieListViewContextMenu);
+                        selectItemListener(actorListView);
+                    }
+                });
+                return cell;
             }
         };
     }
@@ -715,6 +724,15 @@ public class MainController implements Initializable {
                         }
                     }
                 };
+                cell.setOnMouseClicked(mouseEvent -> {
+                    if(cell.isEmpty()) {
+                        cell.setContextMenu(new ContextMenu());
+                    } else {
+                        cell.setContextMenu(actorListViewContextMenu);
+                        selectItemListener(movieListView);
+                    }
+                });
+                return cell;
             }
         };
     }
