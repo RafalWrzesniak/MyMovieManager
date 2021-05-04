@@ -654,10 +654,14 @@ public class MainController implements Initializable {
             listViewToDeselect.getSelectionModel().clearSelection();
             searchField.setText("");
             createSortAndFilter(getSelectedList());
+            movieListView.refresh();
+            actorListView.refresh();
         }
     }
 
     public void makeCustomRefresh() {
+        movieListView.refresh();
+        actorListView.refresh();
         int i = movieListView.getSelectionModel().getSelectedIndex();
         int j = actorListView.getSelectionModel().getSelectedIndex();
         if(i > 0) {
