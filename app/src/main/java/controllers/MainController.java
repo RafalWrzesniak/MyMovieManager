@@ -56,8 +56,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -97,12 +96,12 @@ public class MainController implements Initializable {
             actorYoungest, actorOldest;
     @FXML @Getter private MenuItem movieAlpha, actorAlpha;
 
-
-    @Getter @FXML private MenuButton sort;
+    @FXML @Getter private MenuButton sort;
     @FXML @Getter private StackPane allCenter;
     @FXML @Getter private StackPane rightDetail;
     @FXML @Getter private ListView<ContentList<Movie>> movieListView;
     @FXML @Getter private ListView<ContentList<Actor>> actorListView;
+
     @Getter private Map<String, Comparator<Movie>> sortMovieMap;
     @Getter private Map<String, Comparator<Actor>> sortActorMap;
 
@@ -115,7 +114,8 @@ public class MainController implements Initializable {
         sortActorMap = Map.of(
                 actorAlpha.getId(), Actor.COMP_ALPHA,
                 actorYoungest.getId(), Actor.COMP_AGE,
-                actorOldest.getId(), Actor.COMP_AGE.reversed());
+                actorOldest.getId(), Actor.COMP_AGE.reversed()
+        );
         sortMovieMap = Map.of(
                 movieOldest.getId(), Movie.COMP_PREMIERE,
                 movieShortest.getId(), Movie.COMP_DURATION,
@@ -298,8 +298,7 @@ public class MainController implements Initializable {
                 ExportImport.ImportAll importAllZip = new ExportImport.ImportAll(chosenFile);
                 importAllZip.start();
                 importAllZip.join();
-                XMLOperator.ReadAllDataFromFiles readData = initReadData();
-                initReadMainFolder();
+                XMLOperator.ReadInitDataFromFiles readData = initReadData();
                 addReadDataToObservableList(readData);
                 movieListView.getSelectionModel().select(moviesToWatch);
                 selectItemListener(actorListView);
@@ -307,8 +306,7 @@ public class MainController implements Initializable {
                 ExportImport.ImportDataFromXml importDataFromXml = new ExportImport.ImportDataFromXml(chosenFile);
                 importDataFromXml.start();
                 importDataFromXml.join();
-                XMLOperator.ReadAllDataFromFiles readData = initReadData();
-                initReadMainFolder();
+                XMLOperator.ReadInitDataFromFiles readData = initReadData();
                 addReadDataToObservableList(readData);
                 movieListView.getSelectionModel().select(moviesToWatch);
             }
@@ -612,7 +610,7 @@ public class MainController implements Initializable {
         return dialog;
     }
 
-    private  Dialog<ButtonType> createConfirmDialog(String dialogInfo) throws IOException {
+    private Dialog<ButtonType> createConfirmDialog(String dialogInfo) throws IOException {
         FXMLLoader loader = Main.createLoader(PaneNames.SINGLE_DIALOG, resourceBundle);
         Dialog<ButtonType> dialog = Main.createDialog(loader, main_view.getScene().getWindow());
         dialog.getDialogPane().setMaxWidth(600);
