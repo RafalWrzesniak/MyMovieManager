@@ -19,6 +19,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -60,6 +61,9 @@ public class MovieContextMenu {
         final MenuItem markAsWatchedItem = new MenuItem(resourceBundle.getString("context_menu.mark_as_watched"));
         markAsWatchedItem.setOnAction(event -> markAsWatched(movie));
 
+        final MenuItem openDirectory = new MenuItem(resourceBundle.getString("context_menu.open_movie_directory"));
+        openDirectory.setOnAction(actionEvent -> openWindowsDirectoryContainingMovie());
+
         final MenuItem editItem = new MenuItem(resourceBundle.getString("context_menu.edit"));
         editItem.setOnAction(event -> editMovie());
 
@@ -81,6 +85,7 @@ public class MovieContextMenu {
             ContentList<Movie> selectedList = owner.getMainController().getMovieListView().getSelectionModel().getSelectedItem();
             if(selectedList != null && selectedList.equals(MainController.moviesToWatch)) {
                 contextMenu.getItems().add(1, markAsWatchedItem);
+                contextMenu.getItems().add(2, openDirectory);
             }
             removeItem.setDisable(selectedList == null || selectedList.get(movie) == null);
             addToListItem.getItems().clear();
@@ -220,5 +225,19 @@ public class MovieContextMenu {
         }
     }
 
+
+    @SneakyThrows
+    private void openWindowsDirectoryContainingMovie() {
+        Map<File, Integer> lastRideMap = IO.readLastStateOfMainMovieFolder();
+        File fileToOpen = null;
+        for (Map.Entry<File, Integer> entry : lastRideMap.entrySet()) {
+            File file = entry.getKey();
+            Integer integer = entry.getValue();
+            if (integer == movie.getId()) fileToOpen = file;
+        }
+        if(fileToOpen != null) {
+            Runtime.getRuntime().exec("explorer.exe /open," + fileToOpen.getPath());
+        }
+    }
 
 }
