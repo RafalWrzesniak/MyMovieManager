@@ -507,27 +507,40 @@ public class MainController implements Initializable {
     }
 
 
+    @SneakyThrows
+    private <T extends ContentType> boolean populateFlowPaneContentList(List<T> list, boolean clear) {
+        if(list == null ) return false;
+        List<T> targetList;
+        int lastIndex;
+        int numberOfPanes = 30;
+        if(clear) {
+            removeMovieInfo();
+            flowPaneContentList.getChildren().clear();
+            lastIndex = Math.min(list.size(), numberOfPanes);
+            lastTakenIndex = 0;
+            scrollPane.setVvalue(0);
+            if(list.size() == 0) return false;
 
-        flowPaneContentList.getChildren().clear();
-        for(int i =0; i < contentList.size(); i++) {
-            FXMLLoader loader;
-            Parent parentPane;
+        } else {
+            if(lastTakenIndex == list.size()) return false;
+            lastIndex = Math.min(lastTakenIndex + numberOfPanes, list.size());
+        }
+        targetList = list.subList(lastTakenIndex, lastIndex);
+        lastTakenIndex = lastIndex;
 
-            if(contentList.get(0) instanceof Movie) {
-                loader = createLoader(MOVIE_PANE, resourceBundle);
-            } else if(contentList.get(0) instanceof Actor) {
-                loader = createLoader(ACTOR_PANE, resourceBundle);
-            } else {
-                return;
-            }
-
+        for(int i = 0; i < targetList.size(); i++) {
             try {
-                parentPane = loader.load();
+                FXMLLoader loader = addContentToFlowPane(targetList.get(i));
+                if(flowPaneContentList.getChildren().size() == 1 && i == 0) {
+                    ((ContentPane) loader.getController()).selectItem();
+                }
             } catch (IOException e) {
-                log.warn("Failed to load fxml view in ParentPane while populating");
+                log.warn("Failed to load pane for \"{}\"", targetList.get(i));
                 e.printStackTrace();
-                continue;
             }
+        }
+        return true;
+    }
 
             if(contentList.get(0) instanceof Movie) {
                 MoviePane moviePaneController = loader.getController();
