@@ -92,13 +92,13 @@ public class MainController implements Initializable {
     @FXML private MenuItem importZip, importXml, exportZip, exportXml;
     @FXML private ContextMenu movieListViewContextMenu, actorListViewContextMenu;
     @FXML private Button addContentMovies, addContentActors, addFolderWithMovies, addSingleMovie, settings;
-    @FXML private MenuItem movieShortest, movieLongest, movieNewest, movieOldest, movieByRate, moviePopular,
-            actorYoungest, actorOldest;
-    @FXML @Getter private MenuItem movieAlpha, actorAlpha;
+    @FXML private MenuItem movieZheta, movieShortest, movieLongest, movieNewest, movieOldest, movieByRate, moviePopular,
+            actorZheta ,actorYoungest, actorOldest;
 
     @FXML @Getter private MenuButton sort;
     @FXML @Getter private StackPane allCenter;
     @FXML @Getter private StackPane rightDetail;
+    @FXML @Getter private MenuItem movieAlpha, actorAlpha;
     @FXML @Getter private ListView<ContentList<Movie>> movieListView;
     @FXML @Getter private ListView<ContentList<Actor>> actorListView;
 
@@ -113,6 +113,7 @@ public class MainController implements Initializable {
         this.resourceBundle = resources;
         sortActorMap = Map.of(
                 actorAlpha.getId(), Actor.COMP_ALPHA,
+                actorZheta.getId(), Actor.COMP_ALPHA.reversed(),
                 actorYoungest.getId(), Actor.COMP_AGE,
                 actorOldest.getId(), Actor.COMP_AGE.reversed()
         );
@@ -120,6 +121,7 @@ public class MainController implements Initializable {
                 movieOldest.getId(), Movie.COMP_PREMIERE,
                 movieShortest.getId(), Movie.COMP_DURATION,
                 movieAlpha.getId(), Movie.COMP_ALPHABETICAL,
+                movieZheta.getId(), Movie.COMP_ALPHABETICAL.reversed(),
                 movieByRate.getId(), Movie.COMP_RATE.reversed(),
                 movieNewest.getId(), Movie.COMP_PREMIERE.reversed(),
                 movieLongest.getId(), Movie.COMP_DURATION.reversed(),
