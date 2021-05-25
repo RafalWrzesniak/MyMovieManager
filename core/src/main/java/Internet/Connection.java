@@ -52,7 +52,8 @@ public final class Connection {
             entry(Actor.IMAGE_URL,  "itemprop=\"image\" src")
     );
     private static final Map<String, String> MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
-            entry(Movie.TITLE,      "data-title"),
+//            entry(Movie.TITLE,      "data-title"),
+            entry(Movie.TITLE,      "\"filmDataBasic\">\\{\"id\":\\d+,\"title"),
             entry(Movie.TITLE_ORG,  "originalTitle"),
             entry(Movie.PREMIERE,   "releaseWorldPublicString"),
             entry(Movie.DURATION,   "duration"),
@@ -451,7 +452,7 @@ public final class Connection {
             log.warn("Null as input - can't extract list of items \"{}\" from \"{}\"", itemToExtract, websiteUrl);
             throw new IOException("Null as input - can't extract list of items \"" + itemToExtract + "\" from " + websiteUrl);
         }
-        Pattern patternOfItemProp = Pattern.compile("<div class=\"filmInfo__header\">" + itemToExtract + "</div>(.+?)</div>");
+        Pattern patternOfItemProp = Pattern.compile("<\\w{2,3} class=\"filmInfo__header\">" + itemToExtract + "</\\w{2,3}>(.+?)</div>");
         Matcher matcherOfItemProp = patternOfItemProp.matcher(line);
         List<String> listOfItems = new ArrayList<>();
 
