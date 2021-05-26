@@ -544,33 +544,20 @@ public class MainController implements Initializable {
         return true;
     }
 
-            if(contentList.get(0) instanceof Movie) {
-                MoviePane moviePaneController = loader.getController();
-                moviePaneController.setMovie((Movie) contentList.get(i));
-                moviePaneController.setMainController(this);
-            } else if(contentList.get(0) instanceof Actor) {
-                ActorPane actorPaneController = loader.getController();
-                actorPaneController.setActor((Actor) contentList.get(i));
-                actorPaneController.setMainController(this);
-            }
-            Platform.runLater(() -> flowPaneContentList.getChildren().add(parentPane));
-        }
-//        currentlyDisplayedList = contentList;
-    }
-
-
-    private void handleClickingOnMovies(MouseEvent event) {
-        Stage stage = (Stage) rightDetail.getParent().getScene().getWindow();
-
-        if(rightDetail.getChildren().size() == 0 && main_view.getWidth() <= main_view.getPrefWidth()) {
-            stage.setWidth(stage.getWidth() + MovieDetail.getPREF_WIDTH());
-        }
-
-        if(event.getPickResult().getIntersectedNode().toString().equals(flowPaneContentList.toString())) {
-            rightDetail.getChildren().clear();
-            stage.setWidth(stage.getWidth() - MovieDetail.getPREF_WIDTH());
-            ContentPane.clearBackSthWasClicked.setValue(true);
-            ContentPane.clearBackSthWasClicked.setValue(false);
+    private <T extends ContentType> FXMLLoader addContentToFlowPane(T content) throws IOException {
+        FXMLLoader loader;
+        Parent parentPane;
+        if(content instanceof Movie) {
+            loader = Main.createLoader(PaneNames.MOVIE_PANE, resourceBundle);
+            parentPane = loader.load();
+            MoviePane moviePaneController = loader.getController();
+            moviePaneController.setMovie((Movie) content);
+            moviePaneController.setMainController(this);
+        } else if(content instanceof Actor) {
+            loader = Main.createLoader(PaneNames.ACTOR_PANE, resourceBundle);
+            parentPane = openActorPane((Actor) content, loader);
+        } else {
+            throw new IOException("Not compatible object: " + content);
         }
     }
 
