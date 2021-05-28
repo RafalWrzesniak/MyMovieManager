@@ -559,24 +559,8 @@ public class MainController implements Initializable {
         } else {
             throw new IOException("Not compatible object: " + content);
         }
-    }
-
-    public FXMLLoader createLoader(String viewName, ResourceBundle resourceBundle) {
-        final String PREFIX = "/fxml-views/";
-        final String SUFFIX = ".fxml";
-        return new FXMLLoader(getClass().getResource(PREFIX + viewName + SUFFIX), resourceBundle);
-    }
-
-    private Dialog<ButtonType> createDialog(FXMLLoader loader) throws IOException {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.initOwner(main_view.getScene().getWindow());
-        dialog.getDialogPane().setContent(loader.load());
-        dialog.getDialogPane().getStylesheets().add(String.valueOf(getClass().getResource("/css-styles/dialog.css")));
-        dialog.getDialogPane().getStyleClass().add("dialogBorder");
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
-        dialog.initStyle(StageStyle.TRANSPARENT);
-        return dialog;
+        flowPaneContentList.getChildren().add(parentPane);
+        return loader;
     }
 
 
