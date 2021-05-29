@@ -508,6 +508,36 @@ public class MainController implements Initializable {
         observableContentActors.addAll(FXCollections.observableArrayList(readData.getAllActorsLists()));
     }
 
+    @SneakyThrows
+    public void displayPanesByPopulating(boolean clear) {
+        boolean populated;
+        if(sortAndFilter == null || sortAndFilter.getContentList() == null) return;
+        if(searchField.getText().length() < 2) {
+            populated = populateFlowPaneContentList(sortAndFilter.getFilteredList(), clear);
+        } else {
+            // create not initialized actors if they are desired to found in search field
+            if(sortAndFilter.getContentList().equals(allMovies)) {
+                List<String> foundIds = new ArrayList<>();
+                String filmweb = "https://www.filmweb.pl/person/movie";
+                actorStringList.forEach(s -> {
+                    if(!filmweb.contains(searchField.getText().toLowerCase()) && s.toLowerCase().contains(searchField.getText().toLowerCase())) {
+                        foundIds.add(s.split(";")[0]);
+                    }
+                });
+                XMLOperator.createActorsAndAssignThemToMovies(foundIds, allActors, allMovies);
+            }
+            populated = populateFlowPaneContentList(
+                    sortAndFilter
+                            .getFilteredList()
+                            .stream()
+                            .filter(contentType -> contentType.searchFor(searchField.getText()))
+                            .collect(Collectors.toList()),
+                    clear);
+        }
+        if(scrollPane.getVvalue() < 1.0 && populated) {
+            log.debug("Populating flowPane with \"{}\" to index {}", sortAndFilter.getContentList(), lastTakenIndex);
+        }
+    }
 
     @SneakyThrows
     private <T extends ContentType> boolean populateFlowPaneContentList(List<T> list, boolean clear) {
