@@ -488,24 +488,20 @@ public class MainController implements Initializable {
         return readData;
     }
 
-    @SneakyThrows
-    private void initReadMainFolder() {
-        MovieMainFolder movieMainFolder = new MovieMainFolder(allMovies, allActors);
-        movieMainFolder.start();
-        movieMainFolder.join();
-        moviesToWatch = movieMainFolder.getMoviesToWatch();
-        moviesToWatch.sort();
-    }
-
-    private void addReadDataToObservableList(XMLOperator.ReadAllDataFromFiles readData) {
+    private void addReadDataToObservableList(XMLOperator.ReadInitDataFromFiles readData) {
         observableContentMovies.clear();
         observableContentActors.clear();
+        movieListView.refresh();
+        actorListView.refresh();
         observableContentMovies.add(allMovies);
         observableContentMovies.add(moviesToWatch);
         List<ContentList<Movie>> noAllMoviesList = readData.getAllMoviesLists();
         noAllMoviesList.remove(allMovies);
+        noAllMoviesList.remove(moviesToWatch);
         observableContentMovies.addAll(FXCollections.observableArrayList(noAllMoviesList));
         observableContentActors.addAll(FXCollections.observableArrayList(readData.getAllActorsLists()));
+        movieListView.refresh();
+        actorListView.refresh();
     }
 
     @SneakyThrows
