@@ -473,18 +473,17 @@ public class MainController implements Initializable {
 
 //    == methods ==
     @SneakyThrows
-    private XMLOperator.ReadAllDataFromFiles initReadData() {
+    private XMLOperator.ReadInitDataFromFiles initReadData() {
+        new Thread(() -> actorStringList = XMLOperator.createStringActorList()).start();
         ContentList.clearNames();
-        XMLOperator.ReadAllDataFromFiles readData = new XMLOperator.ReadAllDataFromFiles();
+        XMLOperator.ReadInitDataFromFiles readData = new XMLOperator.ReadInitDataFromFiles();
         readData.start();
         readData.join();
         allActors = readData.getAllActors();
         allMovies = readData.getAllMovies();
-        readData.getAllMoviesLists().forEach(list -> {
-            if(list.getListName().equals(ContentList.RECENTLY_WATCHED)) {
-                recentlyWatched = list;
-            }
-        });
+        moviesToWatch = readData.getMoviesToWatch();
+        recentlyWatched = readData.getRecentlyWatched();
+        readData.readActorsForReadContentLists().start();
         return readData;
     }
 
