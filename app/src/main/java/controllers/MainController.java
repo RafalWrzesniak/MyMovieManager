@@ -465,7 +465,9 @@ public class MainController implements Initializable {
             XMLOperator.removeContentList(getSelectedList());
             observableContentMovies.remove(getSelectedList());
             observableContentActors.remove(getSelectedList());
+            movieListView.getSelectionModel().select(moviesToWatch);
             selectItemListener(actorListView);
+            makeCustomRefresh();
             displayPanesByPopulating(true);
         }
     }
