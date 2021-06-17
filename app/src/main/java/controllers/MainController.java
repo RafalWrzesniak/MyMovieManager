@@ -321,21 +321,21 @@ public class MainController implements Initializable {
         log.info("Export data called from " + callingItem);
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(resourceBundle.getString("dialog.import_export_title"));
-        fileChooser.setInitialFileName("MyMovieManager_exported_data_"
-                .concat(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
-                .replaceAll("\\..*$", "")
-                .replaceAll(":", "_")));
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+        fileChooser.setInitialDirectory(Config.getDEF_PATH().toFile());
         if(callingItem.equals(exportZip)) {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP archive files", "*.zip"));
             File destFile = fileChooser.showSaveDialog(main_view.getScene().getWindow());
-            ExportImport.ExportAll exportAll = new ExportImport.ExportAll(destFile);
-            exportAll.start();
+            if(destFile != null) {
+                ExportImport.ExportAll exportAll = new ExportImport.ExportAll(destFile);
+                exportAll.start();
+            }
         } else if(callingItem.equals(exportXml)) {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML file", "*.xml"));
             File destFile = fileChooser.showSaveDialog(main_view.getScene().getWindow());
-            ExportImport.ExportAllToXml exportAllToXml = new ExportImport.ExportAllToXml(destFile);
-            exportAllToXml.start();
+            if(destFile != null) {
+                ExportImport.ExportAllToXml exportAllToXml = new ExportImport.ExportAllToXml(destFile);
+                exportAllToXml.start();
+            }
         }
     }
 
