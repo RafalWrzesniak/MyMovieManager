@@ -278,8 +278,18 @@ public class MainController implements Initializable {
                 log.warn("Failed to create URL object from provided text");
                 return;
             }
-            DownloadAndProcessMovies.handleMovieFromUrl(providedUrl, allMovies, allActors);
-            makeCustomRefresh();
+            new Thread(() -> {
+                Movie downloadedMovie = DownloadAndProcessMovies.handleMovieFromUrl(providedUrl, allMovies, allActors, actorStringList);
+                ContentList<Movie> selectedMovieList = movieListView.getSelectionModel().getSelectedItem();
+                if(selectedMovieList != null && !selectedMovieList.equals(allMovies)) {
+                    selectedMovieList.add(downloadedMovie);
+                    Platform.runLater(() -> {
+                        selectItemListener(actorListView);
+                        makeCustomRefresh();
+                    });
+                }
+                Platform.runLater(() -> { movieListView.refresh(); actorListView.refresh(); });
+            }).start();
         }
     }
 
