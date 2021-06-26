@@ -234,7 +234,18 @@ public class MainController implements Initializable {
             File chosenFile = Main.chooseFileDialog(resourceBundle.getString("dialog.chooser.find_movie_file"), "movie");
             ((Button) actionEvent.getSource()).getStyleClass().remove("buttonPressed");
             if(chosenFile != null) {
-                DownloadAndProcessMovies.handleMovieFromFile(chosenFile, allMovies, allActors);
+                new Thread(() -> {
+                    Movie downloadedMovie = DownloadAndProcessMovies.handleMovieFromFile(chosenFile, allMovies, allActors, actorStringList);
+                    ContentList<Movie> selectedMovieList = movieListView.getSelectionModel().getSelectedItem();
+                    if(selectedMovieList != null && !selectedMovieList.equals(allMovies)) {
+                        selectedMovieList.add(downloadedMovie);
+                        Platform.runLater(() -> {
+                            selectItemListener(actorListView);
+                            makeCustomRefresh();
+//                        displayPanesByPopulating(true);
+                        });
+                    }
+                }).start();
             }
         }
         else if(actionEvent.getSource().equals(addFolderWithMovies)) {
@@ -242,12 +253,26 @@ public class MainController implements Initializable {
             ((Button) actionEvent.getSource()).getStyleClass().remove("buttonPressed");
             if(chosenDir != null) {
                 List<File> allFoundDirectories = IO.listDirectoryRecursively(chosenDir);
-                DownloadAndProcessMovies dap = new DownloadAndProcessMovies(allFoundDirectories, allMovies, allActors);
+                DownloadAndProcessMovies dap = new DownloadAndProcessMovies(allFoundDirectories, allMovies, allActors, actorStringList);
                 dap.start();
+                new Thread(() -> {
+                    try {
+                        dap.join();
+                        ContentList<Movie> selectedMovieList = movieListView.getSelectionModel().getSelectedItem();
+                        if(selectedMovieList != null && !selectedMovieList.equals(allMovies) && dap.getDownloadedMovies().size() > 0) {
+                            selectedMovieList.addAll(dap.getDownloadedMovies());
+                            Platform.runLater(() -> {
+                                selectItemListener(actorListView);
+                                makeCustomRefresh();
+//                            displayPanesByPopulating(true);
+                            });
+                        }
+                        Platform.runLater(() -> { movieListView.refresh(); actorListView.refresh(); });
+                    } catch (InterruptedException ignored) { }
+                }).start();
             }
 
         }
-        makeCustomRefresh();
     }
 
     @FXML
