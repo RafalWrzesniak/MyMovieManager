@@ -213,7 +213,7 @@ public class MainController implements Initializable {
     @FXML
     public void refreshMainFolder() {
         log.info("Refresh called");
-        MovieMainFolder movieMainFolder = new MovieMainFolder(moviesToWatch, allMovies, allActors);
+        MovieMainFolder movieMainFolder = new MovieMainFolder(moviesToWatch, allMovies, allActors, actorStringList);
         movieMainFolder.start();
         new Thread(() -> {
             try {
@@ -221,7 +221,10 @@ public class MainController implements Initializable {
             } catch (InterruptedException e) {
                 log.warn("Unexpected interrupted exception while downloading new movies \"{}\"", e.getMessage());
             }
-            Platform.runLater(() -> selectItemListener(actorListView));
+            Platform.runLater(() -> {
+                selectItemListener(actorListView);
+                makeCustomRefresh();
+            });
         }).start();
     }
 
