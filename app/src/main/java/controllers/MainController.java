@@ -132,11 +132,14 @@ public class MainController implements Initializable {
         Main.autoSave = new AutoSave();
         Main.autoSave.start();
         if (observableContentMovies.isEmpty()) {
-            // load all data
-            XMLOperator.ReadAllDataFromFiles readData = initReadData();
-            initReadMainFolder();
+            long startTime = System.nanoTime();
+            // load init data
+            XMLOperator.ReadInitDataFromFiles readData = initReadData();
             // add read data to observable lists
             addReadDataToObservableList(readData);
+            Platform.runLater(this::refreshMainFolder);
+            long estimatedTime = System.nanoTime() - startTime;
+            log.debug("Data read in \"{}\" [s]", ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
         }
         System.out.println(allMovies);
         System.out.println(allActors);
