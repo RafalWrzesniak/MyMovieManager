@@ -111,6 +111,7 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.resourceBundle = resources;
+        runTaskProgressBarChecking();
         sortActorMap = Map.of(
                 actorAlpha.getId(), Actor.COMP_ALPHA,
                 actorZheta.getId(), Actor.COMP_ALPHA.reversed(),
@@ -145,29 +146,17 @@ public class MainController implements Initializable {
         System.out.println(allActors);
         System.out.println(moviesToWatch);
 
-
-        // Left menu list view
         // set items
         movieListView.setItems(observableContentMovies);
         actorListView.setItems(observableContentActors);
-        // set cell factory
-        movieListView.setCellFactory(displayTextInViewListMovie());
-        actorListView.setCellFactory(displayTextInViewListActor());
-        // handling selection items in list view
-        movieListView.setOnMouseClicked(event -> selectItemListener(actorListView));
-        actorListView.setOnMouseClicked(event -> selectItemListener(movieListView));
-        movieListView.getSelectionModel().select(moviesToWatch);
-        populateFlowPaneContentList(moviesToWatch);
-        // set list view context menu user data
-        movieListViewContextMenu.setUserData(movieListView);
-        actorListViewContextMenu.setUserData(actorListView);
-
-//        currentlyDisplayedList.sort(Movie.COMP_DURATION);
-//        populateFlowPaneContentList(moviesToWatch);
-    }
-
-        // sorting
-        sort.showingProperty().addListener(SortFilter.borderButtonListener(sort));
+        moviesToWatch.getList().sort(Movie.COMP_ALPHABETICAL);
+        if(moviesToWatch.size() > 0) {
+            movieListView.getSelectionModel().select(moviesToWatch);
+            openMovieDetail(moviesToWatch.get(0), null, false);
+        } else {
+            movieListView.getSelectionModel().select(allMovies);
+        }
+        selectItemListener(actorListView);
     }
 
 
