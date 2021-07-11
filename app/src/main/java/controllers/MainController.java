@@ -129,6 +129,46 @@ public class MainController implements Initializable {
                 moviePopular.getId(), Movie.COMP_POPULARITY.reversed());
 
 
+        // dialog gauss background
+        recForDialogs = new Rectangle(100, 100, Color.valueOf("#212121"));
+        recForDialogs.xProperty().bind(main_view.layoutXProperty());
+        recForDialogs.yProperty().bind(main_view.layoutYProperty());
+        recForDialogs.heightProperty().bind(main_view.heightProperty());
+        recForDialogs.widthProperty().bind(main_view.widthProperty());
+        recForDialogs.setOpacity(0.5);
+        recForDialogs.setVisible(false);
+        main_view.getChildren().add(recForDialogs);
+
+        // searching
+        searchField.textProperty().addListener((observableValue, s, text) -> {
+            if(text.length() > 15) {
+                searchField.setText(s);
+            }
+            new Thread(() -> {
+                int sleepTime = 500;
+                if(text.length() == 2) sleepTime = 1500; else if(text.length() == 3) sleepTime = 1000;
+                try {
+                    Thread.sleep(sleepTime);
+                    if(text.equals(searchField.getText())) {
+                        Platform.runLater(() -> displayPanesByPopulating(true));
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        });
+        clearSearch.setOnMouseClicked(event -> searchField.setText(""));
+
+        // sorting
+        sort.showingProperty().addListener(SortFilter.borderButtonListener(sort));
+
+        // full screen if resolution is too low
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        if(screenSize.height < 720 || screenSize.width < 1300) {
+            Main.primaryStage.setMaximized(true);
+        }
+
+        // get data
         AutoSave.NEW_OBJECTS.clear();
         Main.autoSave = new AutoSave();
         Main.autoSave.start();
