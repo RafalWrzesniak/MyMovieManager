@@ -126,7 +126,54 @@ public class MainController implements Initializable {
                 movieByRate.getId(), Movie.COMP_RATE.reversed(),
                 movieNewest.getId(), Movie.COMP_PREMIERE.reversed(),
                 movieLongest.getId(), Movie.COMP_DURATION.reversed(),
-                moviePopular.getId(), Movie.COMP_POPULARITY.reversed());
+                moviePopular.getId(), Movie.COMP_POPULARITY.reversed()
+        );
+
+        // set list view context menu user data
+        movieListViewContextMenu.setUserData(movieListView);
+        actorListViewContextMenu.setUserData(actorListView);
+        // set cell factory
+        movieListView.setCellFactory(displayTextInViewListMovie());
+        actorListView.setCellFactory(displayTextInViewListActor());
+
+        movieListView.setContextMenu(null);
+        actorListView.setContextMenu(null);
+
+
+//       populate only 30 items at once - adding depends on scroll position
+        scrollPane.vvalueProperty().addListener((observableValue, number, t1) -> {
+            ScrollBar scrollBar = Main.getScrollBar(scrollPane);
+            double threshold = t1.doubleValue() + scrollBar.getBlockIncrement() / 3;
+            if (threshold > 1) {
+                displayPanesByPopulating(false);
+            }
+        });
+
+        // show / hide scroll bar
+        flowPaneContentList.setPadding(new Insets(15, 13, 0, 15));
+        scrollPane.vbarPolicyProperty().addListener((observableValue, scrollBarPolicy, t1) -> {
+            if (t1.equals(ScrollPane.ScrollBarPolicy.ALWAYS)) {
+                flowPaneContentList.setPadding(new Insets(15, 0, 0, 15));
+            } else if (t1.equals(ScrollPane.ScrollBarPolicy.NEVER)) {
+                flowPaneContentList.setPadding(new Insets(15, 13, 0, 15));
+            }
+        });
+        scrollPane.setOnMouseEntered(mouseEvent -> {
+            ScrollBar sb = Main.getScrollBar(scrollPane);
+            if (sb.getBlockIncrement() < 0.87) {
+                scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+            }
+        });
+        scrollPane.setOnMouseExited(mouseEvent -> scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER));
+
+        // control speed of scroll pane
+        scrollPane.getContent().setOnScroll(scrollEvent -> {
+            double flowPaneSize = flowPaneContentList.getChildren().size();
+            double deltaY = scrollEvent.getDeltaY() * (50 / flowPaneSize);
+            double width = scrollPane.getContent().getBoundsInLocal().getWidth();
+            double vValue = scrollPane.getVvalue();
+            scrollPane.setVvalue(vValue - (deltaY / width));
+        });
 
 
         // dialog gauss background
