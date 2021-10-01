@@ -43,7 +43,7 @@ public final class Connection {
     private static final String LINE_WITH_MOVIE_DATA2 = "data-source=\"linksData\"";
     private static final String LINE_WITH_ACTOR_DATA = "personMainHeader";
     private static final String LINE_WITH_ACTOR_DATA2 = "data-linkable=\"personMain\"";
-    private static final String LINE_WITH_CAST_DATA = "data-linkable=\"filmFullCast\"";
+    private static final String LINE_WITH_CAST_DATA = "filmFullCastSection__list";
     private static final String LINE_WITH_ACTOR_FILMOGRAPHY = "userFilmographyfalseactors";
     private static final Map<String, String> ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
             entry(Actor.NAME,        "itemprop=\"name\""),
@@ -52,7 +52,6 @@ public final class Connection {
             entry(Actor.IMAGE_URL,  "itemprop=\"image\" src")
     );
     private static final Map<String, String> MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
-//            entry(Movie.TITLE,      "data-title"),
             entry(Movie.TITLE,      "\"filmDataBasic\">\\{\"id\":\\d+,\"title"),
             entry(Movie.TITLE_ORG,  "originalTitle"),
             entry(Movie.PREMIERE,   "releaseWorldPublicString"),
