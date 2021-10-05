@@ -11,7 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
 import java.io.*;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
@@ -26,6 +29,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static Configuration.Config.getParamValue;
 import static java.util.Map.entry;
 
 @Slf4j
@@ -39,36 +43,36 @@ public final class Connection {
 
 //    == constants ==
     private static final String FILMWEB = "https://www.filmweb.pl";
-    private static final String LINE_WITH_MOVIE_DATA = "data-linkable=\"filmMain\"";
-    private static final String LINE_WITH_MOVIE_DATA2 = "data-source=\"linksData\"";
-    private static final String LINE_WITH_ACTOR_DATA = "personMainHeader";
-    private static final String LINE_WITH_ACTOR_DATA2 = "data-linkable=\"personMain\"";
-    private static final String LINE_WITH_CAST_DATA = "filmFullCastSection__list";
-    private static final String LINE_WITH_ACTOR_FILMOGRAPHY = "userFilmographyfalseactors";
+    private static final String LINE_WITH_MOVIE_DATA = getParamValue("LINE_WITH_MOVIE_DATA");
+    private static final String LINE_WITH_MOVIE_DATA2 = getParamValue("LINE_WITH_MOVIE_DATA2");
+    private static final String LINE_WITH_ACTOR_DATA = getParamValue("LINE_WITH_ACTOR_DATA");
+    private static final String LINE_WITH_ACTOR_DATA2 = getParamValue("LINE_WITH_ACTOR_DATA2");
+    private static final String LINE_WITH_CAST_DATA = getParamValue("LINE_WITH_CAST_DATA");
+    private static final String LINE_WITH_ACTOR_FILMOGRAPHY = getParamValue("LINE_WITH_ACTOR_FILMOGRAPHY");
     private static final Map<String, String> ACTOR_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
-            entry(Actor.NAME,        "itemprop=\"name\""),
-            entry(Actor.NATIONALITY, "birthPlace"),
-            entry(Actor.BIRTHDAY,    "itemprop=\"birthDate\" content"),
-            entry(Actor.IMAGE_URL,  "itemprop=\"image\" src")
+            entry(Actor.NAME,        getParamValue("ACTOR_NAME")),
+            entry(Actor.NATIONALITY, getParamValue("ACTOR_NATIONALITY")),
+            entry(Actor.BIRTHDAY,    getParamValue("ACTOR_BIRTHDAY")),
+            entry(Actor.IMAGE_URL,   getParamValue("ACTOR_IMAGE_URL"))
     );
     private static final Map<String, String> MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
-            entry(Movie.TITLE,      "\"filmDataBasic\">\\{\"id\":\\d+,\"title"),
-            entry(Movie.TITLE_ORG,  "originalTitle"),
-            entry(Movie.PREMIERE,   "releaseWorldPublicString"),
-            entry(Movie.DURATION,   "duration"),
-            entry(Movie.RATE,       "data-rate"),
-            entry(Movie.RATE_COUNT, "dataRating-count"),
-            entry(Movie.DESCRIPTION,"itemprop=\"description\""),
-            entry(Movie.IMAGE_URL, "itemprop=\"image\" content")
+            entry(Movie.TITLE,       getParamValue("MOVIE_TITLE")),
+            entry(Movie.TITLE_ORG,   getParamValue("MOVIE_TITLE_ORG")),
+            entry(Movie.PREMIERE,    getParamValue("MOVIE_PREMIERE")),
+            entry(Movie.DURATION,    getParamValue("MOVIE_DURATION")),
+            entry(Movie.RATE,        getParamValue("MOVIE_RATE")),
+            entry(Movie.RATE_COUNT,  getParamValue("MOVIE_RATE_COUNT")),
+            entry(Movie.DESCRIPTION, getParamValue("MOVIE_DESCRIPTION")),
+            entry(Movie.IMAGE_URL,   getParamValue("MOVIE_IMAGE_URL"))
     );
     private static final Map<String, String> MOVIE_CLASS_LIST_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
-            entry(Movie.GENRES,     "gatunek"), // "genres"
-            entry(Movie.PRODUCTION, "produkcja")
+            entry(Movie.GENRES,     getParamValue("MOVIE_GENRES")),
+            entry(Movie.PRODUCTION, getParamValue("MOVIE_PRODUCTION"))
     );
     private static final Map<String, String> MOVIE_CLASS_CAST_FIELDS_MAP_FILMWEB_KEYS = Map.ofEntries(
-            entry(Movie.CAST,     "actors"),
-            entry(Movie.DIRECTORS,"director"),
-            entry(Movie.WRITERS,  "screenwriter")
+            entry(Movie.CAST,      getParamValue("MOVIE_CAST")),
+            entry(Movie.DIRECTORS, getParamValue("MOVIE_DIRECTORS")),
+            entry(Movie.WRITERS,   getParamValue("MOVIE_WRITERS"))
     );
 
 //    == constructors ==
@@ -319,7 +323,7 @@ public final class Connection {
             assert url != null;
             try {
                 changeUrlTo(url);
-                String lineOfCurrentTitle = grepLineFromWebsite(LINE_WITH_MOVIE_DATA).concat(LINE_WITH_MOVIE_DATA2);
+                String lineOfCurrentTitle = grepLineFromWebsite(LINE_WITH_MOVIE_DATA).concat(grepLineFromWebsite(LINE_WITH_MOVIE_DATA2));
                 String premiereOfCurrentTitle = extractItemFromFilmwebLine(MOVIE_CLASS_FIELDS_MAP_FILMWEB_KEYS.get(Movie.PREMIERE), lineOfCurrentTitle);
                 if(premiereOfCurrentTitle == null) return 0;
                 return LocalDate.parse(premiereOfCurrentTitle, DateTimeFormatter.ISO_DATE).getYear();
