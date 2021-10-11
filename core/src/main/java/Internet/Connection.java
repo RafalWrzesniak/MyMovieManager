@@ -43,6 +43,7 @@ public final class Connection {
 
 //    == constants ==
     private static final String FILMWEB = "https://www.filmweb.pl";
+    private static final String QUERY = getParamValue("QUERY");
     private static final String LINE_WITH_MOVIE_DATA = getParamValue("LINE_WITH_MOVIE_DATA");
     private static final String LINE_WITH_MOVIE_DATA2 = getParamValue("LINE_WITH_MOVIE_DATA2");
     private static final String LINE_WITH_ACTOR_DATA = getParamValue("LINE_WITH_ACTOR_DATA");
@@ -335,7 +336,7 @@ public final class Connection {
 
         Map<Character, Integer> desiredTitleCharMap = createCharCountMap.apply(desiredTitle);
 
-        String foundLine = grepLineFromWebsite("searchMain");
+        String foundLine = grepLineFromWebsite(QUERY);
         Map<String, String> foundTitleAndLinkMap = extractQueryTitleAndItsLinks(foundLine);
         if(foundTitleAndLinkMap == null || foundTitleAndLinkMap.size() == 0) return null;
         String chosenTitle = null;

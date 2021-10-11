@@ -208,6 +208,11 @@ public final class Config {
         rootElement.appendChild(doc.createTextNode("\n\t"));
         element = doc.createElement("MOVIE_WRITERS");
         rootElement.appendChild(element);
+
+        rootElement.appendChild(doc.createTextNode("\n\t"));
+        element = doc.createElement("QUERY");
+        rootElement.appendChild(element);
+
         rootElement.appendChild(doc.createTextNode("\n"));
     }
 
@@ -235,6 +240,7 @@ public final class Config {
         updateParamInCfg("MOVIE_CAST", "actors");
         updateParamInCfg("MOVIE_DIRECTORS", "director");
         updateParamInCfg("MOVIE_WRITERS", "screenwriter");
+        updateParamInCfg("QUERY", "Znalezione");
     }
 
 //    == public methods ==
