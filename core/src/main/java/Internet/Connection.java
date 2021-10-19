@@ -510,7 +510,7 @@ public final class Connection {
             return null;
         }
         List<String> listOfItems = new ArrayList<>();
-        Pattern pattern = Pattern.compile("\"profession\":\"" + itemToExtract + "\",\"person\":\\{\"name\":\".+?\",\"link\":\"(.+?)\"");
+        Pattern pattern = Pattern.compile("\"profession\":\"" + itemToExtract + "\".+?\"link\":\"(.+?)\"");
 //        Pattern pattern = Pattern.compile("data-profession=\"" + itemToExtract + "\".+?<a href=\"(.+?)\">");
         Matcher matcher = pattern.matcher(line);
         int numberOfMatcher = 0;
