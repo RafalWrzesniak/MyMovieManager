@@ -1,5 +1,6 @@
 package Internet;
 
+import Configuration.Config;
 import FileOperations.IO;
 import FileOperations.XMLOperator;
 import MoviesAndActors.Actor;
@@ -79,12 +80,14 @@ public final class Connection {
 //    == constructors ==
 
     public Connection(String desiredTitle) throws IOException {
+        Config.reloadCfgFile();
         String desiredTitleEncoded = URLEncoder.encode(desiredTitle, "UTF-8");
         changeUrlTo(FILMWEB + "/search?type=film&q=" + desiredTitleEncoded);
         changeUrlTo(getMostSimilarTitleUrlFromQuery(desiredTitle));
     }
 
     public Connection(URL websiteUrl) {
+        Config.reloadCfgFile();
         changeUrlTo(websiteUrl);
     }
 

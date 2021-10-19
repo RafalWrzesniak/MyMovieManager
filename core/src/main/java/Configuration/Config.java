@@ -275,6 +275,10 @@ public final class Config {
         return doc.getElementsByTagName(parameter).item(0).getTextContent();
     }
 
+    public static void reloadCfgFile() {
+        CFG_FILE = Config.getDEF_PATH().resolve("cfg").resolve("config.cfg").toFile();
+    }
+
 //    == Exceptions ==
 
     public static class ArgumentIssue extends Exception {

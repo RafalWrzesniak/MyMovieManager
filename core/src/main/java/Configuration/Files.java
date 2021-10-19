@@ -46,6 +46,6 @@ public final class Files {
     /**
      * File to store some app configuration
      */
-    static final File CFG_FILE = Config.getDEF_PATH().resolve("cfg").resolve("config.cfg").toFile();
+    static File CFG_FILE = Config.getDEF_PATH().resolve("cfg").resolve("config.cfg").toFile();
 
 }
