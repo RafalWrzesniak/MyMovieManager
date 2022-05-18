@@ -4,10 +4,9 @@ import Configuration.Config;
 import Configuration.Files;
 import FileOperations.AutoSave;
 import FileOperations.IO;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import FileOperations.StringFunctions;
+import Internet.WebOperations;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -22,6 +21,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Builder
+@AllArgsConstructor
 @Slf4j
 @EqualsAndHashCode(of = "filmweb")
 public final class Actor implements ContentType, Comparable<Actor> {
@@ -68,7 +69,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
 //    == constructors ==
 
     public Actor(Map<String, String> actorMap) {
-        updateClassActorId();
+        getNewClassActorId();
         iAmFromConstructor = true;
         try {
             setFilmweb(new URL(actorMap.get(FILMWEB)));
@@ -80,9 +81,9 @@ public final class Actor implements ContentType, Comparable<Actor> {
         setNationality(actorMap.get(NATIONALITY));
         try { this.imagePath = Paths.get(actorMap.get(IMAGE_PATH)); } catch (NullPointerException ignored) { }
         try { this.imageUrl = new URL(actorMap.get(IMAGE_URL)); } catch (MalformedURLException | NullPointerException ignored) { }
-        this.birthday = convertStrToLocalDate(actorMap.get(Actor.BIRTHDAY));
+        this.birthday = StringFunctions.convertStrToLocalDate(actorMap.get(Actor.BIRTHDAY));
         if(actorMap.get(Actor.DEATH_DAY) != null) {
-            setDeathDay(Objects.requireNonNull(convertStrToLocalDate(actorMap.get(Actor.DEATH_DAY))));
+            setDeathDay(Objects.requireNonNull(StringFunctions.convertStrToLocalDate(actorMap.get(Actor.DEATH_DAY))));
         }
         setAge();
         int id = actorMap.get(ID) == null ? -1 : Integer.parseInt(actorMap.get(ID));
@@ -159,11 +160,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
 
     public void setAge() {
         if(birthday == null) return;
-        if(deathDay == null) {
-            this.age = Period.between(birthday, LocalDate.now()).getYears();
-        } else {
-            this.age = Period.between(birthday, deathDay).getYears();
-        }
+        this.age = Period.between(birthday, Objects.requireNonNullElseGet(deathDay, LocalDate::now)).getYears();
         saveMe();
     }
 
@@ -210,7 +207,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
 
 //    == private static methods ==
 
-    private synchronized static void updateClassActorId() {
+    public synchronized static int getNewClassActorId() {
         File actorDir = Config.getSAVE_PATH_ACTOR().toFile();
         List<String> files = IO.getFileNamesInDirectory(actorDir);
         if(files.size() == 0 && classActorId == -1) {
@@ -226,6 +223,7 @@ public final class Actor implements ContentType, Comparable<Actor> {
             }
         }
         if(classActorId == -1) classActorId = 0;
+        return classActorId;
     }
 
 
@@ -281,14 +279,14 @@ public final class Actor implements ContentType, Comparable<Actor> {
     }
     public void addMovieWrittenBy(Movie movie) {
         if(isWriting(movie)) {
-            log.warn("\"{}\" already exists as a writer in: \"{}\"}", this.toString(), movie);
+            log.warn("\"{}\" already exists as a writer in: \"{}\"}", this, movie);
         } else {
             setIsAWriter(true);
             wroteMovies.add(movie);
             if(!movie.isWrittenBy(this)) {
                 movie.addWriter(this);
             }
-            log.debug("\"{}\" is now a writer in: \"{}\"", this.toString(), movie);
+            log.debug("\"{}\" is now a writer in: \"{}\"", this, movie);
             if(!iAmFromConstructor) saveMe();
         }
     }
@@ -369,4 +367,44 @@ public final class Actor implements ContentType, Comparable<Actor> {
             }
         }
     }
+
+   public static class ActorBuilder {
+        protected int id;
+        protected String name, surname;
+
+        public ActorBuilder() {}
+
+       public ActorBuilder createId() {
+           return id(Actor.getNewClassActorId());
+       }
+
+       public ActorBuilder fullName(String fullName) {
+           fullName = fullName.replaceAll("[iIvVxX]+$", "")
+                   .replaceAll("(Jr\\.)|(Sr\\.)", "");
+           char lastChar = fullName.charAt(fullName.length()-1);
+           if(lastChar == ' ' || lastChar == 160) fullName = fullName.substring(0, fullName.length()-1);
+
+           name = fullName.substring(0, fullName.lastIndexOf(" "));
+           surname = fullName.substring(fullName.lastIndexOf(" ") + 1);
+           return this;
+       }
+   }
+
+    public Actor withDownloadedLocalImage() {
+        File actorDir = IO.createContentDirectory(this);
+        Path downloadedImagePath = actorDir.toPath().resolve(this.getReprName().concat(".jpg"));
+        if (WebOperations.downloadImage(this.getImageUrl(), downloadedImagePath)) {
+            this.setImagePath(downloadedImagePath);
+        } else {
+            this.setImagePath(Files.NO_ACTOR_IMAGE);
+        }
+        return this;
+    }
+
+    public Actor withCalculatedAge() {
+        if(birthday == null) return this;
+        this.age = Period.between(birthday, Optional.ofNullable(deathDay).orElse(LocalDate.now())).getYears();
+        return this;
+    }
+
 }

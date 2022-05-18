@@ -3,7 +3,7 @@ package app;
 import Configuration.Config;
 import FileOperations.AutoSave;
 import FileOperations.IO;
-import Internet.Connection;
+import Internet.WebOperations;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentType;
 import MoviesAndActors.Movie;
@@ -194,7 +194,7 @@ public class Main extends Application {
                 log.warn("\"{}\" is not a correct image url!", addFromUrlField.getText());
                 return;
             }
-            if (Connection.downloadImage(imageUrl, downloadedImagePath)) {
+            if (WebOperations.downloadImage(imageUrl, downloadedImagePath)) {
                 content.setImagePath(downloadedImagePath);
             }
         } else if(dialogController.textField.getText() != null  && !dialogController.textField.getText().isEmpty()) {

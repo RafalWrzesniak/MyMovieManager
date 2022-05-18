@@ -1,11 +1,14 @@
 package utils;
 
 import Configuration.Config;
+import Errors.MovieNotFoundException;
 import FileOperations.IO;
 import FileOperations.XMLOperator;
-import Internet.Connection;
+import Internet.FilmwebClientActor;
+import Internet.FilmwebClientMovie;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
+import Service.MovieCreatorService;
 import app.Main;
 import controllers.DialogController;
 import controllers.MainController;
@@ -24,8 +27,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 @Slf4j
 public class MovieContextMenu {
@@ -104,34 +112,25 @@ public class MovieContextMenu {
 
     protected void downloadAgain(Movie movie) {
         log.info("Downloading data again for \"{}\"", movie);
-        final Movie finalMovie = movie;
         Thread download = new Thread(() -> {
-            Connection connection;
+            MovieCreatorService mcs = new MovieCreatorService(FilmwebClientMovie.getInstance(), FilmwebClientActor.getInstance(),
+                    MainController.allMovies, MainController.allActors, MainController.actorStringList);
             Movie downloadedMovie;
             try {
-                connection = new Connection(finalMovie.getFilmweb());
-                Map<String, List<String>> map = connection.grabMovieDataFromFilmweb();
-                map.put(Movie.ID, Collections.singletonList(String.valueOf(finalMovie.getId())));
-                downloadedMovie = new Movie(map, false);
-                connection.addCastToMovie(downloadedMovie, MainController.allActors,MainController.actorStringList, MainController.allMovies);
-
-                if(downloadedMovie.getImagePath() == null || downloadedMovie.getImagePath().equals(Configuration.Files.NO_MOVIE_COVER))  {
-                    Path downloadedImagePath = Paths.get(IO.createContentDirectory(downloadedMovie).toString(), downloadedMovie.getReprName().replaceAll("[]?\\[*./:;|,\"]", "").concat(".jpg"));
-                    if (Connection.downloadImage(downloadedMovie.getImageUrl(), downloadedImagePath)) {
-                        downloadedMovie.setImagePath(downloadedImagePath);
-                    }
-                }
-                this.movie = downloadedMovie;
-                Platform.runLater(() -> {
-                    owner.setMovie(downloadedMovie);
-                    owner.getMainController().getActorListView().refresh();
-                });
-
-                if(owner instanceof MoviePane) Platform.runLater(((MoviePane) owner)::selectItem);
-                if(owner instanceof MovieDetail && ((MovieDetail) owner).getOwner() != null) Platform.runLater(((MovieDetail) owner).getOwner()::selectItem);
-            } catch (IOException e) {
-                log.warn("Invalid URL - no such movie \"{}\"", finalMovie);
+                downloadedMovie = mcs.createMovieFromUrl(movie.getFilmweb());
+            } catch (MovieNotFoundException e) {
+                log.warn("Invalid URL {}, cannot redownload movie data", movie.getFilmweb());
+                return;
             }
+            this.movie = downloadedMovie;
+            Platform.runLater(() -> {
+                owner.setMovie(downloadedMovie);
+                owner.getMainController().getActorListView().refresh();
+            });
+
+            if(owner instanceof MoviePane) Platform.runLater(((MoviePane) owner)::selectItem);
+            if(owner instanceof MovieDetail && ((MovieDetail) owner).getOwner() != null) Platform.runLater(((MovieDetail) owner).getOwner()::selectItem);
+
         });
         download.start();
     }

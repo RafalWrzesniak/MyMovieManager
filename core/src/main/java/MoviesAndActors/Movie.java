@@ -4,6 +4,10 @@ import Configuration.Config;
 import Configuration.Files;
 import FileOperations.AutoSave;
 import FileOperations.IO;
+import FileOperations.StringFunctions;
+import Internet.WebOperations;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +24,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
+@Builder
+@AllArgsConstructor
 @EqualsAndHashCode(of = "filmweb")
 public final class Movie implements ContentType, Comparable<Movie> {
 
@@ -41,8 +47,8 @@ public final class Movie implements ContentType, Comparable<Movie> {
     @Getter private final List<String> directorIds = new ArrayList<>();
     private final Set<Actor> writers = new LinkedHashSet<>();
     @Getter private final List<String> writerIds = new ArrayList<>();
-    private final Set<String> genres = new HashSet<>();
-    private final Set<String> production = new HashSet<>();
+    private Set<String> genres = new HashSet<>();
+    private Set<String> production = new HashSet<>();
 
     private static int classMovieId = -1;
     public boolean iAmFromConstructor;
@@ -63,18 +69,18 @@ public final class Movie implements ContentType, Comparable<Movie> {
 
 //    == constructors ==
     public Movie(Map<String, List<String>> movieMap, boolean readFromFile) {
-        updateClassMovieId();
+        getNewClassMovieId();
         iAmFromConstructor = true;
         setAllNonActorFields(movieMap);
         iAmFromConstructor = false;
-        log.info("New movie \"{}\" created", this.toString());
+        log.info("New movie \"{}\" created", this);
         if(!readFromFile) saveMe();
     }
 
 
 //   == private static methods ==
 
-    private synchronized static void updateClassMovieId() {
+    public synchronized static int getNewClassMovieId() {
         File movieDir = Config.getSAVE_PATH_MOVIE().toFile();
         List<String> files = IO.getFileNamesInDirectory(movieDir);
         if(files.size() == 0 && classMovieId == -1) {
@@ -92,6 +98,7 @@ public final class Movie implements ContentType, Comparable<Movie> {
             }
         }
         if(classMovieId == -1) classMovieId = 0;
+        return classMovieId;
     }
 
 //    == setters ==
@@ -136,7 +143,7 @@ public final class Movie implements ContentType, Comparable<Movie> {
             setRate(Double.parseDouble(movieMap.get(Movie.RATE).get(0)));
         }
         // LocalDate
-        setPremiere(convertStrToLocalDate(movieMap.get(Movie.PREMIERE).get(0)));
+        setPremiere(StringFunctions.convertStrToLocalDate(movieMap.get(Movie.PREMIERE).get(0)));
         // Path
         if(movieMap.get(Movie.IMAGE_PATH).get(0) != null) {
             setImagePath(Paths.get(movieMap.get(Movie.IMAGE_PATH).get(0)));
@@ -556,5 +563,26 @@ public final class Movie implements ContentType, Comparable<Movie> {
                 log.debug("Movie \"{}\" added to the list of new objects", this);
             }
         }
+    }
+
+    public static class MovieBuilder {
+        protected int id;
+
+        public MovieBuilder() {}
+
+        protected MovieBuilder createId() {
+            return id(getNewClassMovieId());
+        }
+    }
+
+    public Movie withDownloadedLocalImage() {
+        File movieDir = IO.createContentDirectory(this);
+        Path downloadedImagePath = movieDir.toPath().resolve(this.getReprName().concat(".jpg"));
+        if (WebOperations.downloadImage(this.getImageUrl(), downloadedImagePath)) {
+            this.setImagePath(downloadedImagePath);
+        } else {
+            this.setImagePath(Files.NO_MOVIE_COVER);
+        }
+        return this;
     }
 }

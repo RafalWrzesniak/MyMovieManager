@@ -34,6 +34,7 @@ import static Configuration.Config.getParamValue;
 import static java.util.Map.entry;
 
 @Slf4j
+@Deprecated
 public final class Connection {
 
 //    == fields ==
@@ -286,9 +287,7 @@ public final class Connection {
     }
 
     public Movie createMovieFromFilmwebLink() throws NullPointerException, IOException {
-        Map<String, List<String>> movieData;
-        movieData = grabMovieDataFromFilmweb();
-        Movie movie = new Movie(movieData, false);
+        Movie movie = new Movie(grabMovieDataFromFilmweb(), false);
         if(movie.getPremiere() == null) throw new NullPointerException("Couldn't find proper data of " + movie.getTitle());
         return movie;
     }

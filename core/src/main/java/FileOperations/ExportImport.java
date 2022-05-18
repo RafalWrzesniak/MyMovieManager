@@ -1,7 +1,6 @@
 package FileOperations;
 
 import Configuration.Config;
-import Internet.Connection;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.ContentType;
@@ -13,7 +12,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -231,27 +233,10 @@ public final class ExportImport {
             convertImportFileToDirs(importFile);
             super.run();
             setName("ImportData");
-            Thread downloadMovieImages = new Thread(() -> {
-                for(Movie movie : getAllMovies().getList()) {
-                    try {
-                        Connection connection = new Connection(movie.getFilmweb());
-                        Connection.downloadImage(connection.getImageUrl(true), movie.getImagePath());
-                    } catch (IOException ignored) { }
-                }
-            });
-
-            Thread downloadActorImages = new Thread(() -> {
-                for(Actor actor : getAllActors().getList()) {
-                    try {
-                        Connection connection = new Connection(actor.getFilmweb());
-                        Connection.downloadImage(connection.getImageUrl(false), actor.getImagePath());
-                    } catch (IOException | NullPointerException ignored) { }
-                }
-            });
-
+            Thread downloadMovieImages = new Thread(() -> getAllMovies().getList().forEach(Movie::withDownloadedLocalImage));
+            Thread downloadActorImages = new Thread(() -> getAllActors().getList().forEach(Actor::withDownloadedLocalImage));
             downloadActorImages.start();
             downloadMovieImages.start();
-
             try {
                 downloadActorImages.join();
                 downloadMovieImages.join();
@@ -259,7 +244,7 @@ public final class ExportImport {
                 e.printStackTrace();
             }
 
-            log.info("Import data finished from file \"{}\"", importFile.toString());
+            log.info("Import data finished from file \"{}\"", importFile);
         }
 
         public static void convertImportFileToDirs(File importFile) {

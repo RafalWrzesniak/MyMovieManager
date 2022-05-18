@@ -1,8 +1,6 @@
 package utils;
 
-import Configuration.Files;
-import FileOperations.IO;
-import Internet.Connection;
+import Internet.FilmwebClientActor;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import app.Main;
@@ -21,9 +19,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -96,14 +91,9 @@ public class ActorContextMenu {
         log.info("Downloading data again for \"{}\"", actor);
         final Actor actor = actorToDownload;
         Thread download = new Thread(() -> {
-            Connection connection;
             Actor downloadedActor;
             try {
-                connection = new Connection(actor.getFilmweb());
-                Map<String, String> map = connection.grabActorDataFromFilmweb();
-                if(map == null) return;
-                map.put(Actor.ID, String.valueOf(actor.getId()));
-                downloadedActor= new Actor(map);
+                downloadedActor = FilmwebClientActor.getInstance().createActorFromFilmweb(actor.getFilmweb());
             } catch (IOException e) {
                 log.warn("Invalid URL - no such actor \"{}\"", actor);
                 return;
@@ -113,14 +103,6 @@ public class ActorContextMenu {
             actor.getAllMoviesWrittenBy().forEach(downloadedActor::addMovieWrittenBy);
             this.actor = downloadedActor;
             downloadedActor.saveMe();
-
-            if(downloadedActor.getImagePath() == null || downloadedActor.getImagePath().equals(Files.NO_ACTOR_IMAGE))  {
-                Path downloadedImagePath = Paths.get(IO.createContentDirectory(downloadedActor).toString(), downloadedActor.getReprName().concat(".jpg"));
-                if (Connection.downloadImage(downloadedActor.getImageUrl(), downloadedImagePath)) {
-                    downloadedActor.setImagePath(downloadedImagePath);
-                }
-            }
-
             owner.setActor(downloadedActor);
             if(owner instanceof ActorPane) Platform.runLater(((ActorPane) owner)::selectItem);
             if(owner instanceof ActorDetail && ((ActorDetail) owner).getOwner() != null) Platform.runLater(((ActorDetail) owner).getOwner()::selectItem);
