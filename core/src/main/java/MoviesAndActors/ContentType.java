@@ -4,9 +4,6 @@ import Configuration.Config;
 
 import java.net.URL;
 import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,25 +27,6 @@ public interface ContentType  {
     int getId();
 
 //    == default methods ==
-    default LocalDate convertStrToLocalDate(String string) {
-        if(string == null || string.isEmpty()) {
-            throw new IllegalArgumentException("Date argument cannot be null or empty!");
-        } else if(string.equals("-")) return null;
-        string = string.replaceAll("2E3", "2000").replaceAll(",", "-").replaceAll("-0-", "-1-").replaceAll("-0$", "-1");
-        if(string.matches("^\\d{4}$")) {
-            return LocalDate.of(Integer.parseInt(string), 1, 1);
-        } else if(string.matches("^\\d{4}-\\d{1,2}$")) {
-            return LocalDate.of(Integer.parseInt(string.substring(0, 4)), Integer.parseInt(string.substring(5)), 1);
-        }
-        try {
-            return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
-        } catch (DateTimeParseException e) {
-            String[] sepDate = string.split("-");
-            return LocalDate.of(Integer.parseInt(sepDate[0]), Integer.parseInt(sepDate[1]), Integer.parseInt(sepDate[2]));
-        }
-
-    }
-
     static String checkForNullOrEmptyOrIllegalChar(String stringToCheck, String argName) throws Config.ArgumentIssue {
         if(stringToCheck == null) {
             throw new Config.ArgumentIssue(String.format("%s argument cannot be null!", argName));
