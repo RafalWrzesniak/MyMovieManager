@@ -1,11 +1,14 @@
 package MyMovieManager;
 
-import Configuration.Files;
+import Errors.MovieNotFoundException;
 import FileOperations.IO;
-import Internet.Connection;
+import Internet.FilmwebClientActor;
+import Internet.FilmwebClientMovie;
+import Internet.WebOperations;
 import MoviesAndActors.Actor;
 import MoviesAndActors.ContentList;
 import MoviesAndActors.Movie;
+import Service.MovieCreatorService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,14 +17,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,6 +31,8 @@ public final class DownloadAndProcessMovies extends Thread {
     private static List<String> movieMessages;
     private static StringBuilder initDownLoadInfo = new StringBuilder();
     private static final TaskManager taskManager = TaskManager.getInstance();
+    private static final FilmwebClientMovie filmwebClientMovie = FilmwebClientMovie.getInstance();
+    private static final FilmwebClientActor filmwebClientActor = FilmwebClientActor.getInstance();
 
 //    == required fields ==
     private final List<File> initFileList;
@@ -104,100 +104,55 @@ public final class DownloadAndProcessMovies extends Thread {
 
     public static Movie handleMovieFromUrl(URL movieUrl, ContentList<Movie> allMovies, ContentList<Actor> allActors, List<String> actorStringList) {
         taskManager.addTask(movieUrl);
+        MovieCreatorService movieCreatorService = new MovieCreatorService(filmwebClientMovie, filmwebClientActor, allMovies, allActors, actorStringList);
         StringBuilder finalMovieMessage = new StringBuilder();
         String downloadTimeMessage;
+        Movie movie;
         long startTime = System.nanoTime();
-        Connection connection;
-        Movie movie = null;
         try {
-            connection = new Connection(movieUrl);
-            movie = connection.createMovieFromFilmwebLink();
-            if(allMovies.add(movie)) {
-                connection.addCastToMovie(movie, allActors, actorStringList, allMovies);
-                movie.printPretty();
-                File movieDir = IO.createContentDirectory(movie);
-                Path downloadedImagePath = Paths.get(movieDir.toString(), movie.getReprName().replaceAll(":", "").concat(".jpg"));
-                if( Connection.downloadImage(movie.getImageUrl(), downloadedImagePath) ) {
-                    movie.setImagePath(downloadedImagePath);
-                } else {
-                    movie.setImagePath(Files.NO_MOVIE_COVER);
-                }
-                long estimatedTime = System.nanoTime() - startTime;
-                downloadTimeMessage = String.format("Movie \"%s\" downloaded and saved in \"%s\" [s]", movie, ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
-            } else {
-                movie = allMovies.get(movie);
-                downloadTimeMessage = String.format("Movie \"%s\" already exists in the system, new data won't be downloaded", movie);
-            }
-            log.debug(downloadTimeMessage);
-            finalMovieMessage.append(downloadTimeMessage).append("\n\n").append(movie.printPretty()).append(connection.getFailedActorsMessage());
-        } catch (IOException | NullPointerException e) {
-            String failMessage = String.format("Unexpected error while downloading \"%s\" - \"%s\"", movieUrl, e.getMessage());
-            finalMovieMessage.append(failMessage).append("\n");
-            log.warn(failMessage);
+            movie = movieCreatorService.createMovieFromUrl(movieUrl);
+        } catch (MovieNotFoundException e) {
+            finalMovieMessage.append(String.format("Unexpected error while downloading \"%s\" : \"%s\"", movieUrl, e.getMessage()));
+            writeDownLoadSummary(finalMovieMessage.append(Arrays.toString(e.getStackTrace())).toString());
+            taskManager.removeTask(movieUrl);
+            return null;
         }
+        long finalDownloadTime = System.nanoTime() - startTime;
+        if(allMovies.add(movie)) {
+            downloadTimeMessage = String.format("Movie \"%s\" downloaded and saved in \"%s\" [s]", movie, ((double) Math.round(finalDownloadTime/Math.pow(10, 7)))/100);
+        } else {
+            downloadTimeMessage = String.format("Movie \"%s\" already exists in the system, new data won't be downloaded", movie);
+        }
+        log.debug(downloadTimeMessage);
+        finalMovieMessage.append(downloadTimeMessage).append("\n\n").append(movie.printPretty());
         writeDownLoadSummary(finalMovieMessage.toString());
         taskManager.removeTask(movieUrl);
         return movie;
     }
 
     public static Movie handleMovieFromFile(File movieFile, ContentList<Movie> allMovies, ContentList<Actor> allActors, List<String> actorStringList) {
-        taskManager.addTask(movieFile);
-        StringBuilder finalMovieMessage = new StringBuilder();
-        String downloadTimeMessage;
-        long startTime = System.nanoTime();
-        Connection connection = null;
-        Movie movie = null;
+        URL foundUrl;
         try {
-            connection = new Connection(IO.removeFileExtension(movieFile.getName()));
-            movie = allMovies.getObjByUrlIfExists(connection.getMainMoviePage());
-            if(movie != null) {
-                log.info("Movie \"{}\" already exists on the list \"{}\", new data won't be downloaded", movie, allMovies);
-                taskManager.removeTask(movieFile);
-                finalMovieMessage.append(connection.getSearchingMessage());
-                finalMovieMessage.append(String.format("Movie \"%s\" already exists in the system, new data won't be downloaded", movie));
-                if(movieMessages != null) {
-                    movieMessages.add(finalMovieMessage.toString());
-                } else {
-                    writeDownLoadSummary(finalMovieMessage.toString());
-                }
-                return movie;
-            }
-            movie = connection.createMovieFromFilmwebLink();
-            if(allMovies.add(movie)) {
-                connection.addCastToMovie(movie, allActors, actorStringList, allMovies);
-                IO.createSummaryImage(movie, movieFile);
-                File movieDir = IO.createContentDirectory(movie);
-                Path downloadedImagePath = Paths.get(
-                        movieDir.toString(),
-                        movie.getReprName().replaceAll("[]?\\[*./:;|,\"]", "").concat(".jpg"));
-                if( Connection.downloadImage(movie.getImageUrl(), downloadedImagePath) ) {
-                    movie.setImagePath(downloadedImagePath);
-                } else {
-                    movie.setImagePath(Files.NO_MOVIE_COVER);
-                }
-                long estimatedTime = System.nanoTime() - startTime;
-                downloadTimeMessage = String.format("Movie \"%s\" downloaded and saved in \"%s\" [s]", movie, ((double) Math.round(estimatedTime/Math.pow(10, 7)))/100);
-            } else {
-                movie = allMovies.get(movie);
-                downloadTimeMessage = String.format("Movie \"%s\" already exists in the system, new data won't be downloaded", movie);
-            }
-            log.debug(downloadTimeMessage);
-            finalMovieMessage.append(connection.getSearchingMessage()).append(downloadTimeMessage).append("\n\n").append(movie.printPretty()).append(connection.getFailedActorsMessage());
-        } catch (IOException | NullPointerException e) {
-            String failMessage = String.format("Unexpected error while downloading \"%s\" - \"%s\"", movieFile.getName(), e.getMessage());
-            if(connection != null) {
-                finalMovieMessage.append(connection.getSearchingMessage());
-            }
-            finalMovieMessage.append(failMessage).append("\n");
-            log.warn(failMessage);
+            foundUrl = WebOperations.getMostSimilarTitleUrlFromQuery(IO.removeFileExtension(movieFile.getName()));
+        } catch (IOException | MovieNotFoundException e) {
+            e.printStackTrace();
+            log.warn("Could not find any data from file {} because of {}", movieFile, e.getMessage());
+            return null;
         }
-        if(movieMessages != null) {
-            movieMessages.add(finalMovieMessage.toString());
+        Movie movie = allMovies.getObjByUrlIfExists(foundUrl);
+        if(movie == null) {
+            return handleMovieFromUrl(foundUrl, allMovies, allActors, actorStringList);
         } else {
-            writeDownLoadSummary(finalMovieMessage.toString());
+            log.info("Movie \"{}\" already exists on the list \"{}\", new data won't be downloaded", movie, allMovies);
+            StringBuilder finalMovieMessage = new StringBuilder();
+            finalMovieMessage.append(String.format("Movie \"%s\" already exists in the system, new data won't be downloaded", movie));
+            if(movieMessages != null) {
+                movieMessages.add(finalMovieMessage.toString());
+            } else {
+                writeDownLoadSummary(finalMovieMessage.toString());
+            }
+            return movie;
         }
-        taskManager.removeTask(movieFile);
-        return movie;
     }
 
     private static void writeDownLoadSummary(String dataToWrite) {
