@@ -143,11 +143,19 @@ public final class IO {
      * and then \\actor or \\movie and in the end content id. For example: C:\ProjectPath\savedData\actor42
      */
     public static <E extends ContentType> File createContentDirectory(E content) {
-        File outDir;
         if (content instanceof Actor) {
-            outDir = new File(Config.getSAVE_PATH_ACTOR() + "\\actor" + content.getId());
+            return createContentDirectory(Actor.class, content.getId());
         } else if(content instanceof Movie) {
-            outDir = new File(Config.getSAVE_PATH_MOVIE() + "\\movie" + content.getId());
+            return createContentDirectory(Movie.class, content.getId());
+        } else return null;
+    }
+
+    public static <E extends ContentType> File createContentDirectory(Class<E> type, int id) {
+        File outDir;
+        if (type.equals(Actor.class)) {
+            outDir = new File(Config.getSAVE_PATH_ACTOR() + "\\actor" + id);
+        } else if(type.equals(Movie.class)) {
+            outDir = new File(Config.getSAVE_PATH_MOVIE() + "\\movie" + id);
         } else return null;
         if (outDir.mkdir()) {
             log.info("New directory \"{}\" created", outDir);
@@ -177,7 +185,7 @@ public final class IO {
                 return file;
             }
         }
-        log.warn("There is no .xml file in directory \"{}\".", inputDir);
+        log.debug("There is no .xml file in directory \"{}\".", inputDir);
         return null;
     }
 
@@ -219,8 +227,6 @@ public final class IO {
         try {
             java.nio.file.Files.delete(source.getParent());
         } catch (IOException ignored) { }
-
-
     }
 
     /** Method created a .png file with basic information about movie. It uses {@link Movie#getDataForSummary()} to get

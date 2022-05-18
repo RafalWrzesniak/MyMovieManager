@@ -54,7 +54,7 @@ public final class XMLOperator {
                                 .concat(".xml"));
         }
         makeSimpleSave(doc, targetFile);
-        log.debug("Content \"{}\" properly saved in \"{}\"", content.toString(), targetFile);
+        log.debug("Content \"{}\" properly saved in \"{}\"", content, targetFile);
     }
 
     public static <E extends ContentType> void createListFile(ContentList<E> list) {
@@ -325,7 +325,7 @@ public final class XMLOperator {
             }
             actorsList.add(actorString.toString());
         }
-        log.debug("ActorStringList read, found {} items", actorsList.size());
+        log.info("ActorStringList read, found {} items", actorsList.size());
         return actorsList;
     }
 
