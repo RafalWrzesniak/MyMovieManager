@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Files {
@@ -34,11 +33,11 @@ public final class Files {
     /**
      * File to be used when there is no available image of actor on the web
      */
-    public static final Path NO_ACTOR_IMAGE = Paths.get("app","src" ,"main", "resources", "iHaveNoImage.jpg");
+    public static final Path NO_ACTOR_IMAGE = Config.getDEF_PATH().resolve("cfg").resolve("iHaveNoImage.jpg");
     /**
      * File to be used when there is no available cover of movie on the web
      */
-    public static final Path NO_MOVIE_COVER = Paths.get("app","src" ,"main", "resources", "movieHasNoCover.jpg");
+    public static final Path NO_MOVIE_COVER = Config.getDEF_PATH().resolve("cfg").resolve("movieHasNoCover.jpg");
     /**
      * File that contains last seen movies in {@link Config#getMAIN_MOVIE_FOLDER()}
      */
