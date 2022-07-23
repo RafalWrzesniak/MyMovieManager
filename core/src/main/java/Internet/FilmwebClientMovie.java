@@ -57,12 +57,13 @@ public class FilmwebClientMovie {
                 .text();
     }
 
-    private String getTitle(Document parsedUrl) {
+    private String getTitle(Document parsedUrl) throws MovieNotFoundException {
         return getFromDataSourceObject(parsedUrl, "title").textValue();
     }
 
-    private String getTitleOrg(Document parsedUrl) {
-        return getFromDataSourceObject(parsedUrl, "originalTitle").textValue();
+    private String getTitleOrg(Document parsedUrl) throws MovieNotFoundException {
+        Element titleOrg = parsedUrl.getElementsByAttributeValue("class", "filmCoverSection__originalTitle").first();
+        return titleOrg != null ? titleOrg.text() : getTitle(parsedUrl);
     }
 
     private double getRate(Document parsedUrl) {
@@ -114,8 +115,15 @@ public class FilmwebClientMovie {
                 .get("content");
     }
 
-    private JsonNode getFromDataSourceObject(Document parsedUrl, String field) {
-        return getFieldFromObjectWithAttributeKeyAndValue(parsedUrl, field, "data-source", "film-");
+    private JsonNode getFromDataSourceObject(Document parsedUrl, String field) throws MovieNotFoundException {
+        JsonNode jsonNode;
+        try {
+           jsonNode = getFieldFromObjectWithAttributeKeyAndValue(parsedUrl, field, "data-source", "filmTitle");
+        } catch (NullPointerException e) {
+            log.warn("Cannot find object for field " + field);
+            throw new MovieNotFoundException("Cannot find object for field " + field);
+        }
+        return jsonNode;
     }
 
     private JsonNode getFromFilmDataRatingObject(Document parsedUrl, String field) {

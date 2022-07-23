@@ -24,8 +24,8 @@ public class MovieDto {
     private Integer imDbRatingVotes;
 
     private List<HashMap<String, String>> actorList;
-//    private List<HashMap<String, String>> genreList;
-//    private List<HashMap<String, String>> countryList;
+    private List<HashMap<String, String>> genreList;
+    private List<HashMap<String, String>> countryList;
     private List<HashMap<String, String>> directorList;
     private List<HashMap<String, String>> writerList;
 

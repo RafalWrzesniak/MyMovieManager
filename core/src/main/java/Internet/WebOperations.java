@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,10 +49,10 @@ public final class WebOperations {
     }
 
     public static JsonNode getFieldFromObjectWithAttributeKeyAndValue(Document parsedUrl, String field, String key, String match) {
-        String dataSource = parsedUrl.getElementsByAttributeValueContaining(key, match)
-                .first()
-                .data();
-        return StringFunctions.parseString(dataSource).get(field);
+        log.debug("Trying to fetch field '{}' with key '{}' by match '{}'", field, key, match);
+        Elements dataSource = parsedUrl.getElementsByAttributeValueContaining(key, match);
+        log.debug(dataSource.toString());
+        return StringFunctions.parseString(dataSource.first().data()).get(field);
     }
 
     public static Optional<URL> createFilmwebQueryFrom(String query) {
